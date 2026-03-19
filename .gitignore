@@ -1,0 +1,4 @@
+dist/
+.cursor/
+.DS_Store
+terraform-provider-kcore
