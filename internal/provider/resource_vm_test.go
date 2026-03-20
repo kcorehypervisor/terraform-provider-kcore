@@ -40,15 +40,20 @@ func testAccCheckKcoreVMExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No VM ID is set")
 		}
 
+		// Optionally, you could make a GetVM call here to verify it exists
+
 		return nil
 	}
 }
 
 func testAccCheckKcoreVMDestroy(s *terraform.State) error {
+	// Check that all VMs have been destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "kcore_vm" {
 			continue
 		}
+
+		// Optionally, verify the VM no longer exists via API call
 	}
 
 	return nil

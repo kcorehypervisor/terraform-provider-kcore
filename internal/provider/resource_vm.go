@@ -44,7 +44,7 @@ func resourceVM() *schema.Resource {
 				Type:         schema.TypeInt,
 				Required:     true,
 				Description:  "Memory in bytes",
-				ValidateFunc: validation.IntAtLeast(1024 * 1024),
+				ValidateFunc: validation.IntAtLeast(1024 * 1024), // At least 1MB
 			},
 			"target_node": {
 				Type:        schema.TypeString,
@@ -133,12 +133,14 @@ func resourceVM() *schema.Resource {
 func resourceVMCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
 
+	// Build VM spec
 	spec := &pb.VmSpec{
 		Name:        d.Get("name").(string),
 		Cpu:         int32(d.Get("cpu").(int)),
 		MemoryBytes: int64(d.Get("memory_bytes").(int)),
 	}
 
+	// Add disks
 	if v, ok := d.GetOk("disk"); ok {
 		disks := v.([]interface{})
 		for _, disk := range disks {
@@ -152,6 +154,7 @@ func resourceVMCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 		}
 	}
 
+	// Add NICs
 	if v, ok := d.GetOk("nic"); ok {
 		nics := v.([]interface{})
 		for _, nic := range nics {
@@ -167,6 +170,7 @@ func resourceVMCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 		}
 	}
 
+	// Create VM request
 	req := &pb.CreateVmRequest{
 		Spec: spec,
 	}
@@ -175,13 +179,16 @@ func resourceVMCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 		req.TargetNode = targetNode.(string)
 	}
 
+	// Call CreateVM
 	resp, err := client.controller.CreateVm(ctx, req)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("failed to create VM: %w", err))
 	}
 
+	// Set the ID
 	d.SetId(resp.VmId)
 
+	// Read back the VM to populate computed fields
 	return resourceVMRead(ctx, d, meta)
 }
 
@@ -197,10 +204,12 @@ func resourceVMRead(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	resp, err := client.controller.GetVm(ctx, req)
 	if err != nil {
+		// VM not found, remove from state
 		d.SetId("")
 		return diags
 	}
 
+	// Set computed fields
 	d.Set("name", resp.Spec.Name)
 	d.Set("cpu", resp.Spec.Cpu)
 	d.Set("memory_bytes", resp.Spec.MemoryBytes)
@@ -211,6 +220,7 @@ func resourceVMRead(ctx context.Context, d *schema.ResourceData, meta interface{
 		d.Set("created_at", resp.Status.CreatedAt.AsTime().Format(time.RFC3339))
 	}
 
+	// Set disks
 	if len(resp.Spec.Disks) > 0 {
 		disks := make([]map[string]interface{}, len(resp.Spec.Disks))
 		for i, disk := range resp.Spec.Disks {
@@ -224,6 +234,7 @@ func resourceVMRead(ctx context.Context, d *schema.ResourceData, meta interface{
 		d.Set("disk", disks)
 	}
 
+	// Set NICs
 	if len(resp.Spec.Nics) > 0 {
 		nics := make([]map[string]interface{}, len(resp.Spec.Nics))
 		for i, nic := range resp.Spec.Nics {
@@ -240,6 +251,8 @@ func resourceVMRead(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 func resourceVMUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	// For now, most changes require recreation (ForceNew)
+	// In the future, you could implement live updates for certain fields like CPU/memory
 	return resourceVMRead(ctx, d, meta)
 }
 

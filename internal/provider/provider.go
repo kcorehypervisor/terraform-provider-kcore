@@ -81,15 +81,18 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	if insecure {
 		opts = append(opts, grpc.WithInsecure())
 	} else if tlsCertPath != "" && tlsKeyPath != "" {
+		// Load client cert and key
 		cert, err := tls.LoadX509KeyPair(tlsCertPath, tlsKeyPath)
 		if err != nil {
 			return nil, diag.FromErr(fmt.Errorf("failed to load client cert: %w", err))
 		}
 
+		// Create TLS config
 		tlsConfig := &tls.Config{
 			Certificates: []tls.Certificate{cert},
 		}
 
+		// Load CA cert if provided
 		if tlsCAPath != "" {
 			caCert, err := os.ReadFile(tlsCAPath)
 			if err != nil {
@@ -110,6 +113,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		opts = append(opts, grpc.WithInsecure())
 	}
 
+	// Connect to the controller
 	conn, err := grpc.Dial(controllerAddr, opts...)
 	if err != nil {
 		return nil, diag.FromErr(fmt.Errorf("failed to connect to controller: %w", err))

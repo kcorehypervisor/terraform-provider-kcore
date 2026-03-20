@@ -7,8 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// testAccProviders is a map of provider factories for acceptance tests
 var testAccProviders map[string]*schema.Provider
 
+// testAccProvider is the provider instance for acceptance tests
 var testAccProvider *schema.Provider
 
 func init() {
@@ -29,6 +31,7 @@ func TestProvider_impl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
+	// Check that KCORE_CONTROLLER_ADDRESS is set
 	if v := os.Getenv("KCORE_CONTROLLER_ADDRESS"); v == "" {
 		t.Fatal("KCORE_CONTROLLER_ADDRESS must be set for acceptance tests")
 	}

@@ -133,6 +133,7 @@ func dataSourceVMRead(ctx context.Context, d *schema.ResourceData, meta interfac
 		d.Set("created_at", resp.Status.CreatedAt.AsTime().Format(time.RFC3339))
 	}
 
+	// Set disks
 	if len(resp.Spec.Disks) > 0 {
 		disks := make([]map[string]interface{}, len(resp.Spec.Disks))
 		for i, disk := range resp.Spec.Disks {
@@ -146,6 +147,7 @@ func dataSourceVMRead(ctx context.Context, d *schema.ResourceData, meta interfac
 		d.Set("disk", disks)
 	}
 
+	// Set NICs
 	if len(resp.Spec.Nics) > 0 {
 		nics := make([]map[string]interface{}, len(resp.Spec.Nics))
 		for i, nic := range resp.Spec.Nics {
