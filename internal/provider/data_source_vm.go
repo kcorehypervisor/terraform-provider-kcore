@@ -3,12 +3,13 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	pb "github.com/rtacconi/terraform-provider-kcore/api/controller"
+	pb "github.com/kcorehypervisor/terraform-provider-kcore/api/controller"
 )
 
 func dataSourceVM() *schema.Resource {
@@ -19,6 +20,11 @@ func dataSourceVM() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "VM ID",
+			},
+			"target_node": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Optional node address hint for the controller lookup",
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -34,6 +40,21 @@ func dataSourceVM() *schema.Resource {
 				Type:        schema.TypeInt,
 				Computed:    true,
 				Description: "Memory in bytes",
+			},
+			"storage_backend": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "VM storage backend (filesystem, lvm, zfs)",
+			},
+			"storage_size_bytes": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Provisioned storage size in bytes",
+			},
+			"desired_state": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Declarative desired state from spec",
 			},
 			"disk": {
 				Type:        schema.TypeList,
@@ -98,6 +119,11 @@ func dataSourceVM() *schema.Resource {
 				Computed:    true,
 				Description: "Node ID where the VM is running",
 			},
+			"assigned_ip": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Controller-assigned VM IP when available",
+			},
 			"created_at": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -116,6 +142,9 @@ func dataSourceVMRead(ctx context.Context, d *schema.ResourceData, meta interfac
 	req := &pb.GetVmRequest{
 		VmId: vmID,
 	}
+	if v, ok := d.GetOk("target_node"); ok {
+		req.TargetNode = strings.TrimSpace(v.(string))
+	}
 
 	resp, err := client.controller.GetVm(ctx, req)
 	if err != nil {
@@ -126,7 +155,15 @@ func dataSourceVMRead(ctx context.Context, d *schema.ResourceData, meta interfac
 	d.Set("name", resp.Spec.Name)
 	d.Set("cpu", resp.Spec.Cpu)
 	d.Set("memory_bytes", resp.Spec.MemoryBytes)
+	if resp.Spec.StorageBackend != "" {
+		d.Set("storage_backend", normalizeStorageBackendSpec(resp.Spec.StorageBackend))
+	}
+	d.Set("storage_size_bytes", resp.Spec.StorageSizeBytes)
+	if ds := vmDesiredStateTerraform(resp.Spec.DesiredState); ds != "" {
+		d.Set("desired_state", ds)
+	}
 	d.Set("node_id", resp.NodeId)
+	d.Set("assigned_ip", resp.AssignedIp)
 	d.Set("state", resp.Status.State.String())
 
 	if resp.Status.CreatedAt != nil {

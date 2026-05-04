@@ -65,6 +65,11 @@ resource "kcore_vm" "test" {
   name         = "test-vm"
   cpu          = 2
   memory_bytes = 4294967296
+  image_url    = "https://example.com/images/nixos-base.raw"
+  image_sha256 = "abc123def456789012345678901234567890123456789012345678901234abcd"
+
+  storage_backend    = "filesystem"
+  storage_size_bytes = 10737418240
 
   disk {
     name           = "root"

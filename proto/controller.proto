@@ -1,0 +1,1092 @@
+syntax = "proto3";
+
+package kcore.controller;
+
+option go_package = "github.com/kcorehypervisor/terraform-provider-kcore/api/controller";
+
+import "google/protobuf/timestamp.proto";
+
+// Controller service - orchestrates VMs across nodes
+service Controller {
+  // Node registration and heartbeat
+  rpc RegisterNode(RegisterNodeRequest) returns (RegisterNodeResponse);
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  rpc SyncVmState(SyncVmStateRequest) returns (SyncVmStateResponse);
+  rpc SyncWorkloadState(SyncWorkloadStateRequest) returns (SyncWorkloadStateResponse);
+  
+  // VM operations (declarative desired-state API managed by controller)
+  rpc CreateVm(CreateVmRequest) returns (CreateVmResponse);
+  rpc UpdateVm(UpdateVmRequest) returns (UpdateVmResponse);
+  rpc DeleteVm(DeleteVmRequest) returns (DeleteVmResponse);
+  rpc SetVmDesiredState(SetVmDesiredStateRequest) returns (SetVmDesiredStateResponse);
+  rpc GetVm(GetVmRequest) returns (GetVmResponse);
+  rpc ListVms(ListVmsRequest) returns (ListVmsResponse);
+  rpc CreateWorkload(CreateWorkloadRequest) returns (CreateWorkloadResponse);
+  rpc DeleteWorkload(DeleteWorkloadRequest) returns (DeleteWorkloadResponse);
+  rpc SetWorkloadDesiredState(SetWorkloadDesiredStateRequest) returns (SetWorkloadDesiredStateResponse);
+  rpc GetWorkload(GetWorkloadRequest) returns (GetWorkloadResponse);
+  rpc ListWorkloads(ListWorkloadsRequest) returns (ListWorkloadsResponse);
+  rpc CreateNetwork(CreateNetworkRequest) returns (CreateNetworkResponse);
+  rpc DeleteNetwork(DeleteNetworkRequest) returns (DeleteNetworkResponse);
+  rpc ListNetworks(ListNetworksRequest) returns (ListNetworksResponse);
+  rpc CreateSecurityGroup(CreateSecurityGroupRequest) returns (CreateSecurityGroupResponse);
+  rpc GetSecurityGroup(GetSecurityGroupRequest) returns (GetSecurityGroupResponse);
+  rpc ListSecurityGroups(ListSecurityGroupsRequest) returns (ListSecurityGroupsResponse);
+  rpc DeleteSecurityGroup(DeleteSecurityGroupRequest) returns (DeleteSecurityGroupResponse);
+  rpc AttachSecurityGroup(AttachSecurityGroupRequest) returns (AttachSecurityGroupResponse);
+  rpc DetachSecurityGroup(DetachSecurityGroupRequest) returns (DetachSecurityGroupResponse);
+  
+  // Node operations
+  rpc ListNodes(ListNodesRequest) returns (ListNodesResponse);
+  rpc GetNode(GetNodeRequest) returns (GetNodeResponse);
+
+  // SSH key management
+  rpc CreateSshKey(CreateSshKeyRequest) returns (CreateSshKeyResponse);
+  rpc DeleteSshKey(DeleteSshKeyRequest) returns (DeleteSshKeyResponse);
+  rpc ListSshKeys(ListSshKeysRequest) returns (ListSshKeysResponse);
+  rpc GetSshKey(GetSshKeyRequest) returns (GetSshKeyResponse);
+
+  // Node lifecycle
+  rpc DrainNode(DrainNodeRequest) returns (DrainNodeResponse);
+  rpc ApproveNode(ApproveNodeRequest) returns (ApproveNodeResponse);
+  rpc RejectNode(RejectNodeRequest) returns (RejectNodeResponse);
+
+  // Certificate rotation
+  rpc RenewNodeCert(RenewNodeCertRequest) returns (RenewNodeCertResponse);
+  // Bootstrap a node cert/key pair signed by controller sub-CA for fresh installs.
+  rpc IssueNodeBootstrapCert(IssueNodeBootstrapCertRequest) returns (IssueNodeBootstrapCertResponse);
+  rpc RotateSubCa(RotateSubCaRequest) returns (RotateSubCaResponse);
+  rpc ReloadTls(ReloadTlsRequest) returns (ReloadTlsResponse);
+
+  // Compliance
+  rpc GetComplianceReport(GetComplianceReportRequest) returns (GetComplianceReportResponse);
+
+  // Network overview: host interfaces from each node + default network config
+  rpc GetNetworkOverview(GetNetworkOverviewRequest) returns (GetNetworkOverviewResponse);
+
+  // Storage overview: cluster-wide VM data-plane backends (filesystem / LVM / ZFS), LUKS stats,
+  // and per-node block inventory from each node agent (lsblk).
+  rpc GetStorageOverview(GetStorageOverviewRequest) returns (GetStorageOverviewResponse);
+
+  // Volume inventory: list all provisioned VM volumes across the cluster.
+  rpc ListVolumes(ListVolumesRequest) returns (ListVolumesResponse);
+
+  // DiskLayout resource — per-node declarative disk layout. Implemented on the
+  // node via disko; the operator surface uses the plain word "disk". Each
+  // DiskLayout targets exactly one node; dangerous requests (those that would
+  // touch a device currently backing an active workload) are refused by both
+  // the controller pre-flight and the authoritative node-agent re-classifier.
+  rpc CreateDiskLayout(CreateDiskLayoutRequest) returns (CreateDiskLayoutResponse);
+  rpc GetDiskLayout(GetDiskLayoutRequest) returns (GetDiskLayoutResponse);
+  rpc ListDiskLayouts(ListDiskLayoutsRequest) returns (ListDiskLayoutsResponse);
+  rpc DeleteDiskLayout(DeleteDiskLayoutRequest) returns (DeleteDiskLayoutResponse);
+
+  // Read-only pre-flight that runs the controller-side classifier without
+  // persisting or dispatching to the node. Used by `kctl diff disklayout` so
+  // operators can see SAFE/DANGEROUS before applying.
+  rpc ClassifyDiskLayout(ClassifyDiskLayoutRequest) returns (ClassifyDiskLayoutResponse);
+}
+
+message RegisterNodeRequest {
+  string node_id = 1;
+  string hostname = 2;
+  string address = 3; // gRPC endpoint address
+  NodeCapacity capacity = 4;
+  repeated string labels = 5; // e.g., "dc=dc-a", "rack=rack-1"
+  StorageBackendType storage_backend = 6; // Node storage backend capability (filesystem/lvm/zfs)
+  bool disable_vxlan = 7; // When true, node does not support VXLAN overlay networking
+  int32 cert_expiry_days = 8; // Days until node TLS certificate expires
+  string luks_method = 9;     // "tpm2", "key-file", or "" (not reported)
+  string dc_id = 10;          // Datacenter identifier (e.g., "DC1", "DC2")
+}
+
+message RegisterNodeResponse {
+  bool success = 1;
+  string message = 2;
+  string approval_status = 3;
+}
+
+message HeartbeatRequest {
+  string node_id = 1;
+  NodeUsage usage = 2;
+  int32 cert_expiry_days = 3; // Days until node TLS certificate expires
+  string luks_method = 4;     // "tpm2", "key-file", or "" (not reported)
+}
+
+message HeartbeatResponse {
+  bool success = 1;
+}
+
+message SyncVmStateRequest {
+  string node_id = 1;
+  repeated VmInfo vms = 2;  // Complete list of VMs currently on this node
+}
+
+message SyncVmStateResponse {
+  bool success = 1;
+}
+
+message SyncWorkloadStateRequest {
+  string node_id = 1;
+  repeated WorkloadRuntimeInfo workloads = 2;
+}
+
+message SyncWorkloadStateResponse {
+  bool success = 1;
+}
+
+message NodeCapacity {
+  int32 cpu_cores = 1;
+  int64 memory_bytes = 2;
+}
+
+message NodeUsage {
+  int32 cpu_cores_used = 1;
+  int64 memory_bytes_used = 2;
+}
+
+enum StorageBackendType {
+  STORAGE_BACKEND_TYPE_UNSPECIFIED = 0;
+  STORAGE_BACKEND_TYPE_FILESYSTEM = 1;
+  STORAGE_BACKEND_TYPE_LVM = 2;
+  STORAGE_BACKEND_TYPE_ZFS = 3;
+}
+
+enum WorkloadKind {
+  WORKLOAD_KIND_UNSPECIFIED = 0;
+  WORKLOAD_KIND_VM = 1;
+  WORKLOAD_KIND_CONTAINER = 2;
+}
+
+enum WorkloadDesiredState {
+  WORKLOAD_DESIRED_STATE_UNSPECIFIED = 0;
+  WORKLOAD_DESIRED_STATE_RUNNING = 1;
+  WORKLOAD_DESIRED_STATE_STOPPED = 2;
+}
+
+enum ContainerState {
+  CONTAINER_STATE_UNKNOWN = 0;
+  CONTAINER_STATE_CREATED = 1;
+  CONTAINER_STATE_RUNNING = 2;
+  CONTAINER_STATE_STOPPED = 3;
+  CONTAINER_STATE_ERROR = 4;
+}
+
+message ContainerSpec {
+  string name = 1;
+  string image = 2;
+  string network = 3;
+  repeated string command = 4;
+  map<string, string> env = 5;
+  repeated string ports = 6;
+  string storage_backend = 7; // filesystem|lvm|zfs
+  int64 storage_size_bytes = 8;
+  string mount_target = 9;
+  WorkloadDesiredState desired_state = 10; // declarative desired state (running|stopped)
+}
+
+// Reconcile action returned by idempotent Create* (upsert) RPCs.
+enum ApplyAction {
+  APPLY_ACTION_UNSPECIFIED = 0;
+  APPLY_ACTION_CREATED = 1;
+  APPLY_ACTION_UPDATED = 2;
+  APPLY_ACTION_UNCHANGED = 3;
+}
+
+message ContainerInfo {
+  string id = 1;
+  string name = 2;
+  string image = 3;
+  ContainerState state = 4;
+  string status = 5;
+  string node_id = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+message WorkloadRuntimeInfo {
+  string id = 1;
+  string name = 2;
+  WorkloadKind kind = 3;
+  VmState vm_state = 4;
+  ContainerState container_state = 5;
+}
+
+// VM Operations - all include target_node for explicit node selection
+
+message CreateVmRequest {
+  string target_node = 1;  // Node address (e.g., "192.168.1.10:9091") - optional, controller picks if empty
+  VmSpec spec = 2;
+  string image_url = 3;     // HTTPS image URL to download on target node
+  string image_sha256 = 4;  // Required SHA256 checksum for image_url
+  string cloud_init_user_data = 5;  // Optional cloud-init user-data (YAML); uses default if empty
+  string image_path = 6;    // Optional node-local image path (alternative to image_url/image_sha256)
+  string image_format = 7;  // Required when image_path is used: qcow2 or raw
+  repeated string ssh_key_names = 8;  // SSH key names to inject (looked up from controller DB)
+  StorageBackendType storage_backend = 9; // Required VM storage backend for compatibility checks
+  int64 storage_size_bytes = 10; // Required VM storage size in bytes (> 0)
+  string target_dc = 11;    // Datacenter preference (optional; controller picks any DC if empty)
+}
+
+message CreateVmResponse {
+  string vm_id = 1;
+  string node_id = 2;  // Which node created it
+  VmState state = 3;
+  ApplyAction action = 4;              // upsert outcome: created|updated|unchanged
+  repeated string changed_fields = 5;  // names of mutated fields when action == UPDATED
+}
+
+message UpdateVmRequest {
+  string vm_id = 1;
+  string target_node = 2;  // Optional
+  int32 cpu = 3;            // New CPU count (0 = no change)
+  int64 memory_bytes = 4;   // New memory (0 = no change)
+}
+
+message UpdateVmResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DeleteVmRequest {
+  string vm_id = 1;
+  string target_node = 2;  // Optional - controller finds it if empty
+}
+
+message DeleteVmResponse {
+  bool success = 1;
+}
+
+enum VmDesiredState {
+  VM_DESIRED_STATE_UNSPECIFIED = 0;
+  VM_DESIRED_STATE_RUNNING = 1;
+  VM_DESIRED_STATE_STOPPED = 2;
+}
+
+message SetVmDesiredStateRequest {
+  string vm_id = 1;
+  VmDesiredState desired_state = 2;
+  string target_node = 3;  // Optional
+}
+
+message SetVmDesiredStateResponse {
+  VmState state = 1;
+}
+
+message GetVmRequest {
+  string vm_id = 1;
+  string target_node = 2;  // Optional
+}
+
+message GetVmResponse {
+  VmSpec spec = 1;
+  VmStatus status = 2;
+  string node_id = 3;  // Which node it's on
+  string assigned_ip = 4; // Controller-assigned VM IP (static/reserved when available)
+}
+
+message ListVmsRequest {
+  string target_node = 1;  // Optional - list from specific node, or all nodes if empty
+}
+
+message ListVmsResponse {
+  repeated VmInfo vms = 1;
+}
+
+message CreateWorkloadRequest {
+  WorkloadKind kind = 1;
+  string target_node = 2;
+  VmSpec vm_spec = 3;
+  ContainerSpec container_spec = 4;
+  string image_url = 5;
+  string image_sha256 = 6;
+  string cloud_init_user_data = 7;
+  string image_path = 8;
+  string image_format = 9;
+  repeated string ssh_key_names = 10;
+  StorageBackendType storage_backend = 11;
+  int64 storage_size_bytes = 12;
+}
+
+message CreateWorkloadResponse {
+  WorkloadKind kind = 1;
+  string workload_id = 2;
+  string node_id = 3;
+  VmState vm_state = 4;
+  ContainerState container_state = 5;
+  ApplyAction action = 6;              // upsert outcome: created|updated|unchanged
+  repeated string changed_fields = 7;  // names of mutated fields when action == UPDATED
+}
+
+message DeleteWorkloadRequest {
+  WorkloadKind kind = 1;
+  string workload_id = 2;
+  string target_node = 3;
+}
+
+message DeleteWorkloadResponse {
+  bool success = 1;
+}
+
+message SetWorkloadDesiredStateRequest {
+  WorkloadKind kind = 1;
+  string workload_id = 2;
+  WorkloadDesiredState desired_state = 3;
+  string target_node = 4;
+}
+
+message SetWorkloadDesiredStateResponse {
+  WorkloadKind kind = 1;
+  VmState vm_state = 2;
+  ContainerState container_state = 3;
+}
+
+message GetWorkloadRequest {
+  WorkloadKind kind = 1;
+  string workload_id = 2;
+  string target_node = 3;
+}
+
+message GetWorkloadResponse {
+  WorkloadKind kind = 1;
+  VmSpec vm_spec = 2;
+  ContainerSpec container_spec = 3;
+  VmStatus vm_status = 4;
+  ContainerInfo container_info = 5;
+  string node_id = 6;
+  string assigned_ip = 7;
+}
+
+message ListWorkloadsRequest {
+  WorkloadKind kind = 1; // optional filter
+  string target_node = 2;
+}
+
+message ListWorkloadsResponse {
+  repeated VmInfo vms = 1;
+  repeated ContainerInfo containers = 2;
+}
+
+message CreateNetworkRequest {
+  string name = 1;
+  string external_ip = 2;
+  string gateway_ip = 3;
+  string internal_netmask = 4;
+  string target_node = 5;  // Optional - controller picks if empty
+  repeated int32 allowed_tcp_ports = 6;  // TCP ports to DNAT-forward from external IP
+  repeated int32 allowed_udp_ports = 7;  // UDP ports to DNAT-forward from external IP
+  int32 vlan_id = 8;  // Optional VLAN tag (0 = no VLAN, bridges directly on gatewayInterface)
+  string network_type = 9;  // "nat" (default), "bridge", or "vxlan"
+  bool enable_outbound_nat = 10;  // For vxlan: whether VMs can reach the internet (default true)
+}
+
+message CreateNetworkResponse {
+  bool success = 1;
+  string message = 2;
+  string node_id = 3;
+  ApplyAction action = 4;              // upsert outcome: created|unchanged (all fields immutable in v1)
+  repeated string changed_fields = 5;  // unused in v1; reserved for future mutable fields
+}
+
+message DeleteNetworkRequest {
+  string name = 1;
+  string target_node = 2;  // Optional - controller resolves by name if unique
+}
+
+message DeleteNetworkResponse {
+  bool success = 1;
+}
+
+message ListNetworksRequest {
+  string target_node = 1;  // Optional
+}
+
+message ListNetworksResponse {
+  repeated NetworkInfo networks = 1;
+}
+
+message NetworkInfo {
+  string name = 1;
+  string external_ip = 2;
+  string gateway_ip = 3;
+  string internal_netmask = 4;
+  string node_id = 5;
+  repeated int32 allowed_tcp_ports = 6;
+  repeated int32 allowed_udp_ports = 7;
+  int32 vlan_id = 8;
+  string network_type = 9;  // "nat", "bridge", or "vxlan"
+  bool enable_outbound_nat = 10;
+}
+
+enum SecurityGroupTargetKind {
+  SECURITY_GROUP_TARGET_KIND_UNSPECIFIED = 0;
+  SECURITY_GROUP_TARGET_KIND_VM = 1;
+  SECURITY_GROUP_TARGET_KIND_NETWORK = 2;
+}
+
+message SecurityGroupRule {
+  string id = 1;
+  string protocol = 2; // tcp|udp
+  int32 host_port = 3;
+  int32 target_port = 4; // defaults to host_port when unset
+  string source_cidr = 5; // optional, defaults to 0.0.0.0/0
+  string target_vm = 6; // optional VM id/name for DNAT target
+  bool enable_dnat = 7; // when true, map host_port to target_vm:target_port
+}
+
+message SecurityGroup {
+  string name = 1;
+  string description = 2;
+  repeated SecurityGroupRule rules = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message SecurityGroupAttachment {
+  string security_group = 1;
+  SecurityGroupTargetKind target_kind = 2;
+  string target_id = 3;   // vm id/name or network name
+  string target_node = 4; // optional node scope for network attachments
+}
+
+message CreateSecurityGroupRequest {
+  SecurityGroup security_group = 1;
+}
+
+message CreateSecurityGroupResponse {
+  bool success = 1;
+  SecurityGroup security_group = 2;
+  ApplyAction action = 3;              // upsert outcome: created|updated|unchanged
+  repeated string changed_fields = 4;  // names of mutated fields when action == UPDATED
+}
+
+message GetSecurityGroupRequest {
+  string name = 1;
+}
+
+message GetSecurityGroupResponse {
+  SecurityGroup security_group = 1;
+  repeated SecurityGroupAttachment attachments = 2;
+}
+
+message ListSecurityGroupsRequest {}
+
+message ListSecurityGroupsResponse {
+  repeated SecurityGroup security_groups = 1;
+}
+
+message DeleteSecurityGroupRequest {
+  string name = 1;
+}
+
+message DeleteSecurityGroupResponse {
+  bool success = 1;
+}
+
+message AttachSecurityGroupRequest {
+  string security_group = 1;
+  SecurityGroupTargetKind target_kind = 2;
+  string target_id = 3;
+  string target_node = 4;
+}
+
+message AttachSecurityGroupResponse {
+  bool success = 1;
+}
+
+message DetachSecurityGroupRequest {
+  string security_group = 1;
+  SecurityGroupTargetKind target_kind = 2;
+  string target_id = 3;
+  string target_node = 4;
+}
+
+message DetachSecurityGroupResponse {
+  bool success = 1;
+}
+
+message VmInfo {
+  string id = 1;
+  string name = 2;
+  VmState state = 3;
+  int32 cpu = 4;
+  int64 memory_bytes = 5;
+  string node_id = 6;  // Which node it's on
+  google.protobuf.Timestamp created_at = 7;
+  string storage_backend = 8;   // filesystem, lvm, zfs
+  int64 storage_size_bytes = 9; // Provisioned volume size
+}
+
+// Node Operations
+
+message ListNodesRequest {}
+
+message ListNodesResponse {
+  repeated NodeInfo nodes = 1;
+}
+
+message NodeInfo {
+  string node_id = 1;
+  string hostname = 2;
+  string address = 3;
+  NodeCapacity capacity = 4;
+  NodeUsage usage = 5;
+  string status = 6;  // "ready", "not-ready", "unknown"
+  google.protobuf.Timestamp last_heartbeat = 7;
+  repeated string labels = 8;  // e.g., "dc=dc-a", "rack=rack-1"
+  StorageBackendType storage_backend = 9;
+  bool disable_vxlan = 10; // When true, VXLAN overlay networking is disabled
+  string approval_status = 11; // "pending", "approved", or "rejected"
+  int32 cert_expiry_days = 12; // Days until node TLS certificate expires (-1 = unknown)
+  string luks_method = 13;     // "tpm2", "key-file", or "" (unknown/not reported)
+  string dc_id = 14;           // Datacenter identifier (e.g., "DC1", "DC2")
+}
+
+message GetNodeRequest {
+  string node_id = 1;
+}
+
+message GetNodeResponse {
+  NodeInfo node = 1;
+}
+
+// VM Spec (simplified from node.proto)
+
+message VmSpec {
+  string id = 1;
+  string name = 2;
+  int32 cpu = 3;
+  int64 memory_bytes = 4;
+  repeated Disk disks = 5;
+  repeated Nic nics = 6;
+  string storage_backend = 7;   // filesystem, lvm, zfs
+  int64 storage_size_bytes = 8; // Provisioned volume size
+  VmDesiredState desired_state = 9; // declarative desired state (running|stopped)
+}
+
+message Disk {
+  string name = 1;
+  string backend_handle = 2;
+  string bus = 3;
+  string device = 4;
+}
+
+message Nic {
+  string network = 1;
+  string model = 2;
+  string mac_address = 3;
+}
+
+enum VmState {
+  VM_STATE_UNKNOWN = 0;
+  VM_STATE_STOPPED = 1;
+  VM_STATE_RUNNING = 2;
+  VM_STATE_PAUSED = 3;
+  VM_STATE_ERROR = 4;
+}
+
+message VmStatus {
+  string id = 1;
+  VmState state = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+// Management API messages (controller-side)
+
+message ApplyNixConfigRequest {
+  // Full contents to write to /etc/nixos/configuration.nix
+  string configuration_nix = 1;
+
+  // When true, run `nixos-rebuild switch` after writing the file.
+  // When false, only write the file.
+  bool rebuild = 2;
+}
+
+message ApplyNixConfigResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// ControllerAdmin service provides controller-level management operations.
+// Deployments are expected to enforce mTLS on the transport layer.
+service ControllerAdmin {
+  // ApplyNixConfig replaces the controller's /etc/nixos/configuration.nix with
+  // the provided content and (optionally) triggers a nixos-rebuild.
+  rpc ApplyNixConfig(ApplyNixConfigRequest) returns (ApplyNixConfigResponse);
+  // Returns a page of replication outbox events after the provided cursor.
+  rpc GetReplicationEvents(GetReplicationEventsRequest) returns (GetReplicationEventsResponse);
+  // Stores peer replication acknowledgement frontier.
+  rpc AckReplicationEvents(AckReplicationEventsRequest) returns (AckReplicationEventsResponse);
+  // Reports replication lag and frontier health.
+  rpc GetReplicationStatus(GetReplicationStatusRequest) returns (GetReplicationStatusResponse);
+  // Lists unresolved replication conflicts for operator workflows.
+  rpc ListReplicationConflicts(ListReplicationConflictsRequest) returns (ListReplicationConflictsResponse);
+  // Marks a replication conflict resolved.
+  rpc ResolveReplicationConflict(ResolveReplicationConflictRequest) returns (ResolveReplicationConflictResponse);
+}
+
+message GetReplicationEventsRequest {
+  int64 after_event_id = 1; // Exclusive cursor; 0 means from start.
+  int32 limit = 2; // Max rows to return; defaults server-side when <= 0.
+}
+
+message ReplicationEvent {
+  int64 event_id = 1;
+  string created_at = 2;
+  string event_type = 3;
+  string resource_key = 4;
+  bytes payload = 5;
+}
+
+message GetReplicationEventsResponse {
+  repeated ReplicationEvent events = 1;
+}
+
+message AckReplicationEventsRequest {
+  string peer_id = 1;
+  int64 last_event_id = 2;
+}
+
+message AckReplicationEventsResponse {
+  bool success = 1;
+}
+
+message GetReplicationStatusRequest {}
+
+message ReplicationOutgoingStatus {
+  string peer_id = 1;
+  int64 last_acked_event_id = 2;
+  int64 lag_events = 3;
+}
+
+message ReplicationIncomingStatus {
+  string peer_endpoint = 1;
+  int64 last_pulled_event_id = 2;
+  int64 last_applied_event_id = 3;
+}
+
+message GetReplicationStatusResponse {
+  int64 outbox_head_event_id = 1;
+  int64 outbox_size = 2;
+  repeated ReplicationOutgoingStatus outgoing = 3;
+  repeated ReplicationIncomingStatus incoming = 4;
+  int64 unresolved_conflicts = 5;
+  int64 pending_compensation_jobs = 6;
+  int64 failed_compensation_jobs = 7;
+  int64 materialization_backlog = 8;
+  int64 oldest_unresolved_conflict_age_seconds = 9;
+  int64 failed_reservations = 10;
+  bool zero_manual_slo_healthy = 11;
+  repeated string zero_manual_slo_violations = 12;
+  int64 failed_retryable_reservations = 13;
+  int64 failed_non_retryable_reservations = 14;
+  int64 retry_exhausted_reservations = 15;
+}
+
+message ListReplicationConflictsRequest {
+  int32 limit = 1;
+}
+
+message ReplicationConflictInfo {
+  int64 id = 1;
+  string resource_key = 2;
+  string incumbent_op_id = 3;
+  string challenger_op_id = 4;
+  string incumbent_controller_id = 5;
+  string challenger_controller_id = 6;
+  string reason = 7;
+}
+
+message ListReplicationConflictsResponse {
+  repeated ReplicationConflictInfo conflicts = 1;
+}
+
+message ResolveReplicationConflictRequest {
+  int64 id = 1;
+}
+
+message ResolveReplicationConflictResponse {
+  bool success = 1;
+}
+
+// SSH Key Management
+
+message CreateSshKeyRequest {
+  string name = 1;
+  string public_key = 2;  // e.g., "ssh-rsa AAAA... user@host"
+}
+
+message CreateSshKeyResponse {
+  bool success = 1;
+  string message = 2;
+  ApplyAction action = 3;              // upsert outcome: created|unchanged (public_key immutable in v1)
+  repeated string changed_fields = 4;  // unused in v1; reserved for future mutable fields
+}
+
+message DeleteSshKeyRequest {
+  string name = 1;
+}
+
+message DeleteSshKeyResponse {
+  bool success = 1;
+}
+
+message ListSshKeysRequest {}
+
+message ListSshKeysResponse {
+  repeated SshKeyInfo keys = 1;
+}
+
+message GetSshKeyRequest {
+  string name = 1;
+}
+
+message GetSshKeyResponse {
+  SshKeyInfo key = 1;
+}
+
+message SshKeyInfo {
+  string name = 1;
+  string public_key = 2;
+  google.protobuf.Timestamp created_at = 3;
+}
+
+// Node Drain
+
+message DrainNodeRequest {
+  string node_id = 1;
+  string target_node = 2;  // Optional: move VMs to this specific node; auto-schedule if empty
+}
+
+message DrainNodeResponse {
+  bool success = 1;
+  int32 vms_migrated = 2;
+  string message = 3;
+}
+
+// Node Approval
+
+message ApproveNodeRequest {
+  string node_id = 1;
+}
+
+message ApproveNodeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message RejectNodeRequest {
+  string node_id = 1;
+}
+
+message RejectNodeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Certificate Rotation
+
+message RenewNodeCertRequest {
+  string node_id = 1;
+}
+
+message RenewNodeCertResponse {
+  bool success = 1;
+  string cert_pem = 2;
+  string key_pem = 3;
+  string message = 4;
+}
+
+message IssueNodeBootstrapCertRequest {
+  string node_id = 1;
+  string node_host = 2;
+}
+
+message IssueNodeBootstrapCertResponse {
+  bool success = 1;
+  string cert_pem = 2;
+  string key_pem = 3;
+  string message = 4;
+}
+
+message RotateSubCaRequest {
+  string sub_ca_cert_pem = 1;
+  string sub_ca_key_pem = 2;
+}
+
+message RotateSubCaResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ReloadTlsRequest {
+  string cert_pem = 1;
+  string key_pem = 2;
+}
+
+message ReloadTlsResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Compliance Report
+
+message GetComplianceReportRequest {}
+
+message AccessControlEntry {
+  string rpc_method = 1;
+  string allowed_identities = 2;
+}
+
+message GetComplianceReportResponse {
+  string controller_version = 1;
+
+  string crypto_library = 2;
+  repeated string tls13_cipher_suites = 3;
+  repeated string tls12_cipher_suites = 4;
+  repeated string kx_groups = 5;
+  repeated string excluded_algorithms = 6;
+
+  bool mtls_enabled = 7;
+
+  repeated AccessControlEntry access_control = 8;
+
+  int32 total_nodes = 9;
+  int32 approved_nodes = 10;
+  int32 pending_nodes = 11;
+  int32 rejected_nodes = 12;
+
+  int32 total_vms = 13;
+  int32 running_vms = 14;
+  int32 stopped_vms = 15;
+
+  int32 total_networks = 16;
+  int32 nat_networks = 17;
+  int32 bridge_networks = 18;
+  int32 vxlan_networks = 19;
+
+  bool sub_ca_enabled = 20;
+  int32 cert_auto_renewal_days = 21;
+  int32 nodes_expiring_30d = 22;
+  int32 nodes_cert_unknown = 23;
+
+  repeated NodeInfo nodes = 24;
+
+  int32 nodes_luks_tpm2 = 25;      // Nodes with TPM2-sealed LUKS
+  int32 nodes_luks_keyfile = 26;   // Nodes with key-file LUKS
+  int32 nodes_luks_unknown = 27;   // Nodes with unknown/unreported LUKS status
+}
+
+// Network overview
+
+message GetNetworkOverviewRequest {}
+
+message NetworkInterfaceDetail {
+  string name = 1;
+  string mac_address = 2;
+  string state = 3;
+  int32 mtu = 4;
+  repeated string addresses = 5;
+}
+
+message NodeNetworkInfo {
+  string node_id = 1;
+  string hostname = 2;
+  string address = 3;
+  string gateway_interface = 4;
+  bool disable_vxlan = 5;
+  repeated NetworkInterfaceDetail interfaces = 6;
+}
+
+message GetNetworkOverviewResponse {
+  string default_gateway_interface = 1;
+  string default_external_ip = 2;
+  string default_gateway_ip = 3;
+  string default_internal_netmask = 4;
+  repeated NodeNetworkInfo nodes = 5;
+}
+
+// Storage overview (cluster aggregate + per-node block inventory from node ListDisks)
+
+message GetStorageOverviewRequest {}
+
+message StorageDiskDetail {
+  string name = 1;
+  string path = 2;
+  string size = 3;
+  string model = 4;
+  string fstype = 5;
+  string mountpoint = 6;
+}
+
+message StorageLvmVolumeGroupDetail {
+  string name = 1;
+  int64 size_bytes = 2;
+  int64 free_bytes = 3;
+  string attr = 4;
+}
+
+message StorageLvmLogicalVolumeDetail {
+  string name = 1;
+  string vg_name = 2;
+  int64 size_bytes = 3;
+  string attr = 4;
+  string path = 5;
+  string pool = 6;
+  string origin = 7;
+  string data_percent = 8;
+  string metadata_percent = 9;
+}
+
+message StorageLvmPhysicalVolumeDetail {
+  string name = 1;
+  string vg_name = 2;
+  int64 size_bytes = 3;
+  int64 free_bytes = 4;
+  string attr = 5;
+}
+
+message NodeStorageOverview {
+  string node_id = 1;
+  string hostname = 2;
+  string address = 3;
+  StorageBackendType storage_backend = 4;
+  string luks_method = 5;
+  bool disk_inventory_ok = 6;
+  repeated StorageDiskDetail disks = 7;
+  bool lvm_inventory_ok = 8;
+  repeated StorageLvmVolumeGroupDetail lvm_volume_groups = 9;
+  repeated StorageLvmLogicalVolumeDetail lvm_logical_volumes = 10;
+  repeated StorageLvmPhysicalVolumeDetail lvm_physical_volumes = 11;
+}
+
+message GetStorageOverviewResponse {
+  int32 approved_nodes = 1;
+  int32 nodes_disk_inventory_ok = 2;
+  int32 backend_filesystem_nodes = 3;
+  int32 backend_lvm_nodes = 4;
+  int32 backend_zfs_nodes = 5;
+  int32 backend_unspecified_nodes = 6;
+  int32 nodes_luks_tpm2 = 7;
+  int32 nodes_luks_keyfile = 8;
+  int32 nodes_luks_unknown = 9;
+  int32 total_block_devices = 10;
+  repeated NodeStorageOverview nodes = 11;
+}
+
+// Volume inventory
+
+message ListVolumesRequest {}
+
+message ListVolumesResponse {
+  repeated VolumeInfo volumes = 1;
+}
+
+message VolumeInfo {
+  string vm_id = 1;
+  string vm_name = 2;
+  string node_id = 3;
+  string storage_backend = 4;    // filesystem, lvm, zfs
+  int64 storage_size_bytes = 5;  // Provisioned size
+  string backend_handle = 6;     // Actual path: /dev/vg_kcore/kcore-<vm> or /var/lib/...
+  string image_format = 7;       // raw, qcow2
+  VmState vm_state = 8;
+}
+
+// DiskLayout resource ---------------------------------------------------
+
+// Lifecycle phase of a DiskLayout. Pending until the reconciler has
+// dispatched the node-agent RPC, then Applied / Refused / Failed based on the
+// authoritative response.
+enum DiskLayoutPhase {
+  DISK_LAYOUT_PHASE_UNSPECIFIED = 0;
+  DISK_LAYOUT_PHASE_PENDING = 1;
+  DISK_LAYOUT_PHASE_APPLIED = 2;
+  DISK_LAYOUT_PHASE_REFUSED = 3;
+  DISK_LAYOUT_PHASE_FAILED = 4;
+}
+
+message DiskLayout {
+  // Stable operator-facing name (metadata.name in the manifest).
+  string name = 1;
+  // Target node; every DiskLayout applies to exactly one node.
+  string node_id = 2;
+  // Monotonically-increasing generation, bumped on every accepted Create
+  // (upsert) that produces a content change.
+  int64 generation = 3;
+  // Full Nix expression (a `disko.devices` attrset under the hood).
+  string layout_nix = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message DiskLayoutStatus {
+  int64 observed_generation = 1;
+  DiskLayoutPhase phase = 2;
+  // Stable refusal code when phase = REFUSED (mirrors
+  // ApplyDiskLayoutResponse.refusal_reason).
+  string refusal_reason = 3;
+  // Human-readable detail from the last reconcile.
+  string message = 4;
+  // Wall-clock of the last observed status transition on the node.
+  google.protobuf.Timestamp last_transition_at = 5;
+}
+
+message CreateDiskLayoutRequest {
+  DiskLayout disk_layout = 1;
+}
+
+message CreateDiskLayoutResponse {
+  bool success = 1;
+  DiskLayout disk_layout = 2;
+  ApplyAction action = 3;              // upsert outcome: created|updated|unchanged
+  repeated string changed_fields = 4;  // names of mutated fields when action == UPDATED
+}
+
+message GetDiskLayoutRequest {
+  string name = 1;
+}
+
+message GetDiskLayoutResponse {
+  DiskLayout disk_layout = 1;
+  DiskLayoutStatus status = 2;
+}
+
+message ListDiskLayoutsRequest {
+  // Optional filter: when non-empty, only layouts for this node are returned.
+  string node_id = 1;
+}
+
+message DiskLayoutSummary {
+  DiskLayout disk_layout = 1;
+  DiskLayoutStatus status = 2;
+}
+
+message ListDiskLayoutsResponse {
+  repeated DiskLayoutSummary disk_layouts = 1;
+}
+
+message DeleteDiskLayoutRequest {
+  string name = 1;
+}
+
+message DeleteDiskLayoutResponse {
+  bool success = 1;
+}
+
+message ClassifyDiskLayoutRequest {
+  // The same payload the operator would send to CreateDiskLayout.
+  DiskLayout disk_layout = 1;
+}
+
+message ClassifyDiskLayoutResponse {
+  // When true, the controller pre-flight classifier has no objection. The
+  // authoritative node-agent classifier will re-check before apply.
+  bool safe = 1;
+  // Stable refusal code when safe = false (matches
+  // ApplyDiskLayoutResponse.refusal_reason).
+  string refusal_reason = 2;
+  // Human-readable explanation for the operator.
+  string detail = 3;
+  // Target block-device paths the controller extracted from layout_nix.
+  repeated string target_devices = 4;
+}

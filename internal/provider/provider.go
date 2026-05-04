@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	pb "github.com/rtacconi/terraform-provider-kcore/api/controller"
+	pb "github.com/kcorehypervisor/terraform-provider-kcore/api/controller"
 )
 
 // New returns a new provider instance

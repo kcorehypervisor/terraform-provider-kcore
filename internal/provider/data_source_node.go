@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	pb "github.com/rtacconi/terraform-provider-kcore/api/controller"
+	pb "github.com/kcorehypervisor/terraform-provider-kcore/api/controller"
 )
 
 func dataSourceNode() *schema.Resource {
@@ -60,6 +60,16 @@ func dataSourceNode() *schema.Resource {
 				Computed:    true,
 				Description: "Last heartbeat timestamp",
 			},
+			"dc_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Datacenter identifier",
+			},
+			"storage_backend": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Node storage backend (filesystem, lvm, zfs)",
+			},
 		},
 	}
 }
@@ -98,6 +108,9 @@ func dataSourceNodeRead(ctx context.Context, d *schema.ResourceData, meta interf
 	if node.LastHeartbeat != nil {
 		d.Set("last_heartbeat", node.LastHeartbeat.AsTime().Format(time.RFC3339))
 	}
+
+	d.Set("dc_id", node.DcId)
+	d.Set("storage_backend", storageBackendTypeToString(node.StorageBackend))
 
 	return diags
 }
@@ -157,6 +170,16 @@ func dataSourceNodes() *schema.Resource {
 							Computed:    true,
 							Description: "Last heartbeat timestamp",
 						},
+						"dc_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Datacenter identifier",
+						},
+						"storage_backend": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Node storage backend",
+						},
 					},
 				},
 			},
@@ -197,6 +220,9 @@ func dataSourceNodesRead(ctx context.Context, d *schema.ResourceData, meta inter
 		if node.LastHeartbeat != nil {
 			nodeMap["last_heartbeat"] = node.LastHeartbeat.AsTime().Format(time.RFC3339)
 		}
+
+		nodeMap["dc_id"] = node.DcId
+		nodeMap["storage_backend"] = storageBackendTypeToString(node.StorageBackend)
 
 		nodes[i] = nodeMap
 	}

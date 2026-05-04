@@ -4,7 +4,7 @@ import (
 	"flag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/rtacconi/terraform-provider-kcore/internal/provider"
+	"github.com/kcorehypervisor/terraform-provider-kcore/internal/provider"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 	opts := &plugin.ServeOpts{
 		ProviderFunc: provider.New,
 		Debug:        debugMode,
-		ProviderAddr: "registry.terraform.io/rtacconi/kcore",
+		ProviderAddr: "registry.terraform.io/kcorehypervisor/kcore",
 	}
 
 	plugin.Serve(opts)

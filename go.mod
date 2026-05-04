@@ -1,4 +1,4 @@
-module github.com/rtacconi/terraform-provider-kcore
+module github.com/kcorehypervisor/terraform-provider-kcore
 
 go 1.24.0
 
