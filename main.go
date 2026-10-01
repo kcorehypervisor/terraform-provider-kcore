@@ -7,6 +7,12 @@ import (
 	"github.com/kcorehypervisor/terraform-provider-kcore/internal/provider"
 )
 
+// Set by GoReleaser via -ldflags -X.
+var (
+	version = "dev"
+	commit  = "none"
+)
+
 func main() {
 	var debugMode bool
 

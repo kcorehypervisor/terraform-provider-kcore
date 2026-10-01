@@ -19,7 +19,7 @@ terraform {
   required_providers {
     kcore = {
       source  = "kcorehypervisor/kcore"
-      version = ">= 0.2.0"
+      version = "0.3.0"
     }
   }
 }
