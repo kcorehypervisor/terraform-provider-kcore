@@ -7,7 +7,6 @@ func TestResourcesCoverKctlCreateSurface(t *testing.T) {
 	want := []string{
 		"kcore_cluster",
 		"kcore_node",
-		"kcore_node_install",
 		"kcore_vm",
 		"kcore_network",
 		"kcore_security_group",

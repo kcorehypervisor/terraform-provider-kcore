@@ -3,18 +3,40 @@
 page_title: "kcore_node Resource - kcore"
 subcategory: ""
 description: |-
-  Approve a node that has registered with the controller (kctl node approve). Destroy removes it from the cluster.
+  Install a node from the live ISO. bootstrap marks the first controller. Other nodes join it through controller_address.
 ---
 
 # kcore_node (Resource)
 
-Approve a node that has registered with the controller (`kctl node approve`). Destroy removes it from the cluster.
+Install a node from the live ISO (`kctl node install`). Set `bootstrap` on the first controller. Other nodes set `join_controller` to that node's `controller_address`, which makes Terraform create the bootstrap node first. Destroy drops Terraform state and leaves the installed disk in place.
 
 ## Example Usage
 
 ```terraform
-resource "kcore_node" "worker" {
-  node_id = "kcore-node-10.0.0.12"
+resource "kcore_node" "controller" {
+  bootstrap      = true
+  address        = "10.0.0.8:9091"
+  os_disk        = "/dev/nvme0n1"
+  certs_dir      = kcore_cluster.lab.certs_dir
+  run_controller = true
+  hostname       = "ctrl-1"
+  node_id        = "kcore-node-10.0.0.8"
+}
+
+resource "kcore_node" "worker_a" {
+  address         = "10.0.0.12:9091"
+  os_disk         = "/dev/nvme0n1"
+  certs_dir       = kcore_cluster.lab.certs_dir
+  join_controller = kcore_node.controller.controller_address
+  hostname        = "worker-1"
+}
+
+resource "kcore_node" "worker_b" {
+  address         = "10.0.0.13:9091"
+  os_disk         = "/dev/nvme0n1"
+  certs_dir       = kcore_cluster.lab.certs_dir
+  join_controller = kcore_node.controller.controller_address
+  hostname        = "worker-2"
 }
 ```
 
@@ -23,16 +45,34 @@ resource "kcore_node" "worker" {
 
 ### Required
 
-- `node_id` (String)
+- `address` (String) Live installer address. Port defaults to 9091.
+- `certs_dir` (String) Directory produced by kcore_cluster.
+- `os_disk` (String)
 
 ### Optional
 
-- `cordoned` (Boolean) When true, the node is cordoned after approval.
+- `bootstrap` (Boolean) Install this node as the first controller. It does not join an existing controller.
+- `data_disk` (List of String)
+- `dc_id` (String)
+- `disable_vxlan` (Boolean)
+- `hostname` (String)
+- `insecure` (Boolean) Dial the live installer without TLS. The ISO agent has no cluster certificate yet.
+- `join_controller` (String) Controller host:9090 to join. Set this to the bootstrap node's controller_address. Required unless bootstrap is true.
+- `node_id` (String)
+- `run_controller` (Boolean) Run a controller on this node. Implied by bootstrap. Additional controllers must also set join_controller.
+- `storage_backend` (String)
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `address` (String)
-- `approval_status` (String)
-- `hostname` (String)
+- `controller_address` (String) host:9090 for this node's controller. Joiners reference the bootstrap node's controller_address.
 - `id` (String) The ID of this resource.
-- `status` (String)
+- `luks_method` (String)
+- `message` (String)
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)

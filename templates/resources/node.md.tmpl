@@ -3,12 +3,12 @@
 page_title: "kcore_node Resource - kcore"
 subcategory: ""
 description: |-
-  Approve a node that has registered with the controller (kctl node approve). Destroy removes it from the cluster.
+  Install a node from the live ISO. bootstrap marks the first controller. Other nodes join it through controller_address.
 ---
 
 # kcore_node (Resource)
 
-Approve a node that has registered with the controller (`kctl node approve`). Destroy removes it from the cluster.
+Install a node from the live ISO (`kctl node install`). Set `bootstrap` on the first controller. Other nodes set `join_controller` to that node's `controller_address`, which makes Terraform create the bootstrap node first. Destroy drops Terraform state and leaves the installed disk in place.
 
 ## Example Usage
 

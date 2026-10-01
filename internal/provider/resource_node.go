@@ -2,13 +2,19 @@ package provider
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 
 	pb "github.com/kcorehypervisor/terraform-provider-kcore/api/controller"
@@ -17,123 +23,15 @@ import (
 
 func resourceNode() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Approve a node that has registered with the controller (`kctl node approve`). Destroy removes it from the cluster.",
+		Description: "Install a node from the live ISO (`kctl node install`). " +
+			"Set bootstrap on the first controller. Other nodes set join_controller to that node's controller_address so Terraform creates the bootstrap node first. " +
+			"Destroy drops Terraform state and leaves the installed disk in place.",
 		CreateContext: resourceNodeCreate,
 		ReadContext:   resourceNodeRead,
-		UpdateContext: resourceNodeUpdate,
 		DeleteContext: resourceNodeDelete,
-		Schema: map[string]*schema.Schema{
-			"node_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"cordoned": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "When true, the node is cordoned after approval.",
-			},
-			"hostname": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"address": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"approval_status": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
 		},
-	}
-}
-
-func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	c := api(meta).controller
-	id := s(d, "node_id")
-	resp, err := c.ApproveNode(ctx, &pb.ApproveNodeRequest{NodeId: id})
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("approve node: %w", err))
-	}
-	if err := fail(resp.Success, resp.Message); err != nil {
-		return diag.FromErr(err)
-	}
-	if b(d, "cordoned") {
-		cr, err := c.CordonNode(ctx, &pb.CordonNodeRequest{NodeId: id})
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		if err := fail(cr.Success, cr.Message); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-	d.SetId(id)
-	return resourceNodeRead(ctx, d, meta)
-}
-
-func resourceNodeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	resp, err := api(meta).controller.GetNode(ctx, &pb.GetNodeRequest{NodeId: d.Id()})
-	if err != nil || resp.GetNode() == nil || resp.Node.NodeId == "" {
-		d.SetId("")
-		return nil
-	}
-	n := resp.Node
-	d.Set("node_id", n.NodeId)
-	d.Set("hostname", n.Hostname)
-	d.Set("address", n.Address)
-	d.Set("approval_status", n.ApprovalStatus)
-	d.Set("status", n.Status)
-	return nil
-}
-
-func resourceNodeUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if d.HasChange("cordoned") {
-		c := api(meta).controller
-		id := d.Id()
-		if b(d, "cordoned") {
-			resp, err := c.CordonNode(ctx, &pb.CordonNodeRequest{NodeId: id})
-			if err != nil {
-				return diag.FromErr(err)
-			}
-			if err := fail(resp.Success, resp.Message); err != nil {
-				return diag.FromErr(err)
-			}
-		} else {
-			resp, err := c.UncordonNode(ctx, &pb.UncordonNodeRequest{NodeId: id})
-			if err != nil {
-				return diag.FromErr(err)
-			}
-			if err := fail(resp.Success, resp.Message); err != nil {
-				return diag.FromErr(err)
-			}
-		}
-	}
-	return resourceNodeRead(ctx, d, meta)
-}
-
-func resourceNodeDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	resp, err := api(meta).controller.DeleteNode(ctx, &pb.DeleteNodeRequest{NodeId: d.Id()})
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	if err := fail(resp.Success, resp.Message); err != nil {
-		return diag.FromErr(err)
-	}
-	d.SetId("")
-	return nil
-}
-
-func resourceNodeInstall() *schema.Resource {
-	return &schema.Resource{
-		Description:   "Install kcore onto a node that is booted from the ISO (`kctl node install`). This wipes os_disk. Destroy only drops the Terraform state; it does not roll the install back.",
-		CreateContext: resourceNodeInstallCreate,
-		ReadContext:   resourceNodeInstallRead,
-		DeleteContext: resourceNodeInstallDelete,
 		Schema: map[string]*schema.Schema{
 			"address": {
 				Type:        schema.TypeString,
@@ -158,16 +56,23 @@ func resourceNodeInstall() *schema.Resource {
 				ForceNew:    true,
 				Description: "Directory produced by kcore_cluster.",
 			},
+			"bootstrap": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Install this node as the first controller. It does not join an existing controller.",
+			},
 			"run_controller": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Run a controller on this node. Implied by bootstrap. Additional controllers must also set join_controller.",
 			},
 			"join_controller": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "Controller host:9090 to join. Required unless run_controller is true.",
+				Description: "Controller host:9090 to join. Set this to the bootstrap node's controller_address. Required unless bootstrap is true.",
 			},
 			"storage_backend": {
 				Type:         schema.TypeString,
@@ -190,6 +95,7 @@ func resourceNodeInstall() *schema.Resource {
 			"node_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"disable_vxlan": {
@@ -204,6 +110,11 @@ func resourceNodeInstall() *schema.Resource {
 				Default:     true,
 				Description: "Dial the live installer without TLS. The ISO agent has no cluster certificate yet.",
 			},
+			"controller_address": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "host:9090 for this node's controller. Joiners reference the bootstrap node's controller_address.",
+			},
 			"luks_method": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -216,11 +127,15 @@ func resourceNodeInstall() *schema.Resource {
 	}
 }
 
-func resourceNodeInstallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	runController := b(d, "run_controller")
+func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	bootstrap := b(d, "bootstrap")
+	runController := bootstrap || b(d, "run_controller")
 	join := strings.TrimSpace(s(d, "join_controller"))
-	if !runController && join == "" {
-		return diag.FromErr(fmt.Errorf("join_controller is required when run_controller is false"))
+	if bootstrap && join != "" {
+		return diag.FromErr(fmt.Errorf("bootstrap node does not set join_controller"))
+	}
+	if !bootstrap && join == "" {
+		return diag.FromErr(fmt.Errorf("join_controller is required unless bootstrap is true"))
 	}
 	dir := s(d, "certs_dir")
 	addr := s(d, "address")
@@ -269,10 +184,10 @@ func resourceNodeInstallCreate(ctx context.Context, d *schema.ResourceData, meta
 		nodeCert, nodeKey = issued.CertPem, issued.KeyPem
 	}
 
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	if !b(d, "insecure") {
 		return diag.FromErr(fmt.Errorf("TLS to the live installer is not implemented; set insecure = true"))
 	}
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	conn, err := grpc.DialContext(ctx, addr, opts...)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("dial installer %s: %w", addr, err))
@@ -319,25 +234,78 @@ func resourceNodeInstallCreate(ctx context.Context, d *schema.ResourceData, meta
 	if !resp.Accepted {
 		return diag.FromErr(fmt.Errorf("install refused: %s", resp.Message))
 	}
+	controllerAddr := join
+	if runController {
+		controllerAddr = host + ":9090"
+	}
+	if bootstrap {
+		if err := waitForController(ctx, controllerAddr, dir); err != nil {
+			return diag.FromErr(fmt.Errorf("installer accepted node %s; controller %s did not become ready: %w", nodeID, controllerAddr, err))
+		}
+	}
 	d.SetId(nodeID)
+	d.Set("node_id", nodeID)
+	d.Set("controller_address", controllerAddr)
 	d.Set("luks_method", resp.LuksMethod)
 	d.Set("message", resp.Message)
 	return nil
 }
 
-func resourceNodeInstallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func waitForController(ctx context.Context, addr, dir string) error {
+	cert, err := tls.LoadX509KeyPair(filepath.Join(dir, "kctl.crt"), filepath.Join(dir, "kctl.key"))
+	if err != nil {
+		return fmt.Errorf("load kctl certificate: %w", err)
+	}
+	caPEM, err := os.ReadFile(filepath.Join(dir, "ca.crt"))
+	if err != nil {
+		return err
+	}
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(caPEM) {
+		return fmt.Errorf("parse ca.crt")
+	}
+	creds := credentials.NewTLS(&tls.Config{
+		Certificates: []tls.Certificate{cert},
+		RootCAs:      pool,
+		ServerName:   hostFromAddress(addr),
+		MinVersion:   tls.VersionTLS12,
+	})
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+	var last error
+	for {
+		dialCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		conn, err := grpc.DialContext(dialCtx, addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
+		if err == nil {
+			_, err = pb.NewControllerClient(conn).GetClusterHealth(dialCtx, &pb.GetClusterHealthRequest{})
+			conn.Close()
+		}
+		cancel()
+		if err == nil {
+			return nil
+		}
+		last = err
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("%w (last dial: %v)", ctx.Err(), last)
+		case <-ticker.C:
+		}
+	}
+}
+
+func resourceNodeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	_ = ctx
 	_ = meta
 	return nil
 }
 
-func resourceNodeInstallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	_ = ctx
 	_ = meta
 	d.SetId("")
 	return diag.Diagnostics{{
 		Severity: diag.Warning,
-		Summary:  "Node install was removed from Terraform state only",
-		Detail:   "The installed disk was not wiped again. Remove the node from the cluster with kcore_node if it joined.",
+		Summary:  "Node was removed from Terraform state only",
+		Detail:   "The installed disk was not wiped. The node stays on the cluster until it is removed there.",
 	}}
 }

@@ -10,6 +10,15 @@ description: |-
 
 Data volume (`kctl create volume`). Size changes call resize.
 
+## Storage classes
+
+| Class | Role |
+|-------|------|
+| `filesystem` | Node-local directory backend |
+| `lvm` | Node-local LVM backend |
+| `zfs` | Node-local ZFS backend |
+| `ceph` | RBD volume. `CreateVolume` accepts this class. It is the default. |
+
 ## Example Usage
 
 {{tffile "examples/resources/kcore_volume/resource.tf"}}

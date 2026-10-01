@@ -2,7 +2,7 @@
 
 Manage a kcore cluster through the same create path as `kctl`: cluster TLS, node install and approval, VMs, networks, security groups, volumes, Ceph, object storage, operators, SSH keys, host updates, and container workloads.
 
-The controller API matches kcore **0.3.0**. Provider **0.3.2** publishes the resources below. [`kcore_cluster`](docs/resources/cluster.md) writes CA, sub-CA, controller, and kctl certificates on the machine running Terraform. Apply it before any node is installed.
+The controller API matches kcore **0.3.0**. Provider **0.3.3** publishes the resources below. [`kcore_cluster`](docs/resources/cluster.md) writes CA, sub-CA, controller, and kctl certificates on the machine running Terraform. Apply it before any node is installed.
 
 Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terraform.io/providers/kcorehypervisor/kcore/latest).
 
@@ -11,8 +11,7 @@ Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terra
 | Resource | kctl |
 |----------|------|
 | `kcore_cluster` | `kctl create cluster` (local PKI) |
-| `kcore_node_install` | `kctl node install` |
-| `kcore_node` | `kctl node approve` / `delete` |
+| `kcore_node` | `kctl node install`. `bootstrap = true` is the first controller; other nodes set `join_controller` to its `controller_address` |
 | `kcore_vm` | `kctl create vm` |
 | `kcore_workload` | `kctl create container` |
 | `kcore_network` | `kctl create network` |
@@ -30,7 +29,7 @@ Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terra
 | `kcore_operator` | `kctl operator add` |
 | `kcore_cluster_update` | `kctl update-cluster` (destroy cancels) |
 
-Console, drain, migrate, backup, restore, cert rotation, and certificate revoke stay as `kctl` commands. Destroying `kcore_node_install` drops it from state and leaves the installed disk in place.
+Console, drain, migrate, backup, restore, cert rotation, certificate revoke, and node approval stay as `kctl` commands. Destroying `kcore_node` drops it from state and leaves the installed disk in place.
 
 ## Requirements
 
@@ -47,7 +46,7 @@ terraform {
   required_providers {
     kcore = {
       source  = "kcorehypervisor/kcore"
-      version = "0.3.2"
+      version = "0.3.3"
     }
   }
 }

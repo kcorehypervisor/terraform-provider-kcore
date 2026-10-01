@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	pb "github.com/kcorehypervisor/terraform-provider-kcore/api/controller"
 )
@@ -17,9 +18,16 @@ func resourceVolume() *schema.Resource {
 		UpdateContext: resourceVolumeUpdate,
 		DeleteContext: resourceVolumeDelete,
 		Schema: map[string]*schema.Schema{
-			"name":           {Type: schema.TypeString, Required: true, ForceNew: true},
-			"size_bytes":     {Type: schema.TypeInt, Required: true},
-			"storage_class":  {Type: schema.TypeString, Optional: true, ForceNew: true, Default: "ceph"},
+			"name":       {Type: schema.TypeString, Required: true, ForceNew: true},
+			"size_bytes": {Type: schema.TypeInt, Required: true},
+			"storage_class": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "ceph",
+				ValidateFunc: validation.StringInSlice([]string{"filesystem", "lvm", "zfs", "ceph"}, false),
+				Description:  "Storage class: filesystem, lvm, zfs, or ceph. CreateVolume accepts ceph. filesystem, lvm, and zfs are node storage backends.",
+			},
 			"vm":             {Type: schema.TypeString, Optional: true, Description: "VM to attach. The VM must be stopped."},
 			"from_snapshot":  {Type: schema.TypeString, Optional: true, ForceNew: true},
 			"encrypt":        {Type: schema.TypeBool, Optional: true, ForceNew: true},

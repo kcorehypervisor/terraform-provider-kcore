@@ -10,6 +10,15 @@ description: |-
 
 Data volume (`kctl create volume`). Size changes call resize.
 
+## Storage classes
+
+| Class | Role |
+|-------|------|
+| `filesystem` | Node-local directory backend |
+| `lvm` | Node-local LVM backend |
+| `zfs` | Node-local ZFS backend |
+| `ceph` | RBD volume. `CreateVolume` accepts this class. It is the default. |
+
 ## Example Usage
 
 ```terraform
@@ -33,7 +42,7 @@ resource "kcore_volume" "data" {
 
 - `encrypt` (Boolean)
 - `from_snapshot` (String)
-- `storage_class` (String)
+- `storage_class` (String) Storage class: filesystem, lvm, zfs, or ceph. CreateVolume accepts ceph. filesystem, lvm, and zfs are node storage backends.
 - `vm` (String) VM to attach. The VM must be stopped.
 
 ### Read-Only

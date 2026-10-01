@@ -53,7 +53,6 @@ func New() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"kcore_cluster":                   resourceCluster(),
 			"kcore_node":                      resourceNode(),
-			"kcore_node_install":              resourceNodeInstall(),
 			"kcore_vm":                        resourceVM(),
 			"kcore_network":                   resourceNetwork(),
 			"kcore_security_group":            resourceSecurityGroup(),
