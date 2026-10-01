@@ -3,12 +3,12 @@
 page_title: "kcore_vm Resource - kcore"
 subcategory: ""
 description: |-
-  
+  Virtual machine (kctl create vm).
 ---
 
 # kcore_vm (Resource)
 
-
+Virtual machine (`kctl create vm`).
 
 ## Example Usage
 
