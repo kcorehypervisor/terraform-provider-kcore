@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package kcore.node;
+
+option go_package = "github.com/kcorehypervisor/terraform-provider-kcore/api/node";
+
+service NodeAdmin {
+  rpc InstallToDisk(InstallToDiskRequest) returns (InstallToDiskResponse);
+}
+
+enum StorageBackendType {
+  STORAGE_BACKEND_TYPE_UNSPECIFIED = 0;
+  STORAGE_BACKEND_TYPE_FILESYSTEM = 1;
+  STORAGE_BACKEND_TYPE_LVM = 2;
+  STORAGE_BACKEND_TYPE_ZFS = 3;
+  STORAGE_BACKEND_TYPE_CEPH = 4;
+}
+
+message InstallToDiskRequest {
+  string os_disk = 1;
+  repeated string data_disks = 2;
+  string controller = 3;
+  string ca_cert_pem = 4;
+  string node_cert_pem = 5;
+  string node_key_pem = 6;
+  string controller_cert_pem = 7;
+  string controller_key_pem = 8;
+  string kctl_cert_pem = 9;
+  string kctl_key_pem = 10;
+  bool run_controller = 11;
+  string data_disk_mode = 12;
+  StorageBackendType storage_backend = 13;
+  string lvm_vg_name = 14;
+  string lvm_lv_prefix = 15;
+  string zfs_pool_name = 16;
+  string zfs_dataset_prefix = 17;
+  bool disable_vxlan = 18;
+  string sub_ca_cert_pem = 19;
+  string sub_ca_key_pem = 20;
+  string dc_id = 21;
+  repeated string controllers = 22;
+  string hostname = 23;
+  string node_id = 24;
+}
+
+message InstallToDiskResponse {
+  bool accepted = 1;
+  string message = 2;
+  string luks_method = 3;
+}

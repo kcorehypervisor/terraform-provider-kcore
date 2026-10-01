@@ -21,6 +21,9 @@ service Controller {
   rpc SetVmDesiredState(SetVmDesiredStateRequest) returns (SetVmDesiredStateResponse);
   rpc GetVm(GetVmRequest) returns (GetVmResponse);
   rpc ListVms(ListVmsRequest) returns (ListVmsResponse);
+  // AttachVmConsole proxies a bidirectional serial console session to the
+  // node hosting the VM (see NodeAdmin.AttachVmConsole).
+  rpc AttachVmConsole(stream ConsoleMessage) returns (stream ConsoleMessage);
   rpc CreateWorkload(CreateWorkloadRequest) returns (CreateWorkloadResponse);
   rpc DeleteWorkload(DeleteWorkloadRequest) returns (DeleteWorkloadResponse);
   rpc SetWorkloadDesiredState(SetWorkloadDesiredStateRequest) returns (SetWorkloadDesiredStateResponse);
@@ -48,18 +51,65 @@ service Controller {
 
   // Node lifecycle
   rpc DrainNode(DrainNodeRequest) returns (DrainNodeResponse);
+  // Live-migrate a Ceph-backed VM to another CephCluster member (shared RBD).
+  rpc MigrateVm(MigrateVmRequest) returns (MigrateVmResponse);
+  // Report each node's live-migrate receive bookkeeping for a VM. Read-only,
+  // and the thing to run first when a migration keeps failing with
+  // ALREADY_EXISTS. See docs/vm-migration.md.
+  rpc GetLiveMigrateReceiveStatus(GetLiveMigrateReceiveStatusRequest)
+      returns (GetLiveMigrateReceiveStatusResponse);
+  // Clear a stranded receive session on one node. Destructive and refused
+  // unless `force` is set, so the default answer is a report of what would be
+  // cleared rather than the clearing itself.
+  rpc ResetLiveMigrateReceive(ResetLiveMigrateReceiveRequest)
+      returns (ResetLiveMigrateReceiveResponse);
   rpc ApproveNode(ApproveNodeRequest) returns (ApproveNodeResponse);
   rpc RejectNode(RejectNodeRequest) returns (RejectNodeResponse);
+  // Cordon keeps the node and its VMs, and stops the scheduler from placing
+  // anything new on it. Uncordon returns it to scheduling.
+  rpc CordonNode(CordonNodeRequest) returns (CordonNodeResponse);
+  rpc UncordonNode(UncordonNodeRequest) returns (UncordonNodeResponse);
+  // Remove the node after it has no VMs or networks. Revokes every certificate
+  // issued to it before the row is deleted.
+  rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse);
+  // Summary of node readiness, VM placement, certificate expiry, and
+  // replication conflicts. Read-only.
+  rpc GetClusterHealth(GetClusterHealthRequest) returns (GetClusterHealthResponse);
+  // Consistent SQLite snapshot of the controller database.
+  rpc BackupCluster(BackupClusterRequest) returns (BackupClusterResponse);
+  // Replace the controller database from a snapshot. `confirm` must be true.
+  rpc RestoreCluster(RestoreClusterRequest) returns (RestoreClusterResponse);
 
   // Certificate rotation
+  // DEPRECATED: ships a controller-generated private key over the wire. Use
+  // SignNodeCsr, which keeps the node private key on the node. Kept so older
+  // node-agents keep renewing until they are upgraded.
   rpc RenewNodeCert(RenewNodeCertRequest) returns (RenewNodeCertResponse);
   // Bootstrap a node cert/key pair signed by controller sub-CA for fresh installs.
   rpc IssueNodeBootstrapCert(IssueNodeBootstrapCertRequest) returns (IssueNodeBootstrapCertResponse);
   rpc RotateSubCa(RotateSubCaRequest) returns (RotateSubCaResponse);
   rpc ReloadTls(ReloadTlsRequest) returns (ReloadTlsResponse);
 
+  // PKI lifecycle: CSR-based rotation, inventory, revocation, CRL/OCSP.
+  // The node generates its own keypair and submits a CSR; the private key
+  // never leaves the node.
+  rpc SignNodeCsr(SignNodeCsrRequest) returns (SignNodeCsrResponse);
+  // Operator-triggered rotation for one node or the whole cluster.
+  rpc RotateNodeCerts(RotateNodeCertsRequest) returns (RotateNodeCertsResponse);
+  rpc ListCertificates(ListCertificatesRequest) returns (ListCertificatesResponse);
+  rpc RevokeCertificate(RevokeCertificateRequest) returns (RevokeCertificateResponse);
+  rpc GetCrl(GetCrlRequest) returns (GetCrlResponse);
+  rpc GetPkiStatus(GetPkiStatusRequest) returns (GetPkiStatusResponse);
+
   // Compliance
   rpc GetComplianceReport(GetComplianceReportRequest) returns (GetComplianceReportResponse);
+  // Cryptographic posture of this controller (library, suites, rate limit).
+  rpc GetCryptoConfig(GetCryptoConfigRequest) returns (GetCryptoConfigResponse);
+  // CycloneDX SBOM: the installed release document, or the Cargo.lock graph
+  // embedded at build time when no file is configured.
+  rpc ExportSbom(ExportSbomRequest) returns (ExportSbomResponse);
+  // Append-only audit trail (actor = mTLS peer CN until RBAC).
+  rpc ListAuditEvents(ListAuditEventsRequest) returns (ListAuditEventsResponse);
 
   // Network overview: host interfaces from each node + default network config
   rpc GetNetworkOverview(GetNetworkOverviewRequest) returns (GetNetworkOverviewResponse);
@@ -68,8 +118,33 @@ service Controller {
   // and per-node block inventory from each node agent (lsblk).
   rpc GetStorageOverview(GetStorageOverviewRequest) returns (GetStorageOverviewResponse);
 
-  // Volume inventory: list all provisioned VM volumes across the cluster.
+  // Volume inventory and lifecycle (Ceph RBD; many volumes per VM).
   rpc ListVolumes(ListVolumesRequest) returns (ListVolumesResponse);
+  rpc CreateVolume(CreateVolumeRequest) returns (CreateVolumeResponse);
+  rpc GetVolume(GetVolumeRequest) returns (GetVolumeResponse);
+  rpc AttachVolume(AttachVolumeRequest) returns (AttachVolumeResponse);
+  rpc DetachVolume(DetachVolumeRequest) returns (DetachVolumeResponse);
+  rpc DeleteVolume(DeleteVolumeRequest) returns (DeleteVolumeResponse);
+
+  // Long-running VM operations (live migrate progress / cancel).
+  rpc ListVmOperations(ListVmOperationsRequest) returns (ListVmOperationsResponse);
+  rpc GetVmOperation(GetVmOperationRequest) returns (GetVmOperationResponse);
+  rpc CancelVmOperation(CancelVmOperationRequest) returns (CancelVmOperationResponse);
+
+  // Volume snapshots (Ceph RBD crash-consistent).
+  rpc CreateVolumeSnapshot(CreateVolumeSnapshotRequest) returns (CreateVolumeSnapshotResponse);
+  rpc ListVolumeSnapshots(ListVolumeSnapshotsRequest) returns (ListVolumeSnapshotsResponse);
+  rpc DeleteVolumeSnapshot(DeleteVolumeSnapshotRequest) returns (DeleteVolumeSnapshotResponse);
+  rpc RestoreVolume(RestoreVolumeRequest) returns (RestoreVolumeResponse);
+  rpc FlattenVolume(FlattenVolumeRequest) returns (FlattenVolumeResponse);
+  rpc ResizeVolume(ResizeVolumeRequest) returns (ResizeVolumeResponse);
+  // In-place LUKS over an existing plain RBD image (data-destructive; see destroy_data).
+  rpc EncryptVolume(EncryptVolumeRequest) returns (EncryptVolumeResponse);
+
+  rpc CreateSnapshotPolicy(CreateSnapshotPolicyRequest) returns (CreateSnapshotPolicyResponse);
+  rpc GetSnapshotPolicy(GetSnapshotPolicyRequest) returns (GetSnapshotPolicyResponse);
+  rpc ListSnapshotPolicies(ListSnapshotPoliciesRequest) returns (ListSnapshotPoliciesResponse);
+  rpc DeleteSnapshotPolicy(DeleteSnapshotPolicyRequest) returns (DeleteSnapshotPolicyResponse);
 
   // DiskLayout resource — per-node declarative disk layout. Implemented on the
   // node via disko; the operator surface uses the plain word "disk". Each
@@ -85,6 +160,44 @@ service Controller {
   // persisting or dispatching to the node. Used by `kctl diff disklayout` so
   // operators can see SAFE/DANGEROUS before applying.
   rpc ClassifyDiskLayout(ClassifyDiskLayoutRequest) returns (ClassifyDiskLayoutResponse);
+
+  // ClusterUpdate — flake-pinned kcore / host OS rollouts across nodes.
+  rpc CreateClusterUpdate(CreateClusterUpdateRequest) returns (CreateClusterUpdateResponse);
+  rpc GetClusterUpdate(GetClusterUpdateRequest) returns (GetClusterUpdateResponse);
+  rpc ListClusterUpdates(ListClusterUpdatesRequest) returns (ListClusterUpdatesResponse);
+  rpc PlanClusterUpdate(PlanClusterUpdateRequest) returns (PlanClusterUpdateResponse);
+  rpc ApproveClusterUpdate(ApproveClusterUpdateRequest) returns (ApproveClusterUpdateResponse);
+  rpc CancelClusterUpdate(CancelClusterUpdateRequest) returns (CancelClusterUpdateResponse);
+  rpc RollbackClusterUpdate(RollbackClusterUpdateRequest) returns (RollbackClusterUpdateResponse);
+
+  // CephCluster — declarative cluster-scoped Ceph SAN configuration.
+  rpc CreateCephCluster(CreateCephClusterRequest) returns (CreateCephClusterResponse);
+  rpc GetCephCluster(GetCephClusterRequest) returns (GetCephClusterResponse);
+  rpc ListCephClusters(ListCephClustersRequest) returns (ListCephClustersResponse);
+  rpc DeleteCephCluster(DeleteCephClusterRequest) returns (DeleteCephClusterResponse);
+
+  // SharedFilesystem (CephFS) — cluster-scoped POSIX file service on Ceph.
+  rpc CreateSharedFilesystem(CreateSharedFilesystemRequest) returns (CreateSharedFilesystemResponse);
+  rpc GetSharedFilesystem(GetSharedFilesystemRequest) returns (GetSharedFilesystemResponse);
+  rpc ListSharedFilesystems(ListSharedFilesystemsRequest) returns (ListSharedFilesystemsResponse);
+  rpc DeleteSharedFilesystem(DeleteSharedFilesystemRequest) returns (DeleteSharedFilesystemResponse);
+
+  // ObjectStore (RGW) — S3-compatible object storage on Ceph.
+  rpc CreateObjectStore(CreateObjectStoreRequest) returns (CreateObjectStoreResponse);
+  rpc GetObjectStore(GetObjectStoreRequest) returns (GetObjectStoreResponse);
+  rpc ListObjectStores(ListObjectStoresRequest) returns (ListObjectStoresResponse);
+  rpc DeleteObjectStore(DeleteObjectStoreRequest) returns (DeleteObjectStoreResponse);
+  rpc CreateObjectUser(CreateObjectUserRequest) returns (CreateObjectUserResponse);
+  rpc DeleteObjectUser(DeleteObjectUserRequest) returns (DeleteObjectUserResponse);
+
+  // RBAC: operators identified by client cert CN=kctl:<name>. Legacy CN=kctl is bootstrap-only.
+  rpc CreateOperator(CreateOperatorRequest) returns (CreateOperatorResponse);
+  rpc DeleteOperator(DeleteOperatorRequest) returns (DeleteOperatorResponse);
+  rpc ListOperators(ListOperatorsRequest) returns (ListOperatorsResponse);
+  rpc GetOperator(GetOperatorRequest) returns (GetOperatorResponse);
+  rpc GrantOperatorRole(GrantOperatorRoleRequest) returns (GrantOperatorRoleResponse);
+  rpc RevokeOperatorRole(RevokeOperatorRoleRequest) returns (RevokeOperatorRoleResponse);
+  rpc IssueOperatorCert(IssueOperatorCertRequest) returns (IssueOperatorCertResponse);
 }
 
 message RegisterNodeRequest {
@@ -150,6 +263,7 @@ enum StorageBackendType {
   STORAGE_BACKEND_TYPE_FILESYSTEM = 1;
   STORAGE_BACKEND_TYPE_LVM = 2;
   STORAGE_BACKEND_TYPE_ZFS = 3;
+  STORAGE_BACKEND_TYPE_CEPH = 4;
 }
 
 enum WorkloadKind {
@@ -225,6 +339,8 @@ message CreateVmRequest {
   StorageBackendType storage_backend = 9; // Required VM storage backend for compatibility checks
   int64 storage_size_bytes = 10; // Required VM storage size in bytes (> 0)
   string target_dc = 11;    // Datacenter preference (optional; controller picks any DC if empty)
+  repeated string node_labels = 12; // required node labels, e.g. "dc=dc-a"
+  string anti_affinity = 13; // HA group: do not colocate two VMs with the same value
 }
 
 message CreateVmResponse {
@@ -250,6 +366,9 @@ message UpdateVmResponse {
 message DeleteVmRequest {
   string vm_id = 1;
   string target_node = 2;  // Optional - controller finds it if empty
+  // When true, also delete Ceph data volumes (and their RBD images). Default
+  // keeps data volumes as detached inventory.
+  bool delete_data_volumes = 3;
 }
 
 message DeleteVmResponse {
@@ -290,6 +409,12 @@ message ListVmsRequest {
 
 message ListVmsResponse {
   repeated VmInfo vms = 1;
+}
+
+// Bidirectional console payload (proxied to NodeAdmin.AttachVmConsole).
+message ConsoleMessage {
+  string vm_name = 1; // required on the first client → server message
+  bytes data = 2;     // raw serial bytes
 }
 
 message CreateWorkloadRequest {
@@ -377,6 +502,9 @@ message CreateNetworkRequest {
   int32 vlan_id = 8;  // Optional VLAN tag (0 = no VLAN, bridges directly on gatewayInterface)
   string network_type = 9;  // "nat" (default), "bridge", or "vxlan"
   bool enable_outbound_nat = 10;  // For vxlan: whether VMs can reach the internet (default true)
+  string ipv6_prefix = 11;        // Optional /64. Empty leaves the network IPv4-only.
+  string ipv6_gateway = 12;       // Must be prefix::1 when ipv6_prefix is set.
+  bool east_west_firewall = 13;   // Drop VM-to-VM traffic on this bridge unless a security-group rule allows it.
 }
 
 message CreateNetworkResponse {
@@ -415,6 +543,9 @@ message NetworkInfo {
   int32 vlan_id = 8;
   string network_type = 9;  // "nat", "bridge", or "vxlan"
   bool enable_outbound_nat = 10;
+  string ipv6_prefix = 11;
+  string ipv6_gateway = 12;
+  bool east_west_firewall = 13;
 }
 
 enum SecurityGroupTargetKind {
@@ -763,6 +894,100 @@ message DrainNodeResponse {
   string message = 3;
 }
 
+// Live migration (shared RBD / Ceph only)
+
+message MigrateVmRequest {
+  string vm_id = 1;
+  string target_node = 2;
+  // When true, fall back to cold reassignment (drain-style) if live migrate fails.
+  bool allow_cold_fallback = 3;
+}
+
+message MigrateVmResponse {
+  bool success = 1;
+  string message = 2;
+  // "live" or "cold"
+  string mode = 3;
+  string source_node = 4;
+  string target_node = 5;
+  // Populated for live migrate when a vm_operations row was recorded.
+  string operation_id = 6;
+}
+
+// Live-migrate receive session inspection and repair
+
+message GetLiveMigrateReceiveStatusRequest {
+  // VM id or name.
+  string vm_id = 1;
+  // Node to query. Empty asks every CephCluster member, which is what an
+  // operator wants when they do not yet know where the session is stranded.
+  string node_id = 2;
+}
+
+// Mirrors kcore.node.LiveMigrateReceiveState; see node.proto for the meaning
+// of each field. Duplicated rather than imported because the controller and
+// node protos are independent packages.
+message LiveMigrateReceiveState {
+  bool has_session = 1;
+  int32 port = 2;
+  uint32 session_pid = 3;
+  uint32 pid_file_pid = 4;
+  bool vmm_alive = 5;
+  bool vmm_pid_matches_vm = 6;
+  bool port_listening = 7;
+  bool pid_file_present = 8;
+  bool marker_present = 9;
+  bool api_socket_present = 10;
+  string summary = 11;
+}
+
+message NodeLiveMigrateReceiveStatus {
+  string node_id = 1;
+  string node_address = 2;
+  // False when the node could not be reached or refused the RPC; `error` says
+  // why. An unreachable node is reported, not fatal: the point of this RPC is
+  // to find out where a session is, and one bad node must not hide the rest.
+  bool reachable = 3;
+  string error = 4;
+  LiveMigrateReceiveState state = 5;
+  // True when this node currently owns the VM. Sessions here cannot be reset:
+  // the VM is running, and clearing would kill it.
+  bool owns_vm = 6;
+}
+
+message GetLiveMigrateReceiveStatusResponse {
+  bool success = 1;
+  string message = 2;
+  string vm_id = 3;
+  string vm_name = 4;
+  // Name the node agents key the session by (the sanitized VM name).
+  string runtime_name = 5;
+  string current_node = 6;
+  repeated NodeLiveMigrateReceiveStatus nodes = 7;
+}
+
+message ResetLiveMigrateReceiveRequest {
+  // VM id or name.
+  string vm_id = 1;
+  // Required: an operator must name the node whose session they are
+  // destroying. There is no "wherever you find one" mode on purpose.
+  string node_id = 2;
+  // Explicit operator intent. Without it the RPC reports what it would clear
+  // and clears nothing.
+  bool force = 3;
+}
+
+message ResetLiveMigrateReceiveResponse {
+  bool success = 1;
+  string message = 2;
+  // False when `force` was not set, or when there was nothing to clear.
+  bool cleared = 3;
+  string node_id = 4;
+  string runtime_name = 5;
+  // State observed on the node before clearing.
+  LiveMigrateReceiveState observed = 6;
+}
+
 // Node Approval
 
 message ApproveNodeRequest {
@@ -781,6 +1006,68 @@ message RejectNodeRequest {
 message RejectNodeResponse {
   bool success = 1;
   string message = 2;
+}
+
+message CordonNodeRequest {
+  string node_id = 1;
+}
+
+message CordonNodeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UncordonNodeRequest {
+  string node_id = 1;
+}
+
+message UncordonNodeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DeleteNodeRequest {
+  string node_id = 1;
+}
+
+message DeleteNodeResponse {
+  bool success = 1;
+  string message = 2;
+  int32 certificates_revoked = 3;
+}
+
+message GetClusterHealthRequest {}
+
+message GetClusterHealthResponse {
+  // "healthy", "degraded", or "unhealthy"
+  string status = 1;
+  int32 ready_nodes = 2;
+  int32 not_ready_nodes = 3;
+  int32 unschedulable_nodes = 4;
+  int32 pending_nodes = 5;
+  int32 vm_count = 6;
+  int32 vms_on_not_ready_nodes = 7;
+  int32 replication_conflicts = 8;
+  int32 certificates_expiring_soon = 9;
+  repeated string conditions = 10;
+}
+
+message BackupClusterRequest {}
+
+message BackupClusterResponse {
+  bytes sqlite = 1;
+  int32 schema_version = 2;
+}
+
+message RestoreClusterRequest {
+  bytes sqlite = 1;
+  bool confirm = 2;
+}
+
+message RestoreClusterResponse {
+  bool success = 1;
+  string message = 2;
+  int32 schema_version = 3;
 }
 
 // Certificate Rotation
@@ -832,9 +1119,151 @@ message ReloadTlsResponse {
 
 message GetComplianceReportRequest {}
 
+message ListAuditEventsRequest {
+  // Max rows to return (default 100, max 1000).
+  uint32 limit = 1;
+  // Optional RFC3339 lower bound on created_at (inclusive).
+  string since = 2;
+  // Optional exact action filter (e.g. CreateVm).
+  string action = 3;
+}
+
+message AuditEvent {
+  int64 id = 1;
+  string actor = 2;
+  string action = 3;
+  string resource = 4;
+  string created_at = 5;
+  string detail = 6;
+}
+
+message ListAuditEventsResponse {
+  repeated AuditEvent events = 1;
+}
+
+message GetCryptoConfigRequest {}
+
+message GetCryptoConfigResponse {
+  string controller_version = 1;
+  string crypto_library = 2;
+  string fips_certificate = 3;
+  repeated string tls13_cipher_suites = 4;
+  repeated string tls12_cipher_suites = 5;
+  repeated string kx_groups = 6;
+  repeated string excluded_algorithms = 7;
+  bool mtls_enabled = 8;
+  bool rate_limit_enabled = 9;
+  uint32 rate_limit_requests_per_second = 10;
+  uint32 rate_limit_burst = 11;
+  string revocation_fail_mode = 12;
+  // How release artifacts are signed. This describes the release process,
+  // not a signature over the bytes of this response.
+  string signing_scheme = 13;
+}
+
+message ExportSbomRequest {
+  // "crates" (default) or "iso-closure".
+  string kind = 1;
+}
+
+message ExportSbomResponse {
+  string format = 1;
+  string spec_version = 2;
+  string filename = 3;
+  string sha256 = 4;
+  bytes document = 5;
+  // "file" when read from sbom.cratesFile / sbom.isoClosureFile,
+  // "embedded" when the controller served the Cargo.lock graph compiled in.
+  string source = 6;
+  string generator = 7;
+  // True only when a Sigstore bundle was found next to an installed file.
+  // The embedded graph is not a signed release asset.
+  bool signature_present = 8;
+  string signing_scheme = 9;
+}
+
 message AccessControlEntry {
   string rpc_method = 1;
   string allowed_identities = 2;
+  // Minimum operator role when using per-operator certs (CN=kctl:<name>). Empty when the RPC
+  // uses machine identities only (node/controller prefixes) or legacy bootstrap CN=kctl.
+  string required_operator_role = 3;
+}
+
+// Operator RBAC roles (flat cluster-wide).
+// Lattice: read-only < vm-admin < cluster-admin.
+enum OperatorRoleKind {
+  OPERATOR_ROLE_KIND_UNSPECIFIED = 0;
+  OPERATOR_ROLE_KIND_READ_ONLY = 1;
+  OPERATOR_ROLE_KIND_VM_ADMIN = 2;
+  OPERATOR_ROLE_KIND_CLUSTER_ADMIN = 3;
+}
+
+message Operator {
+  string name = 1;
+  string cert_serial = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+  repeated OperatorRoleKind roles = 5;
+}
+
+message CreateOperatorRequest {
+  string name = 1;
+}
+
+message CreateOperatorResponse {
+  Operator operator = 1;
+}
+
+message DeleteOperatorRequest {
+  string name = 1;
+}
+
+message DeleteOperatorResponse {
+  bool success = 1;
+}
+
+message ListOperatorsRequest {}
+
+message ListOperatorsResponse {
+  repeated Operator operators = 1;
+}
+
+message GetOperatorRequest {
+  string name = 1;
+}
+
+message GetOperatorResponse {
+  Operator operator = 1;
+}
+
+message GrantOperatorRoleRequest {
+  string operator_name = 1;
+  OperatorRoleKind role = 2;
+}
+
+message GrantOperatorRoleResponse {
+  Operator operator = 1;
+}
+
+message RevokeOperatorRoleRequest {
+  string operator_name = 1;
+  OperatorRoleKind role = 2;
+}
+
+message RevokeOperatorRoleResponse {
+  Operator operator = 1;
+}
+
+message IssueOperatorCertRequest {
+  string operator_name = 1;
+}
+
+message IssueOperatorCertResponse {
+  bool success = 1;
+  string cert_pem = 2;
+  string key_pem = 3;
+  string message = 4;
 }
 
 message GetComplianceReportResponse {
@@ -975,7 +1404,10 @@ message GetStorageOverviewResponse {
 
 // Volume inventory
 
-message ListVolumesRequest {}
+message ListVolumesRequest {
+  // Optional: only volumes attached to this VM id or name.
+  string vm = 1;
+}
 
 message ListVolumesResponse {
   repeated VolumeInfo volumes = 1;
@@ -985,11 +1417,244 @@ message VolumeInfo {
   string vm_id = 1;
   string vm_name = 2;
   string node_id = 3;
-  string storage_backend = 4;    // filesystem, lvm, zfs
+  string storage_backend = 4;    // filesystem, lvm, zfs, ceph
   int64 storage_size_bytes = 5;  // Provisioned size
-  string backend_handle = 6;     // Actual path: /dev/vg_kcore/kcore-<vm> or /var/lib/...
+  string backend_handle = 6;     // /dev/rbd/<pool>/<image> or local path
   string image_format = 7;       // raw, qcow2
   VmState vm_state = 8;
+  string id = 9;
+  string name = 10;
+  string role = 11;              // root | data
+  string attach_state = 12;
+  string serial = 13;
+  string pool = 14;
+  string image = 15;
+  int32 slot = 16;
+  // -1 = unknown / not checked
+  int64 guest_visible_bytes = 17;
+  string guest_checked_at = 18;
+  // Host-side LUKS over RBD (E2). Transparent to the guest block device.
+  bool encrypted = 19;
+}
+
+message CreateVolumeRequest {
+  string name = 1;
+  int64 size_bytes = 2;
+  string storage_class = 3; // ceph
+  // Optional VM id or name to attach immediately (VM must be stopped).
+  string vm = 4;
+  string guest_format_json = 5;
+  // Optional snapshot id or name to clone from (size_bytes ignored when set).
+  string from_snapshot = 6;
+  // Format LUKS on the RBD image (host dm-crypt). Immutable after create.
+  bool encrypt = 7;
+}
+
+message CreateVolumeResponse {
+  bool success = 1;
+  VolumeInfo volume = 2;
+  string message = 3;
+}
+
+message GetVolumeRequest {
+  // Volume id or name.
+  string name = 1;
+}
+
+message GetVolumeResponse {
+  VolumeInfo volume = 1;
+}
+
+message AttachVolumeRequest {
+  string name = 1; // volume id or name
+  string vm = 2;   // vm id or name
+}
+
+message AttachVolumeResponse {
+  bool success = 1;
+  string message = 2;
+  VolumeInfo volume = 3;
+}
+
+message DetachVolumeRequest {
+  string name = 1;
+}
+
+message DetachVolumeResponse {
+  bool success = 1;
+  string message = 2;
+  VolumeInfo volume = 3;
+}
+
+message DeleteVolumeRequest {
+  string name = 1;
+}
+
+message DeleteVolumeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message VmOperation {
+  string id = 1;
+  string vm_id = 2;
+  string kind = 3;
+  string phase = 4;
+  string source_node = 5;
+  string target_node = 6;
+  bool cancel_requested = 7;
+  bool send_succeeded = 8;
+  string detail_json = 9;
+  google.protobuf.Timestamp started_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  google.protobuf.Timestamp finished_at = 12;
+}
+
+message ListVmOperationsRequest {
+  bool include_finished = 1;
+  string vm_id = 2;
+}
+
+message ListVmOperationsResponse {
+  repeated VmOperation operations = 1;
+}
+
+message GetVmOperationRequest {
+  string id = 1;
+}
+
+message GetVmOperationResponse {
+  VmOperation operation = 1;
+}
+
+message CancelVmOperationRequest {
+  string id = 1;
+}
+
+message CancelVmOperationResponse {
+  bool success = 1;
+  string message = 2;
+  VmOperation operation = 3;
+}
+
+message VolumeSnapshotInfo {
+  string id = 1;
+  string name = 2;
+  string volume_id = 3;
+  string volume_name = 4;
+  string rbd_snap = 5;
+  bool protected = 6;
+  int64 size_bytes = 7;
+  string consistency = 8;
+  google.protobuf.Timestamp created_at = 9;
+}
+
+message CreateVolumeSnapshotRequest {
+  string volume = 1; // volume id or name
+  string name = 2;   // snapshot name; empty = auto
+  string consistency = 3; // crash (default)
+}
+
+message CreateVolumeSnapshotResponse {
+  bool success = 1;
+  string message = 2;
+  VolumeSnapshotInfo snapshot = 3;
+}
+
+message ListVolumeSnapshotsRequest {
+  string volume = 1; // optional filter
+}
+
+message ListVolumeSnapshotsResponse {
+  repeated VolumeSnapshotInfo snapshots = 1;
+}
+
+message DeleteVolumeSnapshotRequest {
+  string name = 1; // snapshot id or name
+}
+
+message DeleteVolumeSnapshotResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message RestoreVolumeRequest {
+  string volume = 1;   // volume id or name
+  string snapshot = 2; // snapshot id or name
+}
+
+message RestoreVolumeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message FlattenVolumeRequest {
+  string name = 1; // volume id or name (must be a clone)
+}
+
+message FlattenVolumeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message SnapshotPolicy {
+  string name = 1;
+  string selector_vm = 2;
+  string selector_volume = 3;
+  // @hourly | @daily | every:<seconds>
+  string schedule = 4;
+  int32 keep = 5;
+  bool enabled = 6;
+  string last_run_at = 7;
+  string last_message = 8;
+}
+
+message CreateSnapshotPolicyRequest { SnapshotPolicy policy = 1; }
+message CreateSnapshotPolicyResponse {
+  bool success = 1;
+  SnapshotPolicy policy = 2;
+  string message = 3;
+}
+message GetSnapshotPolicyRequest { string name = 1; }
+message GetSnapshotPolicyResponse { SnapshotPolicy policy = 1; }
+message ListSnapshotPoliciesRequest {}
+message ListSnapshotPoliciesResponse { repeated SnapshotPolicy policies = 1; }
+message DeleteSnapshotPolicyRequest { string name = 1; }
+message DeleteSnapshotPolicyResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ResizeVolumeRequest {
+  string name = 1; // volume id or name
+  int64 size_bytes = 2;
+  // When true and VM is running with SSH, attempt guest growpart/resize.
+  bool grow_filesystem = 3;
+  // Shrink only when volume is detached; runs `rbd resize --allow-shrink` (destroys
+  // tail of the image). Refused on attached/running workloads.
+  bool allow_shrink = 4;
+}
+
+message ResizeVolumeResponse {
+  bool success = 1;
+  string message = 2;
+  VolumeInfo volume = 3;
+  string operation_id = 4;
+  // Extra guest/CH limitation text (e.g. root disk hotplug).
+  string guest_status_note = 5;
+}
+
+message EncryptVolumeRequest {
+  string name = 1; // volume id or name
+  // Required: formats LUKS2 on the RBD block device; all prior plaintext data is lost.
+  // No offline migration (dd into LUKS) — set true to acknowledge destruction.
+  bool destroy_data = 2;
+}
+
+message EncryptVolumeResponse {
+  bool success = 1;
+  string message = 2;
+  VolumeInfo volume = 3;
 }
 
 // DiskLayout resource ---------------------------------------------------
@@ -1017,6 +1682,9 @@ message DiskLayout {
   string layout_nix = 4;
   google.protobuf.Timestamp created_at = 5;
   google.protobuf.Timestamp updated_at = 6;
+  // When true, the reconciler cordons the node, drains VMs, applies the
+  // layout, then uncordons. Default false: refuse apply while VMs remain.
+  bool evacuate = 7;
 }
 
 message DiskLayoutStatus {
@@ -1089,4 +1757,540 @@ message ClassifyDiskLayoutResponse {
   string detail = 3;
   // Target block-device paths the controller extracted from layout_nix.
   repeated string target_devices = 4;
+}
+
+// --- ClusterUpdate ---------------------------------------------------------------------------
+
+message ClusterUpdateTarget {
+  string version = 1;
+  string flake_ref = 2;
+  string flake_rev = 3;
+  string nixpkgs_rev = 4;
+  string system_profile = 5;
+}
+
+message ClusterUpdateSelector {
+  repeated string node_ids = 1;
+  repeated string labels = 2;
+  repeated string datacenters = 3;
+  bool all_nodes = 4;
+  bool controllers_only = 5;
+}
+
+enum ClusterUpdateStrategyType {
+  CLUSTER_UPDATE_STRATEGY_UNSPECIFIED = 0;
+  CLUSTER_UPDATE_STRATEGY_CANARY = 1;
+  CLUSTER_UPDATE_STRATEGY_ONE_AT_A_TIME = 2;
+  CLUSTER_UPDATE_STRATEGY_BATCH = 3;
+  CLUSTER_UPDATE_STRATEGY_PER_DC = 4;
+}
+
+message ClusterUpdateStrategy {
+  ClusterUpdateStrategyType type = 1;
+  int32 max_unavailable = 2;
+  int32 batch_size = 3;
+}
+
+enum ClusterUpdateApprovalPolicy {
+  CLUSTER_UPDATE_APPROVAL_UNSPECIFIED = 0;
+  CLUSTER_UPDATE_APPROVAL_MANUAL = 1;
+  CLUSTER_UPDATE_APPROVAL_AUTO_NON_DISRUPTIVE = 2;
+  CLUSTER_UPDATE_APPROVAL_AUTO = 3;
+}
+
+enum ClusterUpdateActivationMode {
+  CLUSTER_UPDATE_ACTIVATION_UNSPECIFIED = 0;
+  CLUSTER_UPDATE_ACTIVATION_TEST = 1;
+  CLUSTER_UPDATE_ACTIVATION_SWITCH = 2;
+  CLUSTER_UPDATE_ACTIVATION_BOOT = 3;
+  CLUSTER_UPDATE_ACTIVATION_AUTO = 4;
+}
+
+message ClusterUpdateSpec {
+  string name = 1;
+  ClusterUpdateTarget target = 2;
+  ClusterUpdateSelector selector = 3;
+  ClusterUpdateStrategy strategy = 4;
+  bool drain_vms = 5;
+  int32 drain_timeout_seconds = 6;
+  ClusterUpdateActivationMode activation_mode = 7;
+  string reboot_policy = 8;
+  ClusterUpdateApprovalPolicy approval_policy = 9;
+  bool automatic_rollback = 10;
+}
+
+enum ClusterUpdatePhase {
+  CLUSTER_UPDATE_PHASE_UNSPECIFIED = 0;
+  CLUSTER_UPDATE_PHASE_PENDING = 1;
+  CLUSTER_UPDATE_PHASE_READY = 2;
+  CLUSTER_UPDATE_PHASE_ROLLING_OUT = 3;
+  CLUSTER_UPDATE_PHASE_SUCCEEDED = 4;
+  CLUSTER_UPDATE_PHASE_FAILED = 5;
+  CLUSTER_UPDATE_PHASE_CANCELLED = 6;
+  CLUSTER_UPDATE_PHASE_ROLLING_BACK = 7;
+}
+
+enum ClusterUpdateApprovalStatus {
+  CLUSTER_UPDATE_APPROVAL_STATUS_UNSPECIFIED = 0;
+  CLUSTER_UPDATE_APPROVAL_AWAITING = 1;
+  CLUSTER_UPDATE_APPROVAL_APPROVED = 2;
+}
+
+message ClusterUpdate {
+  ClusterUpdateSpec spec = 1;
+  int64 generation = 2;
+  ClusterUpdatePhase phase = 3;
+  ClusterUpdateApprovalStatus approval_status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+enum NodeUpdatePhase {
+  NODE_UPDATE_PHASE_UNSPECIFIED = 0;
+  NODE_UPDATE_PHASE_PENDING = 1;
+  NODE_UPDATE_PHASE_PREPARED = 2;
+  NODE_UPDATE_PHASE_SUCCEEDED = 3;
+  NODE_UPDATE_PHASE_FAILED = 4;
+  NODE_UPDATE_PHASE_CANCELLED = 5;
+  NODE_UPDATE_PHASE_ROLLING_BACK = 6;
+}
+
+message NodeUpdateStatus {
+  string update_name = 1;
+  string node_id = 2;
+  int64 observed_generation = 3;
+  NodeUpdatePhase phase = 4;
+  string current_version = 5;
+  string target_version = 6;
+  string prepared_closure = 7;
+  string current_generation = 8;
+  string target_generation = 9;
+  bool requires_reboot = 10;
+  string last_error = 11;
+  google.protobuf.Timestamp last_transition_at = 12;
+}
+
+message CreateClusterUpdateRequest {
+  ClusterUpdateSpec spec = 1;
+}
+
+message CreateClusterUpdateResponse {
+  bool success = 1;
+  ClusterUpdate cluster_update = 2;
+  ApplyAction action = 3;
+  repeated string changed_fields = 4;
+}
+
+message GetClusterUpdateRequest {
+  string name = 1;
+}
+
+message GetClusterUpdateResponse {
+  ClusterUpdate cluster_update = 1;
+  repeated NodeUpdateStatus node_statuses = 2;
+}
+
+message ListClusterUpdatesRequest {}
+
+message ListClusterUpdatesResponse {
+  repeated ClusterUpdate cluster_updates = 1;
+}
+
+message PlanClusterUpdateRequest {
+  ClusterUpdateSpec spec = 1;
+}
+
+message PlanIssue {
+  string node_id = 1;
+  string reason = 2;
+}
+
+message PlanClusterUpdateResponse {
+  bool viable = 1;
+  repeated string target_node_ids = 2;
+  repeated PlanIssue issues = 3;
+  bool likely_requires_reboot = 4;
+  string detail = 5;
+}
+
+message ApproveClusterUpdateRequest {
+  string name = 1;
+}
+
+message ApproveClusterUpdateResponse {
+  bool success = 1;
+  ClusterUpdate cluster_update = 2;
+}
+
+message CancelClusterUpdateRequest {
+  string name = 1;
+}
+
+message CancelClusterUpdateResponse {
+  bool success = 1;
+  ClusterUpdate cluster_update = 2;
+}
+
+message RollbackClusterUpdateRequest {
+  string name = 1;
+}
+
+message RollbackClusterUpdateResponse {
+  bool success = 1;
+  ClusterUpdate cluster_update = 2;
+}
+
+// --- CephCluster ----------------------------------------------------------------------------
+
+enum CephClusterPhase {
+  CEPH_CLUSTER_PHASE_UNSPECIFIED = 0;
+  CEPH_CLUSTER_PHASE_PENDING = 1;
+  CEPH_CLUSTER_PHASE_BOOTSTRAPPING = 2;
+  CEPH_CLUSTER_PHASE_HEALTHY = 3;
+  CEPH_CLUSTER_PHASE_DEGRADED = 4;
+  CEPH_CLUSTER_PHASE_FAILED = 5;
+}
+
+message CephClusterNodeSpec {
+  string node_id = 1;
+  string mon_addr = 2;
+  string cluster_addr = 3;
+  string public_iface = 4;
+  string cluster_iface = 5;
+  string osd_device = 6;
+  // Additional OSD disks on this node. `osd_device` is always included.
+  repeated string osd_devices = 7;
+}
+
+message CephClusterSpec {
+  string fsid = 1;
+  string public_network = 2;
+  string cluster_network = 3;
+  int32 size = 4;
+  int32 min_size = 5;
+  bool force_wipe = 6;
+  repeated CephClusterNodeSpec nodes = 7;
+  // OSD-level dm-crypt via ceph-volume --dmcrypt. Immutable once any OSD exists.
+  bool encrypt_osds = 8;
+}
+
+message CephClusterStatus {
+  int64 observed_generation = 1;
+  CephClusterPhase phase = 2;
+  string health_message = 3;
+  string ceph_status_json = 4;
+  google.protobuf.Timestamp last_transition_at = 5;
+}
+
+message CephCluster {
+  string name = 1;
+  int64 generation = 2;
+  CephClusterSpec spec = 3;
+  CephClusterStatus status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message CreateCephClusterRequest { CephCluster ceph_cluster = 1; }
+message CreateCephClusterResponse {
+  bool success = 1;
+  CephCluster ceph_cluster = 2;
+  ApplyAction action = 3;
+  repeated string changed_fields = 4;
+}
+message GetCephClusterRequest { string name = 1; }
+message GetCephClusterResponse { CephCluster ceph_cluster = 1; }
+message ListCephClustersRequest {}
+message ListCephClustersResponse { repeated CephCluster ceph_clusters = 1; }
+message DeleteCephClusterRequest {
+  string name = 1;
+  // Delete the controller record even when a member could not be reached to
+  // stop its mons and OSDs. Does not override the refusal while Ceph VMs exist.
+  bool force = 2;
+}
+message DeleteCephClusterResponse { bool success = 1; }
+
+// --- SharedFilesystem (CephFS) -------------------------------------------------------------
+
+enum SharedFilesystemPhase {
+  SHARED_FILESYSTEM_PHASE_UNSPECIFIED = 0;
+  SHARED_FILESYSTEM_PHASE_PENDING = 1;
+  SHARED_FILESYSTEM_PHASE_BOOTSTRAPPING = 2;
+  SHARED_FILESYSTEM_PHASE_HEALTHY = 3;
+  SHARED_FILESYSTEM_PHASE_DEGRADED = 4;
+  SHARED_FILESYSTEM_PHASE_FAILED = 5;
+}
+
+message SharedFilesystemClientSpec {
+  string name = 1;
+  repeated string paths = 2;
+}
+
+message SharedFilesystemSpec {
+  string ceph_cluster = 1;
+  int64 quota_bytes = 2;
+  repeated SharedFilesystemClientSpec clients = 3;
+  // CephFS volume name; defaults to the resource name when empty.
+  string fs_name = 4;
+}
+
+message SharedFilesystemStatus {
+  int64 observed_generation = 1;
+  SharedFilesystemPhase phase = 2;
+  string health_message = 3;
+  google.protobuf.Timestamp last_transition_at = 4;
+}
+
+message SharedFilesystem {
+  string name = 1;
+  int64 generation = 2;
+  SharedFilesystemSpec spec = 3;
+  SharedFilesystemStatus status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message CreateSharedFilesystemRequest { SharedFilesystem shared_filesystem = 1; }
+message CreateSharedFilesystemResponse {
+  bool success = 1;
+  SharedFilesystem shared_filesystem = 2;
+  ApplyAction action = 3;
+  repeated string changed_fields = 4;
+}
+message GetSharedFilesystemRequest { string name = 1; }
+message GetSharedFilesystemResponse { SharedFilesystem shared_filesystem = 1; }
+message ListSharedFilesystemsRequest {}
+message ListSharedFilesystemsResponse {
+  repeated SharedFilesystem shared_filesystems = 1;
+}
+message DeleteSharedFilesystemRequest { string name = 1; }
+message DeleteSharedFilesystemResponse { bool success = 1; }
+
+// --- ObjectStore (RGW) -----------------------------------------------------------------------
+
+enum ObjectStorePhase {
+  OBJECT_STORE_PHASE_UNSPECIFIED = 0;
+  OBJECT_STORE_PHASE_PENDING = 1;
+  OBJECT_STORE_PHASE_BOOTSTRAPPING = 2;
+  OBJECT_STORE_PHASE_HEALTHY = 3;
+  OBJECT_STORE_PHASE_DEGRADED = 4;
+  OBJECT_STORE_PHASE_FAILED = 5;
+}
+
+message ObjectStoreSpec {
+  string ceph_cluster = 1;
+  repeated string members = 2;
+  int32 port = 3;
+  bool tls = 4;
+  // RGW instance id; defaults to the resource name when empty.
+  string rgw_id = 5;
+}
+
+message ObjectStoreStatus {
+  int64 observed_generation = 1;
+  ObjectStorePhase phase = 2;
+  string health_message = 3;
+  google.protobuf.Timestamp last_transition_at = 4;
+}
+
+message ObjectStore {
+  string name = 1;
+  int64 generation = 2;
+  ObjectStoreSpec spec = 3;
+  ObjectStoreStatus status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message CreateObjectStoreRequest { ObjectStore object_store = 1; }
+message CreateObjectStoreResponse {
+  bool success = 1;
+  ObjectStore object_store = 2;
+  ApplyAction action = 3;
+  repeated string changed_fields = 4;
+}
+message GetObjectStoreRequest { string name = 1; }
+message GetObjectStoreResponse { ObjectStore object_store = 1; }
+message ListObjectStoresRequest {}
+message ListObjectStoresResponse { repeated ObjectStore object_stores = 1; }
+message DeleteObjectStoreRequest { string name = 1; }
+message DeleteObjectStoreResponse { bool success = 1; }
+
+message ObjectUserSpec {
+  string store = 1;
+}
+
+message ObjectUser {
+  string name = 1;
+  ObjectUserSpec spec = 2;
+  string access_key = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message CreateObjectUserRequest { ObjectUser object_user = 1; }
+message CreateObjectUserResponse {
+  bool success = 1;
+  ObjectUser object_user = 2;
+  // Returned once at create time; not stored in Get responses.
+  string secret = 3;
+}
+message DeleteObjectUserRequest {
+  string name = 1;
+  string store = 2;
+}
+message DeleteObjectUserResponse { bool success = 1; }
+
+// ---------------------------------------------------------------------------
+// PKI: certificate inventory, CSR-based rotation, revocation, CRL and OCSP.
+// See docs/mtls-bootstrap-and-auth.md section 4 and docs/security.md.
+// ---------------------------------------------------------------------------
+
+// RFC 5280 §5.3.1 CRL reason codes. Value 7 is unused by the RFC.
+enum RevocationReason {
+  REVOCATION_REASON_UNSPECIFIED = 0;
+  REVOCATION_REASON_KEY_COMPROMISE = 1;
+  REVOCATION_REASON_CA_COMPROMISE = 2;
+  REVOCATION_REASON_AFFILIATION_CHANGED = 3;
+  REVOCATION_REASON_SUPERSEDED = 4;
+  REVOCATION_REASON_CESSATION_OF_OPERATION = 5;
+  REVOCATION_REASON_CERTIFICATE_HOLD = 6;
+  REVOCATION_REASON_REMOVE_FROM_CRL = 8;
+  REVOCATION_REASON_PRIVILEGE_WITHDRAWN = 9;
+  REVOCATION_REASON_AA_COMPROMISE = 10;
+}
+
+enum CertificateStatus {
+  CERTIFICATE_STATUS_UNSPECIFIED = 0;
+  // Current identity for its subject.
+  CERTIFICATE_STATUS_ACTIVE = 1;
+  // Superseded by a newer certificate for the same subject; still valid until
+  // not_after unless it is also revoked.
+  CERTIFICATE_STATUS_ROTATED = 2;
+  CERTIFICATE_STATUS_REVOKED = 3;
+}
+
+// One row of the controller certificate inventory.
+message CertificateInfo {
+  // Uppercase hex, no separators (matches `openssl x509 -serial` output).
+  string serial_hex = 1;
+  string subject_cn = 2;
+  // "node" | "operator" | "controller" | "sub-ca"
+  string identity_kind = 3;
+  // Empty for identities that are not tied to a node.
+  string node_id = 4;
+  string issuer_cn = 5;
+  // Lowercase hex SHA-256 of the DER certificate.
+  string fingerprint_sha256 = 6;
+  google.protobuf.Timestamp not_before = 7;
+  google.protobuf.Timestamp not_after = 8;
+  google.protobuf.Timestamp issued_at = 9;
+  CertificateStatus status = 10;
+  RevocationReason revocation_reason = 11;
+  google.protobuf.Timestamp revoked_at = 12;
+  // Whole days until not_after; negative when already expired.
+  int32 days_until_expiry = 13;
+}
+
+message SignNodeCsrRequest {
+  string node_id = 1;
+  // PEM PKCS#10 certificate signing request generated on the node.
+  string csr_pem = 2;
+}
+
+message SignNodeCsrResponse {
+  bool success = 1;
+  // Leaf certificate + sub-CA certificate, concatenated PEM.
+  string cert_chain_pem = 2;
+  string serial_hex = 3;
+  google.protobuf.Timestamp not_after = 4;
+  string message = 5;
+}
+
+message RotateNodeCertsRequest {
+  // Rotate a single node. Ignored when all_nodes is true.
+  string node_id = 1;
+  bool all_nodes = 2;
+}
+
+message NodeCertRotationResult {
+  string node_id = 1;
+  bool success = 2;
+  string serial_hex = 3;
+  string message = 4;
+}
+
+message RotateNodeCertsResponse {
+  bool success = 1;
+  repeated NodeCertRotationResult results = 2;
+  string message = 3;
+}
+
+message ListCertificatesRequest {
+  // Optional filter; unspecified returns every inventory row.
+  CertificateStatus status = 1;
+  // Optional node id filter.
+  string node_id = 2;
+  // When > 0, only certificates whose not_after is within this many days.
+  int32 expiring_within_days = 3;
+}
+
+message ListCertificatesResponse {
+  repeated CertificateInfo certificates = 1;
+}
+
+message RevokeCertificateRequest {
+  // Either serial_hex, or subject_cn/node_id to revoke the active certificate
+  // of that identity. serial_hex wins when both are supplied.
+  string serial_hex = 1;
+  string subject_cn = 2;
+  string node_id = 3;
+  RevocationReason reason = 4;
+}
+
+message RevokeCertificateResponse {
+  bool success = 1;
+  repeated CertificateInfo revoked = 2;
+  // CRL number of the regenerated list, 0 when regeneration was skipped.
+  int64 crl_number = 3;
+  string message = 4;
+}
+
+message GetCrlRequest {}
+
+message GetCrlResponse {
+  bool success = 1;
+  string crl_pem = 2;
+  bytes crl_der = 3;
+  int64 crl_number = 4;
+  google.protobuf.Timestamp this_update = 5;
+  google.protobuf.Timestamp next_update = 6;
+  int32 revoked_count = 7;
+  string message = 8;
+}
+
+message GetPkiStatusRequest {}
+
+message GetPkiStatusResponse {
+  int32 active_count = 1;
+  int32 rotated_count = 2;
+  int32 revoked_count = 3;
+  int32 expired_count = 4;
+  // Active certificates inside the configured warning window.
+  int32 expiring_soon_count = 5;
+  int32 warn_before_days = 6;
+  int32 renew_before_days = 7;
+  bool rotation_enabled = 8;
+  int64 crl_number = 9;
+  google.protobuf.Timestamp crl_this_update = 10;
+  google.protobuf.Timestamp crl_next_update = 11;
+  bool crl_available = 12;
+  bool sub_ca_available = 13;
+  google.protobuf.Timestamp sub_ca_not_after = 14;
+  // "soft-fail" or "hard-fail".
+  string revocation_fail_mode = 15;
+  // Base URL serving /pki/crl.der, /pki/crl.pem and /pki/ocsp; empty when the
+  // PKI HTTP responder is disabled.
+  string pki_http_base_url = 16;
+  // Active certificates sorted by soonest not_after (at most 20 rows).
+  repeated CertificateInfo soonest_expiring = 17;
 }

@@ -1,8 +1,36 @@
 # Terraform Provider: kcore
 
-Manage VMs and inventory via the **kcore controller** gRPC API (ISO / controller **0.2.0+**).
+Manage a kcore cluster through the same create path as `kctl`: cluster TLS, node install and approval, VMs, networks, security groups, volumes, Ceph, object storage, operators, SSH keys, host updates, and container workloads.
 
-Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terraform.io/providers/kcorehypervisor/kcore/latest)
+The controller API matches kcore **0.3.0**. Provider **0.3.1** publishes the resources below. [`kcore_cluster`](docs/resources/cluster.md) writes CA, sub-CA, controller, and kctl certificates on the machine running Terraform. Apply it before any node is installed.
+
+Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terraform.io/providers/kcorehypervisor/kcore/latest).
+
+## Resources
+
+| Resource | kctl |
+|----------|------|
+| `kcore_cluster` | `kctl create cluster` (local PKI) |
+| `kcore_node_install` | `kctl node install` |
+| `kcore_node` | `kctl node approve` / `delete` |
+| `kcore_vm` | `kctl create vm` |
+| `kcore_workload` | `kctl create container` |
+| `kcore_network` | `kctl create network` |
+| `kcore_security_group` | `kctl security-group` |
+| `kcore_security_group_attachment` | attach a group to a VM or network |
+| `kcore_volume` | `kctl create volume` |
+| `kcore_volume_snapshot` | `kctl create volume-snapshot` |
+| `kcore_snapshot_policy` | `kctl create snapshot-policy` |
+| `kcore_disk_layout` | `kctl create disk-layout` |
+| `kcore_ceph_cluster` | `kctl create ceph-cluster` |
+| `kcore_shared_filesystem` | `kctl create shared-filesystem` |
+| `kcore_object_store` | `kctl create object-store` |
+| `kcore_object_user` | `kctl create object-user` (secret returned once) |
+| `kcore_ssh_key` | `kctl ssh-key add` |
+| `kcore_operator` | `kctl operator add` |
+| `kcore_cluster_update` | `kctl update-cluster` (destroy cancels) |
+
+Console, drain, migrate, backup, restore, cert rotation, and certificate revoke stay as `kctl` commands. Destroying `kcore_node_install` drops it from state and leaves the installed disk in place.
 
 ## Requirements
 
@@ -19,7 +47,7 @@ terraform {
   required_providers {
     kcore = {
       source  = "kcorehypervisor/kcore"
-      version = "0.3.0"
+      version = "0.3.1"
     }
   }
 }
@@ -54,7 +82,7 @@ Runnable snippets live under [`examples/`](examples/):
 | [`examples/data-sources/kcore_node/`](examples/data-sources/kcore_node/) | Read a hypervisor node |
 | [`examples/data-sources/kcore_nodes/`](examples/data-sources/kcore_nodes/) | List all nodes |
 
-### Minimal VM (API 0.2.0 fields)
+### Minimal VM
 
 `storage_backend` and `storage_size_bytes` are required. Provide either **`image_url` + `image_sha256`** or **`image_path` + `image_format`**, not both.
 
@@ -99,13 +127,7 @@ data "kcore_vm" "inspect" {
 
 ## Generated documentation
 
-Schema reference pages are generated with [`terraform-plugin-docs`](https://github.com/hashicorp/terraform-plugin-docs) and checked into **`docs/`** for Terraform Registry and GitHub browsing:
-
-- [Provider configuration](docs/index.md)
-- [Resource `kcore_vm`](docs/resources/vm.md)
-- [Data source `kcore_vm`](docs/data-sources/vm.md)
-- [Data source `kcore_node`](docs/data-sources/node.md)
-- [Data source `kcore_nodes`](docs/data-sources/nodes.md)
+Schema reference pages are generated with [`terraform-plugin-docs`](https://github.com/hashicorp/terraform-plugin-docs) and checked into [`docs/`](docs/index.md). Resource pages live under [`docs/resources/`](docs/resources/).
 
 ### Regenerate `docs/`
 

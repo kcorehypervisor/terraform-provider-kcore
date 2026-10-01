@@ -3,8 +3,8 @@
 page_title: "kcore Provider"
 subcategory: ""
 description: |-
-  Interact with a kcore controller to manage VMs on registered hypervisor nodes. Requires a
-  controller that implements the packaged gRPC API (kcore / ISO 0.2.0+).
+  Manage a kcore cluster: TLS material, nodes, VMs, networks, storage, and Ceph.
+  Requires a controller that implements the packaged gRPC API (kcore 0.3.0).
 ---
 
 # kcore Provider
@@ -20,7 +20,7 @@ terraform {
   required_providers {
     kcore = {
       source  = "kcorehypervisor/kcore"
-      version = "0.3.0"
+      version = "0.3.1"
     }
   }
 }
