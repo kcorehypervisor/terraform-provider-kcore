@@ -1806,6 +1806,13 @@ enum ClusterUpdateActivationMode {
   CLUSTER_UPDATE_ACTIVATION_AUTO = 4;
 }
 
+message TestedOsPin {
+  string nixpkgs_rev = 1;
+  string ceph_rev = 2;
+  string ceph_sha256 = 3;
+  string kubernetes_version = 4;
+}
+
 message ClusterUpdateSpec {
   string name = 1;
   ClusterUpdateTarget target = 2;
@@ -1817,6 +1824,13 @@ message ClusterUpdateSpec {
   string reboot_policy = 8;
   ClusterUpdateApprovalPolicy approval_policy = 9;
   bool automatic_rollback = 10;
+  // "kcore" moves the product pin. "nixpkgs" moves a published OS pin.
+  string update_kind = 11;
+  bool requires_nixpkgs = 12;
+  repeated TestedOsPin tested_os_pins = 13;
+  int32 schema_version = 14;
+  int32 previous_schema_version = 15;
+  int32 min_compatible_reader = 16;
 }
 
 enum ClusterUpdatePhase {

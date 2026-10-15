@@ -13,7 +13,7 @@ import (
 
 func resourceClusterUpdate() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Host OS rollout (`kctl update-cluster`). Destroy cancels the rollout.",
+		Description:   "Host OS rollout (`kctl update cluster`). Destroy cancels the rollout. Reboot stays a kctl command.",
 		CreateContext: resourceClusterUpdateCreate,
 		ReadContext:   resourceClusterUpdateRead,
 		DeleteContext: resourceClusterUpdateDelete,
@@ -33,7 +33,66 @@ func resourceClusterUpdate() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Default:      "one-at-a-time",
-				ValidateFunc: validation.StringInSlice([]string{"canary", "one-at-a-time", "batch", "per-dc"}, false),
+				Description:  "one-at-a-time. The 0.5.0 controller refuses canary, batch, and per-dc.",
+				ValidateFunc: validation.StringInSlice([]string{"one-at-a-time"}, false),
+			},
+			"max_unavailable": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     1,
+				Description: "Defaults to 1.",
+			},
+			"batch_size": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"activation": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Description:  "test, switch, boot, or auto. Reboot stays `kctl update cluster reboot`.",
+				ValidateFunc: validation.StringInSlice([]string{"", "test", "switch", "boot", "auto"}, false),
+			},
+			"nixpkgs_rev": {Type: schema.TypeString, Optional: true, ForceNew: true},
+			"update_kind": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "kcore",
+				Description:  "`kcore` or `nixpkgs`. Defaults to `kcore`.",
+				ValidateFunc: validation.StringInSlice([]string{"kcore", "nixpkgs"}, false),
+			},
+			"requires_nixpkgs": {Type: schema.TypeBool, Optional: true, ForceNew: true},
+			"schema_version": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"previous_schema_version": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"min_compatible_reader": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"tested_os_pins": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Pins from the kcore release manifest.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"nixpkgs_rev":        {Type: schema.TypeString, Optional: true},
+						"ceph_rev":           {Type: schema.TypeString, Optional: true},
+						"ceph_sha256":        {Type: schema.TypeString, Optional: true},
+						"kubernetes_version": {Type: schema.TypeString, Optional: true},
+					},
+				},
 			},
 			"approval": {
 				Type:         schema.TypeString,
@@ -67,6 +126,21 @@ func updateStrategy(name string) pb.ClusterUpdateStrategyType {
 	}
 }
 
+func updateActivation(name string) pb.ClusterUpdateActivationMode {
+	switch name {
+	case "test":
+		return pb.ClusterUpdateActivationMode_CLUSTER_UPDATE_ACTIVATION_TEST
+	case "switch":
+		return pb.ClusterUpdateActivationMode_CLUSTER_UPDATE_ACTIVATION_SWITCH
+	case "boot":
+		return pb.ClusterUpdateActivationMode_CLUSTER_UPDATE_ACTIVATION_BOOT
+	case "auto":
+		return pb.ClusterUpdateActivationMode_CLUSTER_UPDATE_ACTIVATION_AUTO
+	default:
+		return pb.ClusterUpdateActivationMode_CLUSTER_UPDATE_ACTIVATION_UNSPECIFIED
+	}
+}
+
 func updateApproval(name string) pb.ClusterUpdateApprovalPolicy {
 	switch name {
 	case "auto-non-disruptive":
@@ -78,6 +152,35 @@ func updateApproval(name string) pb.ClusterUpdateApprovalPolicy {
 	}
 }
 
+func rowString(row map[string]interface{}, key string) string {
+	v, ok := row[key].(string)
+	if !ok {
+		return ""
+	}
+	return v
+}
+
+func testedOsPins(d *schema.ResourceData) []*pb.TestedOsPin {
+	raw, ok := d.GetOk("tested_os_pins")
+	if !ok {
+		return nil
+	}
+	var pins []*pb.TestedOsPin
+	for _, item := range raw.([]interface{}) {
+		row, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		pins = append(pins, &pb.TestedOsPin{
+			NixpkgsRev:        rowString(row, "nixpkgs_rev"),
+			CephRev:           rowString(row, "ceph_rev"),
+			CephSha256:        rowString(row, "ceph_sha256"),
+			KubernetesVersion: rowString(row, "kubernetes_version"),
+		})
+	}
+	return pins
+}
+
 func clusterUpdateSpec(d *schema.ResourceData) *pb.ClusterUpdateSpec {
 	return &pb.ClusterUpdateSpec{
 		Name: s(d, "name"),
@@ -85,6 +188,7 @@ func clusterUpdateSpec(d *schema.ResourceData) *pb.ClusterUpdateSpec {
 			Version:       s(d, "version"),
 			FlakeRef:      s(d, "flake_ref"),
 			FlakeRev:      s(d, "flake_rev"),
+			NixpkgsRev:    s(d, "nixpkgs_rev"),
 			SystemProfile: s(d, "system_profile"),
 		},
 		Selector: &pb.ClusterUpdateSelector{
@@ -93,9 +197,20 @@ func clusterUpdateSpec(d *schema.ResourceData) *pb.ClusterUpdateSpec {
 			AllNodes:        b(d, "all_nodes"),
 			ControllersOnly: b(d, "controllers_only"),
 		},
-		Strategy:       &pb.ClusterUpdateStrategy{Type: updateStrategy(s(d, "strategy"))},
-		DrainVms:       b(d, "drain_vms"),
-		ApprovalPolicy: updateApproval(s(d, "approval")),
+		Strategy: &pb.ClusterUpdateStrategy{
+			Type:           updateStrategy(s(d, "strategy")),
+			MaxUnavailable: int32(d.Get("max_unavailable").(int)),
+			BatchSize:      int32(d.Get("batch_size").(int)),
+		},
+		DrainVms:              b(d, "drain_vms"),
+		ActivationMode:        updateActivation(s(d, "activation")),
+		ApprovalPolicy:        updateApproval(s(d, "approval")),
+		UpdateKind:            s(d, "update_kind"),
+		RequiresNixpkgs:       b(d, "requires_nixpkgs"),
+		TestedOsPins:          testedOsPins(d),
+		SchemaVersion:         int32(d.Get("schema_version").(int)),
+		PreviousSchemaVersion: int32(d.Get("previous_schema_version").(int)),
+		MinCompatibleReader:   int32(d.Get("min_compatible_reader").(int)),
 	}
 }
 

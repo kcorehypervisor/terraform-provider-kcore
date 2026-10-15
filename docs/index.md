@@ -4,7 +4,7 @@ page_title: "kcore Provider"
 subcategory: ""
 description: |-
   Manage a kcore cluster: TLS material, nodes, VMs, networks, storage, and Ceph.
-  Requires a controller that implements the packaged gRPC API (kcore 0.3.0).
+  Requires a controller that implements the packaged gRPC API (kcore 0.5.0).
 ---
 
 # kcore Provider
@@ -20,7 +20,7 @@ terraform {
   required_providers {
     kcore = {
       source  = "kcorehypervisor/kcore"
-      version = "0.3.3"
+      version = "0.5.0"
     }
   }
 }

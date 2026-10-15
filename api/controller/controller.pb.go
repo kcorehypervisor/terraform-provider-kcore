@@ -15150,6 +15150,74 @@ func (x *ClusterUpdateStrategy) GetBatchSize() int32 {
 	return 0
 }
 
+type TestedOsPin struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	NixpkgsRev        string                 `protobuf:"bytes,1,opt,name=nixpkgs_rev,json=nixpkgsRev,proto3" json:"nixpkgs_rev,omitempty"`
+	CephRev           string                 `protobuf:"bytes,2,opt,name=ceph_rev,json=cephRev,proto3" json:"ceph_rev,omitempty"`
+	CephSha256        string                 `protobuf:"bytes,3,opt,name=ceph_sha256,json=cephSha256,proto3" json:"ceph_sha256,omitempty"`
+	KubernetesVersion string                 `protobuf:"bytes,4,opt,name=kubernetes_version,json=kubernetesVersion,proto3" json:"kubernetes_version,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *TestedOsPin) Reset() {
+	*x = TestedOsPin{}
+	mi := &file_controller_proto_msgTypes[223]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TestedOsPin) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TestedOsPin) ProtoMessage() {}
+
+func (x *TestedOsPin) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[223]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TestedOsPin.ProtoReflect.Descriptor instead.
+func (*TestedOsPin) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{223}
+}
+
+func (x *TestedOsPin) GetNixpkgsRev() string {
+	if x != nil {
+		return x.NixpkgsRev
+	}
+	return ""
+}
+
+func (x *TestedOsPin) GetCephRev() string {
+	if x != nil {
+		return x.CephRev
+	}
+	return ""
+}
+
+func (x *TestedOsPin) GetCephSha256() string {
+	if x != nil {
+		return x.CephSha256
+	}
+	return ""
+}
+
+func (x *TestedOsPin) GetKubernetesVersion() string {
+	if x != nil {
+		return x.KubernetesVersion
+	}
+	return ""
+}
+
 type ClusterUpdateSpec struct {
 	state               protoimpl.MessageState      `protogen:"open.v1"`
 	Name                string                      `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -15162,13 +15230,20 @@ type ClusterUpdateSpec struct {
 	RebootPolicy        string                      `protobuf:"bytes,8,opt,name=reboot_policy,json=rebootPolicy,proto3" json:"reboot_policy,omitempty"`
 	ApprovalPolicy      ClusterUpdateApprovalPolicy `protobuf:"varint,9,opt,name=approval_policy,json=approvalPolicy,proto3,enum=kcore.controller.ClusterUpdateApprovalPolicy" json:"approval_policy,omitempty"`
 	AutomaticRollback   bool                        `protobuf:"varint,10,opt,name=automatic_rollback,json=automaticRollback,proto3" json:"automatic_rollback,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	// "kcore" moves the product pin. "nixpkgs" moves a published OS pin.
+	UpdateKind            string         `protobuf:"bytes,11,opt,name=update_kind,json=updateKind,proto3" json:"update_kind,omitempty"`
+	RequiresNixpkgs       bool           `protobuf:"varint,12,opt,name=requires_nixpkgs,json=requiresNixpkgs,proto3" json:"requires_nixpkgs,omitempty"`
+	TestedOsPins          []*TestedOsPin `protobuf:"bytes,13,rep,name=tested_os_pins,json=testedOsPins,proto3" json:"tested_os_pins,omitempty"`
+	SchemaVersion         int32          `protobuf:"varint,14,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
+	PreviousSchemaVersion int32          `protobuf:"varint,15,opt,name=previous_schema_version,json=previousSchemaVersion,proto3" json:"previous_schema_version,omitempty"`
+	MinCompatibleReader   int32          `protobuf:"varint,16,opt,name=min_compatible_reader,json=minCompatibleReader,proto3" json:"min_compatible_reader,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *ClusterUpdateSpec) Reset() {
 	*x = ClusterUpdateSpec{}
-	mi := &file_controller_proto_msgTypes[223]
+	mi := &file_controller_proto_msgTypes[224]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15180,7 +15255,7 @@ func (x *ClusterUpdateSpec) String() string {
 func (*ClusterUpdateSpec) ProtoMessage() {}
 
 func (x *ClusterUpdateSpec) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[223]
+	mi := &file_controller_proto_msgTypes[224]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15193,7 +15268,7 @@ func (x *ClusterUpdateSpec) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClusterUpdateSpec.ProtoReflect.Descriptor instead.
 func (*ClusterUpdateSpec) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{223}
+	return file_controller_proto_rawDescGZIP(), []int{224}
 }
 
 func (x *ClusterUpdateSpec) GetName() string {
@@ -15266,6 +15341,48 @@ func (x *ClusterUpdateSpec) GetAutomaticRollback() bool {
 	return false
 }
 
+func (x *ClusterUpdateSpec) GetUpdateKind() string {
+	if x != nil {
+		return x.UpdateKind
+	}
+	return ""
+}
+
+func (x *ClusterUpdateSpec) GetRequiresNixpkgs() bool {
+	if x != nil {
+		return x.RequiresNixpkgs
+	}
+	return false
+}
+
+func (x *ClusterUpdateSpec) GetTestedOsPins() []*TestedOsPin {
+	if x != nil {
+		return x.TestedOsPins
+	}
+	return nil
+}
+
+func (x *ClusterUpdateSpec) GetSchemaVersion() int32 {
+	if x != nil {
+		return x.SchemaVersion
+	}
+	return 0
+}
+
+func (x *ClusterUpdateSpec) GetPreviousSchemaVersion() int32 {
+	if x != nil {
+		return x.PreviousSchemaVersion
+	}
+	return 0
+}
+
+func (x *ClusterUpdateSpec) GetMinCompatibleReader() int32 {
+	if x != nil {
+		return x.MinCompatibleReader
+	}
+	return 0
+}
+
 type ClusterUpdate struct {
 	state          protoimpl.MessageState      `protogen:"open.v1"`
 	Spec           *ClusterUpdateSpec          `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
@@ -15280,7 +15397,7 @@ type ClusterUpdate struct {
 
 func (x *ClusterUpdate) Reset() {
 	*x = ClusterUpdate{}
-	mi := &file_controller_proto_msgTypes[224]
+	mi := &file_controller_proto_msgTypes[225]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15292,7 +15409,7 @@ func (x *ClusterUpdate) String() string {
 func (*ClusterUpdate) ProtoMessage() {}
 
 func (x *ClusterUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[224]
+	mi := &file_controller_proto_msgTypes[225]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15305,7 +15422,7 @@ func (x *ClusterUpdate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClusterUpdate.ProtoReflect.Descriptor instead.
 func (*ClusterUpdate) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{224}
+	return file_controller_proto_rawDescGZIP(), []int{225}
 }
 
 func (x *ClusterUpdate) GetSpec() *ClusterUpdateSpec {
@@ -15370,7 +15487,7 @@ type NodeUpdateStatus struct {
 
 func (x *NodeUpdateStatus) Reset() {
 	*x = NodeUpdateStatus{}
-	mi := &file_controller_proto_msgTypes[225]
+	mi := &file_controller_proto_msgTypes[226]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15382,7 +15499,7 @@ func (x *NodeUpdateStatus) String() string {
 func (*NodeUpdateStatus) ProtoMessage() {}
 
 func (x *NodeUpdateStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[225]
+	mi := &file_controller_proto_msgTypes[226]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15395,7 +15512,7 @@ func (x *NodeUpdateStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeUpdateStatus.ProtoReflect.Descriptor instead.
 func (*NodeUpdateStatus) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{225}
+	return file_controller_proto_rawDescGZIP(), []int{226}
 }
 
 func (x *NodeUpdateStatus) GetUpdateName() string {
@@ -15491,7 +15608,7 @@ type CreateClusterUpdateRequest struct {
 
 func (x *CreateClusterUpdateRequest) Reset() {
 	*x = CreateClusterUpdateRequest{}
-	mi := &file_controller_proto_msgTypes[226]
+	mi := &file_controller_proto_msgTypes[227]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15503,7 +15620,7 @@ func (x *CreateClusterUpdateRequest) String() string {
 func (*CreateClusterUpdateRequest) ProtoMessage() {}
 
 func (x *CreateClusterUpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[226]
+	mi := &file_controller_proto_msgTypes[227]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15516,7 +15633,7 @@ func (x *CreateClusterUpdateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateClusterUpdateRequest.ProtoReflect.Descriptor instead.
 func (*CreateClusterUpdateRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{226}
+	return file_controller_proto_rawDescGZIP(), []int{227}
 }
 
 func (x *CreateClusterUpdateRequest) GetSpec() *ClusterUpdateSpec {
@@ -15538,7 +15655,7 @@ type CreateClusterUpdateResponse struct {
 
 func (x *CreateClusterUpdateResponse) Reset() {
 	*x = CreateClusterUpdateResponse{}
-	mi := &file_controller_proto_msgTypes[227]
+	mi := &file_controller_proto_msgTypes[228]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15550,7 +15667,7 @@ func (x *CreateClusterUpdateResponse) String() string {
 func (*CreateClusterUpdateResponse) ProtoMessage() {}
 
 func (x *CreateClusterUpdateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[227]
+	mi := &file_controller_proto_msgTypes[228]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15563,7 +15680,7 @@ func (x *CreateClusterUpdateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateClusterUpdateResponse.ProtoReflect.Descriptor instead.
 func (*CreateClusterUpdateResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{227}
+	return file_controller_proto_rawDescGZIP(), []int{228}
 }
 
 func (x *CreateClusterUpdateResponse) GetSuccess() bool {
@@ -15603,7 +15720,7 @@ type GetClusterUpdateRequest struct {
 
 func (x *GetClusterUpdateRequest) Reset() {
 	*x = GetClusterUpdateRequest{}
-	mi := &file_controller_proto_msgTypes[228]
+	mi := &file_controller_proto_msgTypes[229]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15615,7 +15732,7 @@ func (x *GetClusterUpdateRequest) String() string {
 func (*GetClusterUpdateRequest) ProtoMessage() {}
 
 func (x *GetClusterUpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[228]
+	mi := &file_controller_proto_msgTypes[229]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15628,7 +15745,7 @@ func (x *GetClusterUpdateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetClusterUpdateRequest.ProtoReflect.Descriptor instead.
 func (*GetClusterUpdateRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{228}
+	return file_controller_proto_rawDescGZIP(), []int{229}
 }
 
 func (x *GetClusterUpdateRequest) GetName() string {
@@ -15648,7 +15765,7 @@ type GetClusterUpdateResponse struct {
 
 func (x *GetClusterUpdateResponse) Reset() {
 	*x = GetClusterUpdateResponse{}
-	mi := &file_controller_proto_msgTypes[229]
+	mi := &file_controller_proto_msgTypes[230]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15660,7 +15777,7 @@ func (x *GetClusterUpdateResponse) String() string {
 func (*GetClusterUpdateResponse) ProtoMessage() {}
 
 func (x *GetClusterUpdateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[229]
+	mi := &file_controller_proto_msgTypes[230]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15673,7 +15790,7 @@ func (x *GetClusterUpdateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetClusterUpdateResponse.ProtoReflect.Descriptor instead.
 func (*GetClusterUpdateResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{229}
+	return file_controller_proto_rawDescGZIP(), []int{230}
 }
 
 func (x *GetClusterUpdateResponse) GetClusterUpdate() *ClusterUpdate {
@@ -15698,7 +15815,7 @@ type ListClusterUpdatesRequest struct {
 
 func (x *ListClusterUpdatesRequest) Reset() {
 	*x = ListClusterUpdatesRequest{}
-	mi := &file_controller_proto_msgTypes[230]
+	mi := &file_controller_proto_msgTypes[231]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15710,7 +15827,7 @@ func (x *ListClusterUpdatesRequest) String() string {
 func (*ListClusterUpdatesRequest) ProtoMessage() {}
 
 func (x *ListClusterUpdatesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[230]
+	mi := &file_controller_proto_msgTypes[231]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15723,7 +15840,7 @@ func (x *ListClusterUpdatesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListClusterUpdatesRequest.ProtoReflect.Descriptor instead.
 func (*ListClusterUpdatesRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{230}
+	return file_controller_proto_rawDescGZIP(), []int{231}
 }
 
 type ListClusterUpdatesResponse struct {
@@ -15735,7 +15852,7 @@ type ListClusterUpdatesResponse struct {
 
 func (x *ListClusterUpdatesResponse) Reset() {
 	*x = ListClusterUpdatesResponse{}
-	mi := &file_controller_proto_msgTypes[231]
+	mi := &file_controller_proto_msgTypes[232]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15747,7 +15864,7 @@ func (x *ListClusterUpdatesResponse) String() string {
 func (*ListClusterUpdatesResponse) ProtoMessage() {}
 
 func (x *ListClusterUpdatesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[231]
+	mi := &file_controller_proto_msgTypes[232]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15760,7 +15877,7 @@ func (x *ListClusterUpdatesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListClusterUpdatesResponse.ProtoReflect.Descriptor instead.
 func (*ListClusterUpdatesResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{231}
+	return file_controller_proto_rawDescGZIP(), []int{232}
 }
 
 func (x *ListClusterUpdatesResponse) GetClusterUpdates() []*ClusterUpdate {
@@ -15779,7 +15896,7 @@ type PlanClusterUpdateRequest struct {
 
 func (x *PlanClusterUpdateRequest) Reset() {
 	*x = PlanClusterUpdateRequest{}
-	mi := &file_controller_proto_msgTypes[232]
+	mi := &file_controller_proto_msgTypes[233]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15791,7 +15908,7 @@ func (x *PlanClusterUpdateRequest) String() string {
 func (*PlanClusterUpdateRequest) ProtoMessage() {}
 
 func (x *PlanClusterUpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[232]
+	mi := &file_controller_proto_msgTypes[233]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15804,7 +15921,7 @@ func (x *PlanClusterUpdateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlanClusterUpdateRequest.ProtoReflect.Descriptor instead.
 func (*PlanClusterUpdateRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{232}
+	return file_controller_proto_rawDescGZIP(), []int{233}
 }
 
 func (x *PlanClusterUpdateRequest) GetSpec() *ClusterUpdateSpec {
@@ -15824,7 +15941,7 @@ type PlanIssue struct {
 
 func (x *PlanIssue) Reset() {
 	*x = PlanIssue{}
-	mi := &file_controller_proto_msgTypes[233]
+	mi := &file_controller_proto_msgTypes[234]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15836,7 +15953,7 @@ func (x *PlanIssue) String() string {
 func (*PlanIssue) ProtoMessage() {}
 
 func (x *PlanIssue) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[233]
+	mi := &file_controller_proto_msgTypes[234]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15849,7 +15966,7 @@ func (x *PlanIssue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlanIssue.ProtoReflect.Descriptor instead.
 func (*PlanIssue) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{233}
+	return file_controller_proto_rawDescGZIP(), []int{234}
 }
 
 func (x *PlanIssue) GetNodeId() string {
@@ -15879,7 +15996,7 @@ type PlanClusterUpdateResponse struct {
 
 func (x *PlanClusterUpdateResponse) Reset() {
 	*x = PlanClusterUpdateResponse{}
-	mi := &file_controller_proto_msgTypes[234]
+	mi := &file_controller_proto_msgTypes[235]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15891,7 +16008,7 @@ func (x *PlanClusterUpdateResponse) String() string {
 func (*PlanClusterUpdateResponse) ProtoMessage() {}
 
 func (x *PlanClusterUpdateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[234]
+	mi := &file_controller_proto_msgTypes[235]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15904,7 +16021,7 @@ func (x *PlanClusterUpdateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlanClusterUpdateResponse.ProtoReflect.Descriptor instead.
 func (*PlanClusterUpdateResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{234}
+	return file_controller_proto_rawDescGZIP(), []int{235}
 }
 
 func (x *PlanClusterUpdateResponse) GetViable() bool {
@@ -15951,7 +16068,7 @@ type ApproveClusterUpdateRequest struct {
 
 func (x *ApproveClusterUpdateRequest) Reset() {
 	*x = ApproveClusterUpdateRequest{}
-	mi := &file_controller_proto_msgTypes[235]
+	mi := &file_controller_proto_msgTypes[236]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15963,7 +16080,7 @@ func (x *ApproveClusterUpdateRequest) String() string {
 func (*ApproveClusterUpdateRequest) ProtoMessage() {}
 
 func (x *ApproveClusterUpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[235]
+	mi := &file_controller_proto_msgTypes[236]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15976,7 +16093,7 @@ func (x *ApproveClusterUpdateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveClusterUpdateRequest.ProtoReflect.Descriptor instead.
 func (*ApproveClusterUpdateRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{235}
+	return file_controller_proto_rawDescGZIP(), []int{236}
 }
 
 func (x *ApproveClusterUpdateRequest) GetName() string {
@@ -15996,7 +16113,7 @@ type ApproveClusterUpdateResponse struct {
 
 func (x *ApproveClusterUpdateResponse) Reset() {
 	*x = ApproveClusterUpdateResponse{}
-	mi := &file_controller_proto_msgTypes[236]
+	mi := &file_controller_proto_msgTypes[237]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16008,7 +16125,7 @@ func (x *ApproveClusterUpdateResponse) String() string {
 func (*ApproveClusterUpdateResponse) ProtoMessage() {}
 
 func (x *ApproveClusterUpdateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[236]
+	mi := &file_controller_proto_msgTypes[237]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16021,7 +16138,7 @@ func (x *ApproveClusterUpdateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveClusterUpdateResponse.ProtoReflect.Descriptor instead.
 func (*ApproveClusterUpdateResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{236}
+	return file_controller_proto_rawDescGZIP(), []int{237}
 }
 
 func (x *ApproveClusterUpdateResponse) GetSuccess() bool {
@@ -16047,7 +16164,7 @@ type CancelClusterUpdateRequest struct {
 
 func (x *CancelClusterUpdateRequest) Reset() {
 	*x = CancelClusterUpdateRequest{}
-	mi := &file_controller_proto_msgTypes[237]
+	mi := &file_controller_proto_msgTypes[238]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16059,7 +16176,7 @@ func (x *CancelClusterUpdateRequest) String() string {
 func (*CancelClusterUpdateRequest) ProtoMessage() {}
 
 func (x *CancelClusterUpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[237]
+	mi := &file_controller_proto_msgTypes[238]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16072,7 +16189,7 @@ func (x *CancelClusterUpdateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelClusterUpdateRequest.ProtoReflect.Descriptor instead.
 func (*CancelClusterUpdateRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{237}
+	return file_controller_proto_rawDescGZIP(), []int{238}
 }
 
 func (x *CancelClusterUpdateRequest) GetName() string {
@@ -16092,7 +16209,7 @@ type CancelClusterUpdateResponse struct {
 
 func (x *CancelClusterUpdateResponse) Reset() {
 	*x = CancelClusterUpdateResponse{}
-	mi := &file_controller_proto_msgTypes[238]
+	mi := &file_controller_proto_msgTypes[239]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16104,7 +16221,7 @@ func (x *CancelClusterUpdateResponse) String() string {
 func (*CancelClusterUpdateResponse) ProtoMessage() {}
 
 func (x *CancelClusterUpdateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[238]
+	mi := &file_controller_proto_msgTypes[239]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16117,7 +16234,7 @@ func (x *CancelClusterUpdateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelClusterUpdateResponse.ProtoReflect.Descriptor instead.
 func (*CancelClusterUpdateResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{238}
+	return file_controller_proto_rawDescGZIP(), []int{239}
 }
 
 func (x *CancelClusterUpdateResponse) GetSuccess() bool {
@@ -16143,7 +16260,7 @@ type RollbackClusterUpdateRequest struct {
 
 func (x *RollbackClusterUpdateRequest) Reset() {
 	*x = RollbackClusterUpdateRequest{}
-	mi := &file_controller_proto_msgTypes[239]
+	mi := &file_controller_proto_msgTypes[240]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16155,7 +16272,7 @@ func (x *RollbackClusterUpdateRequest) String() string {
 func (*RollbackClusterUpdateRequest) ProtoMessage() {}
 
 func (x *RollbackClusterUpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[239]
+	mi := &file_controller_proto_msgTypes[240]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16168,7 +16285,7 @@ func (x *RollbackClusterUpdateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RollbackClusterUpdateRequest.ProtoReflect.Descriptor instead.
 func (*RollbackClusterUpdateRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{239}
+	return file_controller_proto_rawDescGZIP(), []int{240}
 }
 
 func (x *RollbackClusterUpdateRequest) GetName() string {
@@ -16188,7 +16305,7 @@ type RollbackClusterUpdateResponse struct {
 
 func (x *RollbackClusterUpdateResponse) Reset() {
 	*x = RollbackClusterUpdateResponse{}
-	mi := &file_controller_proto_msgTypes[240]
+	mi := &file_controller_proto_msgTypes[241]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16200,7 +16317,7 @@ func (x *RollbackClusterUpdateResponse) String() string {
 func (*RollbackClusterUpdateResponse) ProtoMessage() {}
 
 func (x *RollbackClusterUpdateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[240]
+	mi := &file_controller_proto_msgTypes[241]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16213,7 +16330,7 @@ func (x *RollbackClusterUpdateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RollbackClusterUpdateResponse.ProtoReflect.Descriptor instead.
 func (*RollbackClusterUpdateResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{240}
+	return file_controller_proto_rawDescGZIP(), []int{241}
 }
 
 func (x *RollbackClusterUpdateResponse) GetSuccess() bool {
@@ -16246,7 +16363,7 @@ type CephClusterNodeSpec struct {
 
 func (x *CephClusterNodeSpec) Reset() {
 	*x = CephClusterNodeSpec{}
-	mi := &file_controller_proto_msgTypes[241]
+	mi := &file_controller_proto_msgTypes[242]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16258,7 +16375,7 @@ func (x *CephClusterNodeSpec) String() string {
 func (*CephClusterNodeSpec) ProtoMessage() {}
 
 func (x *CephClusterNodeSpec) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[241]
+	mi := &file_controller_proto_msgTypes[242]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16271,7 +16388,7 @@ func (x *CephClusterNodeSpec) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CephClusterNodeSpec.ProtoReflect.Descriptor instead.
 func (*CephClusterNodeSpec) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{241}
+	return file_controller_proto_rawDescGZIP(), []int{242}
 }
 
 func (x *CephClusterNodeSpec) GetNodeId() string {
@@ -16340,7 +16457,7 @@ type CephClusterSpec struct {
 
 func (x *CephClusterSpec) Reset() {
 	*x = CephClusterSpec{}
-	mi := &file_controller_proto_msgTypes[242]
+	mi := &file_controller_proto_msgTypes[243]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16352,7 +16469,7 @@ func (x *CephClusterSpec) String() string {
 func (*CephClusterSpec) ProtoMessage() {}
 
 func (x *CephClusterSpec) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[242]
+	mi := &file_controller_proto_msgTypes[243]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16365,7 +16482,7 @@ func (x *CephClusterSpec) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CephClusterSpec.ProtoReflect.Descriptor instead.
 func (*CephClusterSpec) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{242}
+	return file_controller_proto_rawDescGZIP(), []int{243}
 }
 
 func (x *CephClusterSpec) GetFsid() string {
@@ -16437,7 +16554,7 @@ type CephClusterStatus struct {
 
 func (x *CephClusterStatus) Reset() {
 	*x = CephClusterStatus{}
-	mi := &file_controller_proto_msgTypes[243]
+	mi := &file_controller_proto_msgTypes[244]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16449,7 +16566,7 @@ func (x *CephClusterStatus) String() string {
 func (*CephClusterStatus) ProtoMessage() {}
 
 func (x *CephClusterStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[243]
+	mi := &file_controller_proto_msgTypes[244]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16462,7 +16579,7 @@ func (x *CephClusterStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CephClusterStatus.ProtoReflect.Descriptor instead.
 func (*CephClusterStatus) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{243}
+	return file_controller_proto_rawDescGZIP(), []int{244}
 }
 
 func (x *CephClusterStatus) GetObservedGeneration() int64 {
@@ -16514,7 +16631,7 @@ type CephCluster struct {
 
 func (x *CephCluster) Reset() {
 	*x = CephCluster{}
-	mi := &file_controller_proto_msgTypes[244]
+	mi := &file_controller_proto_msgTypes[245]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16526,7 +16643,7 @@ func (x *CephCluster) String() string {
 func (*CephCluster) ProtoMessage() {}
 
 func (x *CephCluster) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[244]
+	mi := &file_controller_proto_msgTypes[245]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16539,7 +16656,7 @@ func (x *CephCluster) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CephCluster.ProtoReflect.Descriptor instead.
 func (*CephCluster) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{244}
+	return file_controller_proto_rawDescGZIP(), []int{245}
 }
 
 func (x *CephCluster) GetName() string {
@@ -16593,7 +16710,7 @@ type CreateCephClusterRequest struct {
 
 func (x *CreateCephClusterRequest) Reset() {
 	*x = CreateCephClusterRequest{}
-	mi := &file_controller_proto_msgTypes[245]
+	mi := &file_controller_proto_msgTypes[246]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16605,7 +16722,7 @@ func (x *CreateCephClusterRequest) String() string {
 func (*CreateCephClusterRequest) ProtoMessage() {}
 
 func (x *CreateCephClusterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[245]
+	mi := &file_controller_proto_msgTypes[246]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16618,7 +16735,7 @@ func (x *CreateCephClusterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCephClusterRequest.ProtoReflect.Descriptor instead.
 func (*CreateCephClusterRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{245}
+	return file_controller_proto_rawDescGZIP(), []int{246}
 }
 
 func (x *CreateCephClusterRequest) GetCephCluster() *CephCluster {
@@ -16640,7 +16757,7 @@ type CreateCephClusterResponse struct {
 
 func (x *CreateCephClusterResponse) Reset() {
 	*x = CreateCephClusterResponse{}
-	mi := &file_controller_proto_msgTypes[246]
+	mi := &file_controller_proto_msgTypes[247]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16652,7 +16769,7 @@ func (x *CreateCephClusterResponse) String() string {
 func (*CreateCephClusterResponse) ProtoMessage() {}
 
 func (x *CreateCephClusterResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[246]
+	mi := &file_controller_proto_msgTypes[247]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16665,7 +16782,7 @@ func (x *CreateCephClusterResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCephClusterResponse.ProtoReflect.Descriptor instead.
 func (*CreateCephClusterResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{246}
+	return file_controller_proto_rawDescGZIP(), []int{247}
 }
 
 func (x *CreateCephClusterResponse) GetSuccess() bool {
@@ -16705,7 +16822,7 @@ type GetCephClusterRequest struct {
 
 func (x *GetCephClusterRequest) Reset() {
 	*x = GetCephClusterRequest{}
-	mi := &file_controller_proto_msgTypes[247]
+	mi := &file_controller_proto_msgTypes[248]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16717,7 +16834,7 @@ func (x *GetCephClusterRequest) String() string {
 func (*GetCephClusterRequest) ProtoMessage() {}
 
 func (x *GetCephClusterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[247]
+	mi := &file_controller_proto_msgTypes[248]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16730,7 +16847,7 @@ func (x *GetCephClusterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCephClusterRequest.ProtoReflect.Descriptor instead.
 func (*GetCephClusterRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{247}
+	return file_controller_proto_rawDescGZIP(), []int{248}
 }
 
 func (x *GetCephClusterRequest) GetName() string {
@@ -16749,7 +16866,7 @@ type GetCephClusterResponse struct {
 
 func (x *GetCephClusterResponse) Reset() {
 	*x = GetCephClusterResponse{}
-	mi := &file_controller_proto_msgTypes[248]
+	mi := &file_controller_proto_msgTypes[249]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16761,7 +16878,7 @@ func (x *GetCephClusterResponse) String() string {
 func (*GetCephClusterResponse) ProtoMessage() {}
 
 func (x *GetCephClusterResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[248]
+	mi := &file_controller_proto_msgTypes[249]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16774,7 +16891,7 @@ func (x *GetCephClusterResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCephClusterResponse.ProtoReflect.Descriptor instead.
 func (*GetCephClusterResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{248}
+	return file_controller_proto_rawDescGZIP(), []int{249}
 }
 
 func (x *GetCephClusterResponse) GetCephCluster() *CephCluster {
@@ -16792,7 +16909,7 @@ type ListCephClustersRequest struct {
 
 func (x *ListCephClustersRequest) Reset() {
 	*x = ListCephClustersRequest{}
-	mi := &file_controller_proto_msgTypes[249]
+	mi := &file_controller_proto_msgTypes[250]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16804,7 +16921,7 @@ func (x *ListCephClustersRequest) String() string {
 func (*ListCephClustersRequest) ProtoMessage() {}
 
 func (x *ListCephClustersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[249]
+	mi := &file_controller_proto_msgTypes[250]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16817,7 +16934,7 @@ func (x *ListCephClustersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCephClustersRequest.ProtoReflect.Descriptor instead.
 func (*ListCephClustersRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{249}
+	return file_controller_proto_rawDescGZIP(), []int{250}
 }
 
 type ListCephClustersResponse struct {
@@ -16829,7 +16946,7 @@ type ListCephClustersResponse struct {
 
 func (x *ListCephClustersResponse) Reset() {
 	*x = ListCephClustersResponse{}
-	mi := &file_controller_proto_msgTypes[250]
+	mi := &file_controller_proto_msgTypes[251]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16841,7 +16958,7 @@ func (x *ListCephClustersResponse) String() string {
 func (*ListCephClustersResponse) ProtoMessage() {}
 
 func (x *ListCephClustersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[250]
+	mi := &file_controller_proto_msgTypes[251]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16854,7 +16971,7 @@ func (x *ListCephClustersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCephClustersResponse.ProtoReflect.Descriptor instead.
 func (*ListCephClustersResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{250}
+	return file_controller_proto_rawDescGZIP(), []int{251}
 }
 
 func (x *ListCephClustersResponse) GetCephClusters() []*CephCluster {
@@ -16876,7 +16993,7 @@ type DeleteCephClusterRequest struct {
 
 func (x *DeleteCephClusterRequest) Reset() {
 	*x = DeleteCephClusterRequest{}
-	mi := &file_controller_proto_msgTypes[251]
+	mi := &file_controller_proto_msgTypes[252]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16888,7 +17005,7 @@ func (x *DeleteCephClusterRequest) String() string {
 func (*DeleteCephClusterRequest) ProtoMessage() {}
 
 func (x *DeleteCephClusterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[251]
+	mi := &file_controller_proto_msgTypes[252]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16901,7 +17018,7 @@ func (x *DeleteCephClusterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCephClusterRequest.ProtoReflect.Descriptor instead.
 func (*DeleteCephClusterRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{251}
+	return file_controller_proto_rawDescGZIP(), []int{252}
 }
 
 func (x *DeleteCephClusterRequest) GetName() string {
@@ -16927,7 +17044,7 @@ type DeleteCephClusterResponse struct {
 
 func (x *DeleteCephClusterResponse) Reset() {
 	*x = DeleteCephClusterResponse{}
-	mi := &file_controller_proto_msgTypes[252]
+	mi := &file_controller_proto_msgTypes[253]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16939,7 +17056,7 @@ func (x *DeleteCephClusterResponse) String() string {
 func (*DeleteCephClusterResponse) ProtoMessage() {}
 
 func (x *DeleteCephClusterResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[252]
+	mi := &file_controller_proto_msgTypes[253]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16952,7 +17069,7 @@ func (x *DeleteCephClusterResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCephClusterResponse.ProtoReflect.Descriptor instead.
 func (*DeleteCephClusterResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{252}
+	return file_controller_proto_rawDescGZIP(), []int{253}
 }
 
 func (x *DeleteCephClusterResponse) GetSuccess() bool {
@@ -16972,7 +17089,7 @@ type SharedFilesystemClientSpec struct {
 
 func (x *SharedFilesystemClientSpec) Reset() {
 	*x = SharedFilesystemClientSpec{}
-	mi := &file_controller_proto_msgTypes[253]
+	mi := &file_controller_proto_msgTypes[254]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -16984,7 +17101,7 @@ func (x *SharedFilesystemClientSpec) String() string {
 func (*SharedFilesystemClientSpec) ProtoMessage() {}
 
 func (x *SharedFilesystemClientSpec) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[253]
+	mi := &file_controller_proto_msgTypes[254]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -16997,7 +17114,7 @@ func (x *SharedFilesystemClientSpec) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SharedFilesystemClientSpec.ProtoReflect.Descriptor instead.
 func (*SharedFilesystemClientSpec) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{253}
+	return file_controller_proto_rawDescGZIP(), []int{254}
 }
 
 func (x *SharedFilesystemClientSpec) GetName() string {
@@ -17027,7 +17144,7 @@ type SharedFilesystemSpec struct {
 
 func (x *SharedFilesystemSpec) Reset() {
 	*x = SharedFilesystemSpec{}
-	mi := &file_controller_proto_msgTypes[254]
+	mi := &file_controller_proto_msgTypes[255]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17039,7 +17156,7 @@ func (x *SharedFilesystemSpec) String() string {
 func (*SharedFilesystemSpec) ProtoMessage() {}
 
 func (x *SharedFilesystemSpec) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[254]
+	mi := &file_controller_proto_msgTypes[255]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17052,7 +17169,7 @@ func (x *SharedFilesystemSpec) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SharedFilesystemSpec.ProtoReflect.Descriptor instead.
 func (*SharedFilesystemSpec) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{254}
+	return file_controller_proto_rawDescGZIP(), []int{255}
 }
 
 func (x *SharedFilesystemSpec) GetCephCluster() string {
@@ -17095,7 +17212,7 @@ type SharedFilesystemStatus struct {
 
 func (x *SharedFilesystemStatus) Reset() {
 	*x = SharedFilesystemStatus{}
-	mi := &file_controller_proto_msgTypes[255]
+	mi := &file_controller_proto_msgTypes[256]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17107,7 +17224,7 @@ func (x *SharedFilesystemStatus) String() string {
 func (*SharedFilesystemStatus) ProtoMessage() {}
 
 func (x *SharedFilesystemStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[255]
+	mi := &file_controller_proto_msgTypes[256]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17120,7 +17237,7 @@ func (x *SharedFilesystemStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SharedFilesystemStatus.ProtoReflect.Descriptor instead.
 func (*SharedFilesystemStatus) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{255}
+	return file_controller_proto_rawDescGZIP(), []int{256}
 }
 
 func (x *SharedFilesystemStatus) GetObservedGeneration() int64 {
@@ -17165,7 +17282,7 @@ type SharedFilesystem struct {
 
 func (x *SharedFilesystem) Reset() {
 	*x = SharedFilesystem{}
-	mi := &file_controller_proto_msgTypes[256]
+	mi := &file_controller_proto_msgTypes[257]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17177,7 +17294,7 @@ func (x *SharedFilesystem) String() string {
 func (*SharedFilesystem) ProtoMessage() {}
 
 func (x *SharedFilesystem) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[256]
+	mi := &file_controller_proto_msgTypes[257]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17190,7 +17307,7 @@ func (x *SharedFilesystem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SharedFilesystem.ProtoReflect.Descriptor instead.
 func (*SharedFilesystem) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{256}
+	return file_controller_proto_rawDescGZIP(), []int{257}
 }
 
 func (x *SharedFilesystem) GetName() string {
@@ -17244,7 +17361,7 @@ type CreateSharedFilesystemRequest struct {
 
 func (x *CreateSharedFilesystemRequest) Reset() {
 	*x = CreateSharedFilesystemRequest{}
-	mi := &file_controller_proto_msgTypes[257]
+	mi := &file_controller_proto_msgTypes[258]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17256,7 +17373,7 @@ func (x *CreateSharedFilesystemRequest) String() string {
 func (*CreateSharedFilesystemRequest) ProtoMessage() {}
 
 func (x *CreateSharedFilesystemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[257]
+	mi := &file_controller_proto_msgTypes[258]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17269,7 +17386,7 @@ func (x *CreateSharedFilesystemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateSharedFilesystemRequest.ProtoReflect.Descriptor instead.
 func (*CreateSharedFilesystemRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{257}
+	return file_controller_proto_rawDescGZIP(), []int{258}
 }
 
 func (x *CreateSharedFilesystemRequest) GetSharedFilesystem() *SharedFilesystem {
@@ -17291,7 +17408,7 @@ type CreateSharedFilesystemResponse struct {
 
 func (x *CreateSharedFilesystemResponse) Reset() {
 	*x = CreateSharedFilesystemResponse{}
-	mi := &file_controller_proto_msgTypes[258]
+	mi := &file_controller_proto_msgTypes[259]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17303,7 +17420,7 @@ func (x *CreateSharedFilesystemResponse) String() string {
 func (*CreateSharedFilesystemResponse) ProtoMessage() {}
 
 func (x *CreateSharedFilesystemResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[258]
+	mi := &file_controller_proto_msgTypes[259]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17316,7 +17433,7 @@ func (x *CreateSharedFilesystemResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateSharedFilesystemResponse.ProtoReflect.Descriptor instead.
 func (*CreateSharedFilesystemResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{258}
+	return file_controller_proto_rawDescGZIP(), []int{259}
 }
 
 func (x *CreateSharedFilesystemResponse) GetSuccess() bool {
@@ -17356,7 +17473,7 @@ type GetSharedFilesystemRequest struct {
 
 func (x *GetSharedFilesystemRequest) Reset() {
 	*x = GetSharedFilesystemRequest{}
-	mi := &file_controller_proto_msgTypes[259]
+	mi := &file_controller_proto_msgTypes[260]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17368,7 +17485,7 @@ func (x *GetSharedFilesystemRequest) String() string {
 func (*GetSharedFilesystemRequest) ProtoMessage() {}
 
 func (x *GetSharedFilesystemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[259]
+	mi := &file_controller_proto_msgTypes[260]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17381,7 +17498,7 @@ func (x *GetSharedFilesystemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSharedFilesystemRequest.ProtoReflect.Descriptor instead.
 func (*GetSharedFilesystemRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{259}
+	return file_controller_proto_rawDescGZIP(), []int{260}
 }
 
 func (x *GetSharedFilesystemRequest) GetName() string {
@@ -17400,7 +17517,7 @@ type GetSharedFilesystemResponse struct {
 
 func (x *GetSharedFilesystemResponse) Reset() {
 	*x = GetSharedFilesystemResponse{}
-	mi := &file_controller_proto_msgTypes[260]
+	mi := &file_controller_proto_msgTypes[261]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17412,7 +17529,7 @@ func (x *GetSharedFilesystemResponse) String() string {
 func (*GetSharedFilesystemResponse) ProtoMessage() {}
 
 func (x *GetSharedFilesystemResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[260]
+	mi := &file_controller_proto_msgTypes[261]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17425,7 +17542,7 @@ func (x *GetSharedFilesystemResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSharedFilesystemResponse.ProtoReflect.Descriptor instead.
 func (*GetSharedFilesystemResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{260}
+	return file_controller_proto_rawDescGZIP(), []int{261}
 }
 
 func (x *GetSharedFilesystemResponse) GetSharedFilesystem() *SharedFilesystem {
@@ -17443,7 +17560,7 @@ type ListSharedFilesystemsRequest struct {
 
 func (x *ListSharedFilesystemsRequest) Reset() {
 	*x = ListSharedFilesystemsRequest{}
-	mi := &file_controller_proto_msgTypes[261]
+	mi := &file_controller_proto_msgTypes[262]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17455,7 +17572,7 @@ func (x *ListSharedFilesystemsRequest) String() string {
 func (*ListSharedFilesystemsRequest) ProtoMessage() {}
 
 func (x *ListSharedFilesystemsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[261]
+	mi := &file_controller_proto_msgTypes[262]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17468,7 +17585,7 @@ func (x *ListSharedFilesystemsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSharedFilesystemsRequest.ProtoReflect.Descriptor instead.
 func (*ListSharedFilesystemsRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{261}
+	return file_controller_proto_rawDescGZIP(), []int{262}
 }
 
 type ListSharedFilesystemsResponse struct {
@@ -17480,7 +17597,7 @@ type ListSharedFilesystemsResponse struct {
 
 func (x *ListSharedFilesystemsResponse) Reset() {
 	*x = ListSharedFilesystemsResponse{}
-	mi := &file_controller_proto_msgTypes[262]
+	mi := &file_controller_proto_msgTypes[263]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17492,7 +17609,7 @@ func (x *ListSharedFilesystemsResponse) String() string {
 func (*ListSharedFilesystemsResponse) ProtoMessage() {}
 
 func (x *ListSharedFilesystemsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[262]
+	mi := &file_controller_proto_msgTypes[263]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17505,7 +17622,7 @@ func (x *ListSharedFilesystemsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSharedFilesystemsResponse.ProtoReflect.Descriptor instead.
 func (*ListSharedFilesystemsResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{262}
+	return file_controller_proto_rawDescGZIP(), []int{263}
 }
 
 func (x *ListSharedFilesystemsResponse) GetSharedFilesystems() []*SharedFilesystem {
@@ -17524,7 +17641,7 @@ type DeleteSharedFilesystemRequest struct {
 
 func (x *DeleteSharedFilesystemRequest) Reset() {
 	*x = DeleteSharedFilesystemRequest{}
-	mi := &file_controller_proto_msgTypes[263]
+	mi := &file_controller_proto_msgTypes[264]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17536,7 +17653,7 @@ func (x *DeleteSharedFilesystemRequest) String() string {
 func (*DeleteSharedFilesystemRequest) ProtoMessage() {}
 
 func (x *DeleteSharedFilesystemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[263]
+	mi := &file_controller_proto_msgTypes[264]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17549,7 +17666,7 @@ func (x *DeleteSharedFilesystemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSharedFilesystemRequest.ProtoReflect.Descriptor instead.
 func (*DeleteSharedFilesystemRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{263}
+	return file_controller_proto_rawDescGZIP(), []int{264}
 }
 
 func (x *DeleteSharedFilesystemRequest) GetName() string {
@@ -17568,7 +17685,7 @@ type DeleteSharedFilesystemResponse struct {
 
 func (x *DeleteSharedFilesystemResponse) Reset() {
 	*x = DeleteSharedFilesystemResponse{}
-	mi := &file_controller_proto_msgTypes[264]
+	mi := &file_controller_proto_msgTypes[265]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17580,7 +17697,7 @@ func (x *DeleteSharedFilesystemResponse) String() string {
 func (*DeleteSharedFilesystemResponse) ProtoMessage() {}
 
 func (x *DeleteSharedFilesystemResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[264]
+	mi := &file_controller_proto_msgTypes[265]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17593,7 +17710,7 @@ func (x *DeleteSharedFilesystemResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSharedFilesystemResponse.ProtoReflect.Descriptor instead.
 func (*DeleteSharedFilesystemResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{264}
+	return file_controller_proto_rawDescGZIP(), []int{265}
 }
 
 func (x *DeleteSharedFilesystemResponse) GetSuccess() bool {
@@ -17617,7 +17734,7 @@ type ObjectStoreSpec struct {
 
 func (x *ObjectStoreSpec) Reset() {
 	*x = ObjectStoreSpec{}
-	mi := &file_controller_proto_msgTypes[265]
+	mi := &file_controller_proto_msgTypes[266]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17629,7 +17746,7 @@ func (x *ObjectStoreSpec) String() string {
 func (*ObjectStoreSpec) ProtoMessage() {}
 
 func (x *ObjectStoreSpec) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[265]
+	mi := &file_controller_proto_msgTypes[266]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17642,7 +17759,7 @@ func (x *ObjectStoreSpec) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObjectStoreSpec.ProtoReflect.Descriptor instead.
 func (*ObjectStoreSpec) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{265}
+	return file_controller_proto_rawDescGZIP(), []int{266}
 }
 
 func (x *ObjectStoreSpec) GetCephCluster() string {
@@ -17692,7 +17809,7 @@ type ObjectStoreStatus struct {
 
 func (x *ObjectStoreStatus) Reset() {
 	*x = ObjectStoreStatus{}
-	mi := &file_controller_proto_msgTypes[266]
+	mi := &file_controller_proto_msgTypes[267]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17704,7 +17821,7 @@ func (x *ObjectStoreStatus) String() string {
 func (*ObjectStoreStatus) ProtoMessage() {}
 
 func (x *ObjectStoreStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[266]
+	mi := &file_controller_proto_msgTypes[267]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17717,7 +17834,7 @@ func (x *ObjectStoreStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObjectStoreStatus.ProtoReflect.Descriptor instead.
 func (*ObjectStoreStatus) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{266}
+	return file_controller_proto_rawDescGZIP(), []int{267}
 }
 
 func (x *ObjectStoreStatus) GetObservedGeneration() int64 {
@@ -17762,7 +17879,7 @@ type ObjectStore struct {
 
 func (x *ObjectStore) Reset() {
 	*x = ObjectStore{}
-	mi := &file_controller_proto_msgTypes[267]
+	mi := &file_controller_proto_msgTypes[268]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17774,7 +17891,7 @@ func (x *ObjectStore) String() string {
 func (*ObjectStore) ProtoMessage() {}
 
 func (x *ObjectStore) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[267]
+	mi := &file_controller_proto_msgTypes[268]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17787,7 +17904,7 @@ func (x *ObjectStore) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObjectStore.ProtoReflect.Descriptor instead.
 func (*ObjectStore) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{267}
+	return file_controller_proto_rawDescGZIP(), []int{268}
 }
 
 func (x *ObjectStore) GetName() string {
@@ -17841,7 +17958,7 @@ type CreateObjectStoreRequest struct {
 
 func (x *CreateObjectStoreRequest) Reset() {
 	*x = CreateObjectStoreRequest{}
-	mi := &file_controller_proto_msgTypes[268]
+	mi := &file_controller_proto_msgTypes[269]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17853,7 +17970,7 @@ func (x *CreateObjectStoreRequest) String() string {
 func (*CreateObjectStoreRequest) ProtoMessage() {}
 
 func (x *CreateObjectStoreRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[268]
+	mi := &file_controller_proto_msgTypes[269]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17866,7 +17983,7 @@ func (x *CreateObjectStoreRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateObjectStoreRequest.ProtoReflect.Descriptor instead.
 func (*CreateObjectStoreRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{268}
+	return file_controller_proto_rawDescGZIP(), []int{269}
 }
 
 func (x *CreateObjectStoreRequest) GetObjectStore() *ObjectStore {
@@ -17888,7 +18005,7 @@ type CreateObjectStoreResponse struct {
 
 func (x *CreateObjectStoreResponse) Reset() {
 	*x = CreateObjectStoreResponse{}
-	mi := &file_controller_proto_msgTypes[269]
+	mi := &file_controller_proto_msgTypes[270]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17900,7 +18017,7 @@ func (x *CreateObjectStoreResponse) String() string {
 func (*CreateObjectStoreResponse) ProtoMessage() {}
 
 func (x *CreateObjectStoreResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[269]
+	mi := &file_controller_proto_msgTypes[270]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17913,7 +18030,7 @@ func (x *CreateObjectStoreResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateObjectStoreResponse.ProtoReflect.Descriptor instead.
 func (*CreateObjectStoreResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{269}
+	return file_controller_proto_rawDescGZIP(), []int{270}
 }
 
 func (x *CreateObjectStoreResponse) GetSuccess() bool {
@@ -17953,7 +18070,7 @@ type GetObjectStoreRequest struct {
 
 func (x *GetObjectStoreRequest) Reset() {
 	*x = GetObjectStoreRequest{}
-	mi := &file_controller_proto_msgTypes[270]
+	mi := &file_controller_proto_msgTypes[271]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -17965,7 +18082,7 @@ func (x *GetObjectStoreRequest) String() string {
 func (*GetObjectStoreRequest) ProtoMessage() {}
 
 func (x *GetObjectStoreRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[270]
+	mi := &file_controller_proto_msgTypes[271]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -17978,7 +18095,7 @@ func (x *GetObjectStoreRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetObjectStoreRequest.ProtoReflect.Descriptor instead.
 func (*GetObjectStoreRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{270}
+	return file_controller_proto_rawDescGZIP(), []int{271}
 }
 
 func (x *GetObjectStoreRequest) GetName() string {
@@ -17997,7 +18114,7 @@ type GetObjectStoreResponse struct {
 
 func (x *GetObjectStoreResponse) Reset() {
 	*x = GetObjectStoreResponse{}
-	mi := &file_controller_proto_msgTypes[271]
+	mi := &file_controller_proto_msgTypes[272]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18009,7 +18126,7 @@ func (x *GetObjectStoreResponse) String() string {
 func (*GetObjectStoreResponse) ProtoMessage() {}
 
 func (x *GetObjectStoreResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[271]
+	mi := &file_controller_proto_msgTypes[272]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18022,7 +18139,7 @@ func (x *GetObjectStoreResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetObjectStoreResponse.ProtoReflect.Descriptor instead.
 func (*GetObjectStoreResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{271}
+	return file_controller_proto_rawDescGZIP(), []int{272}
 }
 
 func (x *GetObjectStoreResponse) GetObjectStore() *ObjectStore {
@@ -18040,7 +18157,7 @@ type ListObjectStoresRequest struct {
 
 func (x *ListObjectStoresRequest) Reset() {
 	*x = ListObjectStoresRequest{}
-	mi := &file_controller_proto_msgTypes[272]
+	mi := &file_controller_proto_msgTypes[273]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18052,7 +18169,7 @@ func (x *ListObjectStoresRequest) String() string {
 func (*ListObjectStoresRequest) ProtoMessage() {}
 
 func (x *ListObjectStoresRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[272]
+	mi := &file_controller_proto_msgTypes[273]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18065,7 +18182,7 @@ func (x *ListObjectStoresRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListObjectStoresRequest.ProtoReflect.Descriptor instead.
 func (*ListObjectStoresRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{272}
+	return file_controller_proto_rawDescGZIP(), []int{273}
 }
 
 type ListObjectStoresResponse struct {
@@ -18077,7 +18194,7 @@ type ListObjectStoresResponse struct {
 
 func (x *ListObjectStoresResponse) Reset() {
 	*x = ListObjectStoresResponse{}
-	mi := &file_controller_proto_msgTypes[273]
+	mi := &file_controller_proto_msgTypes[274]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18089,7 +18206,7 @@ func (x *ListObjectStoresResponse) String() string {
 func (*ListObjectStoresResponse) ProtoMessage() {}
 
 func (x *ListObjectStoresResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[273]
+	mi := &file_controller_proto_msgTypes[274]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18102,7 +18219,7 @@ func (x *ListObjectStoresResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListObjectStoresResponse.ProtoReflect.Descriptor instead.
 func (*ListObjectStoresResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{273}
+	return file_controller_proto_rawDescGZIP(), []int{274}
 }
 
 func (x *ListObjectStoresResponse) GetObjectStores() []*ObjectStore {
@@ -18121,7 +18238,7 @@ type DeleteObjectStoreRequest struct {
 
 func (x *DeleteObjectStoreRequest) Reset() {
 	*x = DeleteObjectStoreRequest{}
-	mi := &file_controller_proto_msgTypes[274]
+	mi := &file_controller_proto_msgTypes[275]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18133,7 +18250,7 @@ func (x *DeleteObjectStoreRequest) String() string {
 func (*DeleteObjectStoreRequest) ProtoMessage() {}
 
 func (x *DeleteObjectStoreRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[274]
+	mi := &file_controller_proto_msgTypes[275]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18146,7 +18263,7 @@ func (x *DeleteObjectStoreRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteObjectStoreRequest.ProtoReflect.Descriptor instead.
 func (*DeleteObjectStoreRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{274}
+	return file_controller_proto_rawDescGZIP(), []int{275}
 }
 
 func (x *DeleteObjectStoreRequest) GetName() string {
@@ -18165,7 +18282,7 @@ type DeleteObjectStoreResponse struct {
 
 func (x *DeleteObjectStoreResponse) Reset() {
 	*x = DeleteObjectStoreResponse{}
-	mi := &file_controller_proto_msgTypes[275]
+	mi := &file_controller_proto_msgTypes[276]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18177,7 +18294,7 @@ func (x *DeleteObjectStoreResponse) String() string {
 func (*DeleteObjectStoreResponse) ProtoMessage() {}
 
 func (x *DeleteObjectStoreResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[275]
+	mi := &file_controller_proto_msgTypes[276]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18190,7 +18307,7 @@ func (x *DeleteObjectStoreResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteObjectStoreResponse.ProtoReflect.Descriptor instead.
 func (*DeleteObjectStoreResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{275}
+	return file_controller_proto_rawDescGZIP(), []int{276}
 }
 
 func (x *DeleteObjectStoreResponse) GetSuccess() bool {
@@ -18209,7 +18326,7 @@ type ObjectUserSpec struct {
 
 func (x *ObjectUserSpec) Reset() {
 	*x = ObjectUserSpec{}
-	mi := &file_controller_proto_msgTypes[276]
+	mi := &file_controller_proto_msgTypes[277]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18221,7 +18338,7 @@ func (x *ObjectUserSpec) String() string {
 func (*ObjectUserSpec) ProtoMessage() {}
 
 func (x *ObjectUserSpec) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[276]
+	mi := &file_controller_proto_msgTypes[277]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18234,7 +18351,7 @@ func (x *ObjectUserSpec) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObjectUserSpec.ProtoReflect.Descriptor instead.
 func (*ObjectUserSpec) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{276}
+	return file_controller_proto_rawDescGZIP(), []int{277}
 }
 
 func (x *ObjectUserSpec) GetStore() string {
@@ -18256,7 +18373,7 @@ type ObjectUser struct {
 
 func (x *ObjectUser) Reset() {
 	*x = ObjectUser{}
-	mi := &file_controller_proto_msgTypes[277]
+	mi := &file_controller_proto_msgTypes[278]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18268,7 +18385,7 @@ func (x *ObjectUser) String() string {
 func (*ObjectUser) ProtoMessage() {}
 
 func (x *ObjectUser) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[277]
+	mi := &file_controller_proto_msgTypes[278]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18281,7 +18398,7 @@ func (x *ObjectUser) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObjectUser.ProtoReflect.Descriptor instead.
 func (*ObjectUser) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{277}
+	return file_controller_proto_rawDescGZIP(), []int{278}
 }
 
 func (x *ObjectUser) GetName() string {
@@ -18321,7 +18438,7 @@ type CreateObjectUserRequest struct {
 
 func (x *CreateObjectUserRequest) Reset() {
 	*x = CreateObjectUserRequest{}
-	mi := &file_controller_proto_msgTypes[278]
+	mi := &file_controller_proto_msgTypes[279]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18333,7 +18450,7 @@ func (x *CreateObjectUserRequest) String() string {
 func (*CreateObjectUserRequest) ProtoMessage() {}
 
 func (x *CreateObjectUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[278]
+	mi := &file_controller_proto_msgTypes[279]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18346,7 +18463,7 @@ func (x *CreateObjectUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateObjectUserRequest.ProtoReflect.Descriptor instead.
 func (*CreateObjectUserRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{278}
+	return file_controller_proto_rawDescGZIP(), []int{279}
 }
 
 func (x *CreateObjectUserRequest) GetObjectUser() *ObjectUser {
@@ -18368,7 +18485,7 @@ type CreateObjectUserResponse struct {
 
 func (x *CreateObjectUserResponse) Reset() {
 	*x = CreateObjectUserResponse{}
-	mi := &file_controller_proto_msgTypes[279]
+	mi := &file_controller_proto_msgTypes[280]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18380,7 +18497,7 @@ func (x *CreateObjectUserResponse) String() string {
 func (*CreateObjectUserResponse) ProtoMessage() {}
 
 func (x *CreateObjectUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[279]
+	mi := &file_controller_proto_msgTypes[280]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18393,7 +18510,7 @@ func (x *CreateObjectUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateObjectUserResponse.ProtoReflect.Descriptor instead.
 func (*CreateObjectUserResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{279}
+	return file_controller_proto_rawDescGZIP(), []int{280}
 }
 
 func (x *CreateObjectUserResponse) GetSuccess() bool {
@@ -18427,7 +18544,7 @@ type DeleteObjectUserRequest struct {
 
 func (x *DeleteObjectUserRequest) Reset() {
 	*x = DeleteObjectUserRequest{}
-	mi := &file_controller_proto_msgTypes[280]
+	mi := &file_controller_proto_msgTypes[281]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18439,7 +18556,7 @@ func (x *DeleteObjectUserRequest) String() string {
 func (*DeleteObjectUserRequest) ProtoMessage() {}
 
 func (x *DeleteObjectUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[280]
+	mi := &file_controller_proto_msgTypes[281]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18452,7 +18569,7 @@ func (x *DeleteObjectUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteObjectUserRequest.ProtoReflect.Descriptor instead.
 func (*DeleteObjectUserRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{280}
+	return file_controller_proto_rawDescGZIP(), []int{281}
 }
 
 func (x *DeleteObjectUserRequest) GetName() string {
@@ -18478,7 +18595,7 @@ type DeleteObjectUserResponse struct {
 
 func (x *DeleteObjectUserResponse) Reset() {
 	*x = DeleteObjectUserResponse{}
-	mi := &file_controller_proto_msgTypes[281]
+	mi := &file_controller_proto_msgTypes[282]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18490,7 +18607,7 @@ func (x *DeleteObjectUserResponse) String() string {
 func (*DeleteObjectUserResponse) ProtoMessage() {}
 
 func (x *DeleteObjectUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[281]
+	mi := &file_controller_proto_msgTypes[282]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18503,7 +18620,7 @@ func (x *DeleteObjectUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteObjectUserResponse.ProtoReflect.Descriptor instead.
 func (*DeleteObjectUserResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{281}
+	return file_controller_proto_rawDescGZIP(), []int{282}
 }
 
 func (x *DeleteObjectUserResponse) GetSuccess() bool {
@@ -18540,7 +18657,7 @@ type CertificateInfo struct {
 
 func (x *CertificateInfo) Reset() {
 	*x = CertificateInfo{}
-	mi := &file_controller_proto_msgTypes[282]
+	mi := &file_controller_proto_msgTypes[283]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18552,7 +18669,7 @@ func (x *CertificateInfo) String() string {
 func (*CertificateInfo) ProtoMessage() {}
 
 func (x *CertificateInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[282]
+	mi := &file_controller_proto_msgTypes[283]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18565,7 +18682,7 @@ func (x *CertificateInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CertificateInfo.ProtoReflect.Descriptor instead.
 func (*CertificateInfo) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{282}
+	return file_controller_proto_rawDescGZIP(), []int{283}
 }
 
 func (x *CertificateInfo) GetSerialHex() string {
@@ -18670,7 +18787,7 @@ type SignNodeCsrRequest struct {
 
 func (x *SignNodeCsrRequest) Reset() {
 	*x = SignNodeCsrRequest{}
-	mi := &file_controller_proto_msgTypes[283]
+	mi := &file_controller_proto_msgTypes[284]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18682,7 +18799,7 @@ func (x *SignNodeCsrRequest) String() string {
 func (*SignNodeCsrRequest) ProtoMessage() {}
 
 func (x *SignNodeCsrRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[283]
+	mi := &file_controller_proto_msgTypes[284]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18695,7 +18812,7 @@ func (x *SignNodeCsrRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SignNodeCsrRequest.ProtoReflect.Descriptor instead.
 func (*SignNodeCsrRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{283}
+	return file_controller_proto_rawDescGZIP(), []int{284}
 }
 
 func (x *SignNodeCsrRequest) GetNodeId() string {
@@ -18726,7 +18843,7 @@ type SignNodeCsrResponse struct {
 
 func (x *SignNodeCsrResponse) Reset() {
 	*x = SignNodeCsrResponse{}
-	mi := &file_controller_proto_msgTypes[284]
+	mi := &file_controller_proto_msgTypes[285]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18738,7 +18855,7 @@ func (x *SignNodeCsrResponse) String() string {
 func (*SignNodeCsrResponse) ProtoMessage() {}
 
 func (x *SignNodeCsrResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[284]
+	mi := &file_controller_proto_msgTypes[285]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18751,7 +18868,7 @@ func (x *SignNodeCsrResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SignNodeCsrResponse.ProtoReflect.Descriptor instead.
 func (*SignNodeCsrResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{284}
+	return file_controller_proto_rawDescGZIP(), []int{285}
 }
 
 func (x *SignNodeCsrResponse) GetSuccess() bool {
@@ -18800,7 +18917,7 @@ type RotateNodeCertsRequest struct {
 
 func (x *RotateNodeCertsRequest) Reset() {
 	*x = RotateNodeCertsRequest{}
-	mi := &file_controller_proto_msgTypes[285]
+	mi := &file_controller_proto_msgTypes[286]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18812,7 +18929,7 @@ func (x *RotateNodeCertsRequest) String() string {
 func (*RotateNodeCertsRequest) ProtoMessage() {}
 
 func (x *RotateNodeCertsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[285]
+	mi := &file_controller_proto_msgTypes[286]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18825,7 +18942,7 @@ func (x *RotateNodeCertsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RotateNodeCertsRequest.ProtoReflect.Descriptor instead.
 func (*RotateNodeCertsRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{285}
+	return file_controller_proto_rawDescGZIP(), []int{286}
 }
 
 func (x *RotateNodeCertsRequest) GetNodeId() string {
@@ -18854,7 +18971,7 @@ type NodeCertRotationResult struct {
 
 func (x *NodeCertRotationResult) Reset() {
 	*x = NodeCertRotationResult{}
-	mi := &file_controller_proto_msgTypes[286]
+	mi := &file_controller_proto_msgTypes[287]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18866,7 +18983,7 @@ func (x *NodeCertRotationResult) String() string {
 func (*NodeCertRotationResult) ProtoMessage() {}
 
 func (x *NodeCertRotationResult) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[286]
+	mi := &file_controller_proto_msgTypes[287]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18879,7 +18996,7 @@ func (x *NodeCertRotationResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeCertRotationResult.ProtoReflect.Descriptor instead.
 func (*NodeCertRotationResult) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{286}
+	return file_controller_proto_rawDescGZIP(), []int{287}
 }
 
 func (x *NodeCertRotationResult) GetNodeId() string {
@@ -18921,7 +19038,7 @@ type RotateNodeCertsResponse struct {
 
 func (x *RotateNodeCertsResponse) Reset() {
 	*x = RotateNodeCertsResponse{}
-	mi := &file_controller_proto_msgTypes[287]
+	mi := &file_controller_proto_msgTypes[288]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18933,7 +19050,7 @@ func (x *RotateNodeCertsResponse) String() string {
 func (*RotateNodeCertsResponse) ProtoMessage() {}
 
 func (x *RotateNodeCertsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[287]
+	mi := &file_controller_proto_msgTypes[288]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -18946,7 +19063,7 @@ func (x *RotateNodeCertsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RotateNodeCertsResponse.ProtoReflect.Descriptor instead.
 func (*RotateNodeCertsResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{287}
+	return file_controller_proto_rawDescGZIP(), []int{288}
 }
 
 func (x *RotateNodeCertsResponse) GetSuccess() bool {
@@ -18984,7 +19101,7 @@ type ListCertificatesRequest struct {
 
 func (x *ListCertificatesRequest) Reset() {
 	*x = ListCertificatesRequest{}
-	mi := &file_controller_proto_msgTypes[288]
+	mi := &file_controller_proto_msgTypes[289]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -18996,7 +19113,7 @@ func (x *ListCertificatesRequest) String() string {
 func (*ListCertificatesRequest) ProtoMessage() {}
 
 func (x *ListCertificatesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[288]
+	mi := &file_controller_proto_msgTypes[289]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -19009,7 +19126,7 @@ func (x *ListCertificatesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCertificatesRequest.ProtoReflect.Descriptor instead.
 func (*ListCertificatesRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{288}
+	return file_controller_proto_rawDescGZIP(), []int{289}
 }
 
 func (x *ListCertificatesRequest) GetStatus() CertificateStatus {
@@ -19042,7 +19159,7 @@ type ListCertificatesResponse struct {
 
 func (x *ListCertificatesResponse) Reset() {
 	*x = ListCertificatesResponse{}
-	mi := &file_controller_proto_msgTypes[289]
+	mi := &file_controller_proto_msgTypes[290]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -19054,7 +19171,7 @@ func (x *ListCertificatesResponse) String() string {
 func (*ListCertificatesResponse) ProtoMessage() {}
 
 func (x *ListCertificatesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[289]
+	mi := &file_controller_proto_msgTypes[290]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -19067,7 +19184,7 @@ func (x *ListCertificatesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCertificatesResponse.ProtoReflect.Descriptor instead.
 func (*ListCertificatesResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{289}
+	return file_controller_proto_rawDescGZIP(), []int{290}
 }
 
 func (x *ListCertificatesResponse) GetCertificates() []*CertificateInfo {
@@ -19091,7 +19208,7 @@ type RevokeCertificateRequest struct {
 
 func (x *RevokeCertificateRequest) Reset() {
 	*x = RevokeCertificateRequest{}
-	mi := &file_controller_proto_msgTypes[290]
+	mi := &file_controller_proto_msgTypes[291]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -19103,7 +19220,7 @@ func (x *RevokeCertificateRequest) String() string {
 func (*RevokeCertificateRequest) ProtoMessage() {}
 
 func (x *RevokeCertificateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[290]
+	mi := &file_controller_proto_msgTypes[291]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -19116,7 +19233,7 @@ func (x *RevokeCertificateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeCertificateRequest.ProtoReflect.Descriptor instead.
 func (*RevokeCertificateRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{290}
+	return file_controller_proto_rawDescGZIP(), []int{291}
 }
 
 func (x *RevokeCertificateRequest) GetSerialHex() string {
@@ -19160,7 +19277,7 @@ type RevokeCertificateResponse struct {
 
 func (x *RevokeCertificateResponse) Reset() {
 	*x = RevokeCertificateResponse{}
-	mi := &file_controller_proto_msgTypes[291]
+	mi := &file_controller_proto_msgTypes[292]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -19172,7 +19289,7 @@ func (x *RevokeCertificateResponse) String() string {
 func (*RevokeCertificateResponse) ProtoMessage() {}
 
 func (x *RevokeCertificateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[291]
+	mi := &file_controller_proto_msgTypes[292]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -19185,7 +19302,7 @@ func (x *RevokeCertificateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeCertificateResponse.ProtoReflect.Descriptor instead.
 func (*RevokeCertificateResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{291}
+	return file_controller_proto_rawDescGZIP(), []int{292}
 }
 
 func (x *RevokeCertificateResponse) GetSuccess() bool {
@@ -19224,7 +19341,7 @@ type GetCrlRequest struct {
 
 func (x *GetCrlRequest) Reset() {
 	*x = GetCrlRequest{}
-	mi := &file_controller_proto_msgTypes[292]
+	mi := &file_controller_proto_msgTypes[293]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -19236,7 +19353,7 @@ func (x *GetCrlRequest) String() string {
 func (*GetCrlRequest) ProtoMessage() {}
 
 func (x *GetCrlRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[292]
+	mi := &file_controller_proto_msgTypes[293]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -19249,7 +19366,7 @@ func (x *GetCrlRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCrlRequest.ProtoReflect.Descriptor instead.
 func (*GetCrlRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{292}
+	return file_controller_proto_rawDescGZIP(), []int{293}
 }
 
 type GetCrlResponse struct {
@@ -19268,7 +19385,7 @@ type GetCrlResponse struct {
 
 func (x *GetCrlResponse) Reset() {
 	*x = GetCrlResponse{}
-	mi := &file_controller_proto_msgTypes[293]
+	mi := &file_controller_proto_msgTypes[294]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -19280,7 +19397,7 @@ func (x *GetCrlResponse) String() string {
 func (*GetCrlResponse) ProtoMessage() {}
 
 func (x *GetCrlResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[293]
+	mi := &file_controller_proto_msgTypes[294]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -19293,7 +19410,7 @@ func (x *GetCrlResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCrlResponse.ProtoReflect.Descriptor instead.
 func (*GetCrlResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{293}
+	return file_controller_proto_rawDescGZIP(), []int{294}
 }
 
 func (x *GetCrlResponse) GetSuccess() bool {
@@ -19360,7 +19477,7 @@ type GetPkiStatusRequest struct {
 
 func (x *GetPkiStatusRequest) Reset() {
 	*x = GetPkiStatusRequest{}
-	mi := &file_controller_proto_msgTypes[294]
+	mi := &file_controller_proto_msgTypes[295]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -19372,7 +19489,7 @@ func (x *GetPkiStatusRequest) String() string {
 func (*GetPkiStatusRequest) ProtoMessage() {}
 
 func (x *GetPkiStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[294]
+	mi := &file_controller_proto_msgTypes[295]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -19385,7 +19502,7 @@ func (x *GetPkiStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPkiStatusRequest.ProtoReflect.Descriptor instead.
 func (*GetPkiStatusRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{294}
+	return file_controller_proto_rawDescGZIP(), []int{295}
 }
 
 type GetPkiStatusResponse struct {
@@ -19418,7 +19535,7 @@ type GetPkiStatusResponse struct {
 
 func (x *GetPkiStatusResponse) Reset() {
 	*x = GetPkiStatusResponse{}
-	mi := &file_controller_proto_msgTypes[295]
+	mi := &file_controller_proto_msgTypes[296]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -19430,7 +19547,7 @@ func (x *GetPkiStatusResponse) String() string {
 func (*GetPkiStatusResponse) ProtoMessage() {}
 
 func (x *GetPkiStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[295]
+	mi := &file_controller_proto_msgTypes[296]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -19443,7 +19560,7 @@ func (x *GetPkiStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPkiStatusResponse.ProtoReflect.Descriptor instead.
 func (*GetPkiStatusResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{295}
+	return file_controller_proto_rawDescGZIP(), []int{296}
 }
 
 func (x *GetPkiStatusResponse) GetActiveCount() int32 {
@@ -20659,7 +20776,14 @@ const file_controller_proto_rawDesc = "" +
 	"\x04type\x18\x01 \x01(\x0e2+.kcore.controller.ClusterUpdateStrategyTypeR\x04type\x12'\n" +
 	"\x0fmax_unavailable\x18\x02 \x01(\x05R\x0emaxUnavailable\x12\x1d\n" +
 	"\n" +
-	"batch_size\x18\x03 \x01(\x05R\tbatchSize\"\xc5\x04\n" +
+	"batch_size\x18\x03 \x01(\x05R\tbatchSize\"\x99\x01\n" +
+	"\vTestedOsPin\x12\x1f\n" +
+	"\vnixpkgs_rev\x18\x01 \x01(\tR\n" +
+	"nixpkgsRev\x12\x19\n" +
+	"\bceph_rev\x18\x02 \x01(\tR\acephRev\x12\x1f\n" +
+	"\vceph_sha256\x18\x03 \x01(\tR\n" +
+	"cephSha256\x12-\n" +
+	"\x12kubernetes_version\x18\x04 \x01(\tR\x11kubernetesVersion\"\xe9\x06\n" +
 	"\x11ClusterUpdateSpec\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12=\n" +
 	"\x06target\x18\x02 \x01(\v2%.kcore.controller.ClusterUpdateTargetR\x06target\x12C\n" +
@@ -20671,7 +20795,14 @@ const file_controller_proto_rawDesc = "" +
 	"\rreboot_policy\x18\b \x01(\tR\frebootPolicy\x12V\n" +
 	"\x0fapproval_policy\x18\t \x01(\x0e2-.kcore.controller.ClusterUpdateApprovalPolicyR\x0eapprovalPolicy\x12-\n" +
 	"\x12automatic_rollback\x18\n" +
-	" \x01(\bR\x11automaticRollback\"\xf2\x02\n" +
+	" \x01(\bR\x11automaticRollback\x12\x1f\n" +
+	"\vupdate_kind\x18\v \x01(\tR\n" +
+	"updateKind\x12)\n" +
+	"\x10requires_nixpkgs\x18\f \x01(\bR\x0frequiresNixpkgs\x12C\n" +
+	"\x0etested_os_pins\x18\r \x03(\v2\x1d.kcore.controller.TestedOsPinR\ftestedOsPins\x12%\n" +
+	"\x0eschema_version\x18\x0e \x01(\x05R\rschemaVersion\x126\n" +
+	"\x17previous_schema_version\x18\x0f \x01(\x05R\x15previousSchemaVersion\x122\n" +
+	"\x15min_compatible_reader\x18\x10 \x01(\x05R\x13minCompatibleReader\"\xf2\x02\n" +
 	"\rClusterUpdate\x127\n" +
 	"\x04spec\x18\x01 \x01(\v2#.kcore.controller.ClusterUpdateSpecR\x04spec\x12\x1e\n" +
 	"\n" +
@@ -21262,7 +21393,7 @@ func file_controller_proto_rawDescGZIP() []byte {
 }
 
 var file_controller_proto_enumTypes = make([]protoimpl.EnumInfo, 21)
-var file_controller_proto_msgTypes = make([]protoimpl.MessageInfo, 297)
+var file_controller_proto_msgTypes = make([]protoimpl.MessageInfo, 298)
 var file_controller_proto_goTypes = []any{
 	(StorageBackendType)(0),                     // 0: kcore.controller.StorageBackendType
 	(WorkloadKind)(0),                           // 1: kcore.controller.WorkloadKind
@@ -21508,81 +21639,82 @@ var file_controller_proto_goTypes = []any{
 	(*ClusterUpdateTarget)(nil),                 // 241: kcore.controller.ClusterUpdateTarget
 	(*ClusterUpdateSelector)(nil),               // 242: kcore.controller.ClusterUpdateSelector
 	(*ClusterUpdateStrategy)(nil),               // 243: kcore.controller.ClusterUpdateStrategy
-	(*ClusterUpdateSpec)(nil),                   // 244: kcore.controller.ClusterUpdateSpec
-	(*ClusterUpdate)(nil),                       // 245: kcore.controller.ClusterUpdate
-	(*NodeUpdateStatus)(nil),                    // 246: kcore.controller.NodeUpdateStatus
-	(*CreateClusterUpdateRequest)(nil),          // 247: kcore.controller.CreateClusterUpdateRequest
-	(*CreateClusterUpdateResponse)(nil),         // 248: kcore.controller.CreateClusterUpdateResponse
-	(*GetClusterUpdateRequest)(nil),             // 249: kcore.controller.GetClusterUpdateRequest
-	(*GetClusterUpdateResponse)(nil),            // 250: kcore.controller.GetClusterUpdateResponse
-	(*ListClusterUpdatesRequest)(nil),           // 251: kcore.controller.ListClusterUpdatesRequest
-	(*ListClusterUpdatesResponse)(nil),          // 252: kcore.controller.ListClusterUpdatesResponse
-	(*PlanClusterUpdateRequest)(nil),            // 253: kcore.controller.PlanClusterUpdateRequest
-	(*PlanIssue)(nil),                           // 254: kcore.controller.PlanIssue
-	(*PlanClusterUpdateResponse)(nil),           // 255: kcore.controller.PlanClusterUpdateResponse
-	(*ApproveClusterUpdateRequest)(nil),         // 256: kcore.controller.ApproveClusterUpdateRequest
-	(*ApproveClusterUpdateResponse)(nil),        // 257: kcore.controller.ApproveClusterUpdateResponse
-	(*CancelClusterUpdateRequest)(nil),          // 258: kcore.controller.CancelClusterUpdateRequest
-	(*CancelClusterUpdateResponse)(nil),         // 259: kcore.controller.CancelClusterUpdateResponse
-	(*RollbackClusterUpdateRequest)(nil),        // 260: kcore.controller.RollbackClusterUpdateRequest
-	(*RollbackClusterUpdateResponse)(nil),       // 261: kcore.controller.RollbackClusterUpdateResponse
-	(*CephClusterNodeSpec)(nil),                 // 262: kcore.controller.CephClusterNodeSpec
-	(*CephClusterSpec)(nil),                     // 263: kcore.controller.CephClusterSpec
-	(*CephClusterStatus)(nil),                   // 264: kcore.controller.CephClusterStatus
-	(*CephCluster)(nil),                         // 265: kcore.controller.CephCluster
-	(*CreateCephClusterRequest)(nil),            // 266: kcore.controller.CreateCephClusterRequest
-	(*CreateCephClusterResponse)(nil),           // 267: kcore.controller.CreateCephClusterResponse
-	(*GetCephClusterRequest)(nil),               // 268: kcore.controller.GetCephClusterRequest
-	(*GetCephClusterResponse)(nil),              // 269: kcore.controller.GetCephClusterResponse
-	(*ListCephClustersRequest)(nil),             // 270: kcore.controller.ListCephClustersRequest
-	(*ListCephClustersResponse)(nil),            // 271: kcore.controller.ListCephClustersResponse
-	(*DeleteCephClusterRequest)(nil),            // 272: kcore.controller.DeleteCephClusterRequest
-	(*DeleteCephClusterResponse)(nil),           // 273: kcore.controller.DeleteCephClusterResponse
-	(*SharedFilesystemClientSpec)(nil),          // 274: kcore.controller.SharedFilesystemClientSpec
-	(*SharedFilesystemSpec)(nil),                // 275: kcore.controller.SharedFilesystemSpec
-	(*SharedFilesystemStatus)(nil),              // 276: kcore.controller.SharedFilesystemStatus
-	(*SharedFilesystem)(nil),                    // 277: kcore.controller.SharedFilesystem
-	(*CreateSharedFilesystemRequest)(nil),       // 278: kcore.controller.CreateSharedFilesystemRequest
-	(*CreateSharedFilesystemResponse)(nil),      // 279: kcore.controller.CreateSharedFilesystemResponse
-	(*GetSharedFilesystemRequest)(nil),          // 280: kcore.controller.GetSharedFilesystemRequest
-	(*GetSharedFilesystemResponse)(nil),         // 281: kcore.controller.GetSharedFilesystemResponse
-	(*ListSharedFilesystemsRequest)(nil),        // 282: kcore.controller.ListSharedFilesystemsRequest
-	(*ListSharedFilesystemsResponse)(nil),       // 283: kcore.controller.ListSharedFilesystemsResponse
-	(*DeleteSharedFilesystemRequest)(nil),       // 284: kcore.controller.DeleteSharedFilesystemRequest
-	(*DeleteSharedFilesystemResponse)(nil),      // 285: kcore.controller.DeleteSharedFilesystemResponse
-	(*ObjectStoreSpec)(nil),                     // 286: kcore.controller.ObjectStoreSpec
-	(*ObjectStoreStatus)(nil),                   // 287: kcore.controller.ObjectStoreStatus
-	(*ObjectStore)(nil),                         // 288: kcore.controller.ObjectStore
-	(*CreateObjectStoreRequest)(nil),            // 289: kcore.controller.CreateObjectStoreRequest
-	(*CreateObjectStoreResponse)(nil),           // 290: kcore.controller.CreateObjectStoreResponse
-	(*GetObjectStoreRequest)(nil),               // 291: kcore.controller.GetObjectStoreRequest
-	(*GetObjectStoreResponse)(nil),              // 292: kcore.controller.GetObjectStoreResponse
-	(*ListObjectStoresRequest)(nil),             // 293: kcore.controller.ListObjectStoresRequest
-	(*ListObjectStoresResponse)(nil),            // 294: kcore.controller.ListObjectStoresResponse
-	(*DeleteObjectStoreRequest)(nil),            // 295: kcore.controller.DeleteObjectStoreRequest
-	(*DeleteObjectStoreResponse)(nil),           // 296: kcore.controller.DeleteObjectStoreResponse
-	(*ObjectUserSpec)(nil),                      // 297: kcore.controller.ObjectUserSpec
-	(*ObjectUser)(nil),                          // 298: kcore.controller.ObjectUser
-	(*CreateObjectUserRequest)(nil),             // 299: kcore.controller.CreateObjectUserRequest
-	(*CreateObjectUserResponse)(nil),            // 300: kcore.controller.CreateObjectUserResponse
-	(*DeleteObjectUserRequest)(nil),             // 301: kcore.controller.DeleteObjectUserRequest
-	(*DeleteObjectUserResponse)(nil),            // 302: kcore.controller.DeleteObjectUserResponse
-	(*CertificateInfo)(nil),                     // 303: kcore.controller.CertificateInfo
-	(*SignNodeCsrRequest)(nil),                  // 304: kcore.controller.SignNodeCsrRequest
-	(*SignNodeCsrResponse)(nil),                 // 305: kcore.controller.SignNodeCsrResponse
-	(*RotateNodeCertsRequest)(nil),              // 306: kcore.controller.RotateNodeCertsRequest
-	(*NodeCertRotationResult)(nil),              // 307: kcore.controller.NodeCertRotationResult
-	(*RotateNodeCertsResponse)(nil),             // 308: kcore.controller.RotateNodeCertsResponse
-	(*ListCertificatesRequest)(nil),             // 309: kcore.controller.ListCertificatesRequest
-	(*ListCertificatesResponse)(nil),            // 310: kcore.controller.ListCertificatesResponse
-	(*RevokeCertificateRequest)(nil),            // 311: kcore.controller.RevokeCertificateRequest
-	(*RevokeCertificateResponse)(nil),           // 312: kcore.controller.RevokeCertificateResponse
-	(*GetCrlRequest)(nil),                       // 313: kcore.controller.GetCrlRequest
-	(*GetCrlResponse)(nil),                      // 314: kcore.controller.GetCrlResponse
-	(*GetPkiStatusRequest)(nil),                 // 315: kcore.controller.GetPkiStatusRequest
-	(*GetPkiStatusResponse)(nil),                // 316: kcore.controller.GetPkiStatusResponse
-	nil,                                         // 317: kcore.controller.ContainerSpec.EnvEntry
-	(*timestamppb.Timestamp)(nil),               // 318: google.protobuf.Timestamp
+	(*TestedOsPin)(nil),                         // 244: kcore.controller.TestedOsPin
+	(*ClusterUpdateSpec)(nil),                   // 245: kcore.controller.ClusterUpdateSpec
+	(*ClusterUpdate)(nil),                       // 246: kcore.controller.ClusterUpdate
+	(*NodeUpdateStatus)(nil),                    // 247: kcore.controller.NodeUpdateStatus
+	(*CreateClusterUpdateRequest)(nil),          // 248: kcore.controller.CreateClusterUpdateRequest
+	(*CreateClusterUpdateResponse)(nil),         // 249: kcore.controller.CreateClusterUpdateResponse
+	(*GetClusterUpdateRequest)(nil),             // 250: kcore.controller.GetClusterUpdateRequest
+	(*GetClusterUpdateResponse)(nil),            // 251: kcore.controller.GetClusterUpdateResponse
+	(*ListClusterUpdatesRequest)(nil),           // 252: kcore.controller.ListClusterUpdatesRequest
+	(*ListClusterUpdatesResponse)(nil),          // 253: kcore.controller.ListClusterUpdatesResponse
+	(*PlanClusterUpdateRequest)(nil),            // 254: kcore.controller.PlanClusterUpdateRequest
+	(*PlanIssue)(nil),                           // 255: kcore.controller.PlanIssue
+	(*PlanClusterUpdateResponse)(nil),           // 256: kcore.controller.PlanClusterUpdateResponse
+	(*ApproveClusterUpdateRequest)(nil),         // 257: kcore.controller.ApproveClusterUpdateRequest
+	(*ApproveClusterUpdateResponse)(nil),        // 258: kcore.controller.ApproveClusterUpdateResponse
+	(*CancelClusterUpdateRequest)(nil),          // 259: kcore.controller.CancelClusterUpdateRequest
+	(*CancelClusterUpdateResponse)(nil),         // 260: kcore.controller.CancelClusterUpdateResponse
+	(*RollbackClusterUpdateRequest)(nil),        // 261: kcore.controller.RollbackClusterUpdateRequest
+	(*RollbackClusterUpdateResponse)(nil),       // 262: kcore.controller.RollbackClusterUpdateResponse
+	(*CephClusterNodeSpec)(nil),                 // 263: kcore.controller.CephClusterNodeSpec
+	(*CephClusterSpec)(nil),                     // 264: kcore.controller.CephClusterSpec
+	(*CephClusterStatus)(nil),                   // 265: kcore.controller.CephClusterStatus
+	(*CephCluster)(nil),                         // 266: kcore.controller.CephCluster
+	(*CreateCephClusterRequest)(nil),            // 267: kcore.controller.CreateCephClusterRequest
+	(*CreateCephClusterResponse)(nil),           // 268: kcore.controller.CreateCephClusterResponse
+	(*GetCephClusterRequest)(nil),               // 269: kcore.controller.GetCephClusterRequest
+	(*GetCephClusterResponse)(nil),              // 270: kcore.controller.GetCephClusterResponse
+	(*ListCephClustersRequest)(nil),             // 271: kcore.controller.ListCephClustersRequest
+	(*ListCephClustersResponse)(nil),            // 272: kcore.controller.ListCephClustersResponse
+	(*DeleteCephClusterRequest)(nil),            // 273: kcore.controller.DeleteCephClusterRequest
+	(*DeleteCephClusterResponse)(nil),           // 274: kcore.controller.DeleteCephClusterResponse
+	(*SharedFilesystemClientSpec)(nil),          // 275: kcore.controller.SharedFilesystemClientSpec
+	(*SharedFilesystemSpec)(nil),                // 276: kcore.controller.SharedFilesystemSpec
+	(*SharedFilesystemStatus)(nil),              // 277: kcore.controller.SharedFilesystemStatus
+	(*SharedFilesystem)(nil),                    // 278: kcore.controller.SharedFilesystem
+	(*CreateSharedFilesystemRequest)(nil),       // 279: kcore.controller.CreateSharedFilesystemRequest
+	(*CreateSharedFilesystemResponse)(nil),      // 280: kcore.controller.CreateSharedFilesystemResponse
+	(*GetSharedFilesystemRequest)(nil),          // 281: kcore.controller.GetSharedFilesystemRequest
+	(*GetSharedFilesystemResponse)(nil),         // 282: kcore.controller.GetSharedFilesystemResponse
+	(*ListSharedFilesystemsRequest)(nil),        // 283: kcore.controller.ListSharedFilesystemsRequest
+	(*ListSharedFilesystemsResponse)(nil),       // 284: kcore.controller.ListSharedFilesystemsResponse
+	(*DeleteSharedFilesystemRequest)(nil),       // 285: kcore.controller.DeleteSharedFilesystemRequest
+	(*DeleteSharedFilesystemResponse)(nil),      // 286: kcore.controller.DeleteSharedFilesystemResponse
+	(*ObjectStoreSpec)(nil),                     // 287: kcore.controller.ObjectStoreSpec
+	(*ObjectStoreStatus)(nil),                   // 288: kcore.controller.ObjectStoreStatus
+	(*ObjectStore)(nil),                         // 289: kcore.controller.ObjectStore
+	(*CreateObjectStoreRequest)(nil),            // 290: kcore.controller.CreateObjectStoreRequest
+	(*CreateObjectStoreResponse)(nil),           // 291: kcore.controller.CreateObjectStoreResponse
+	(*GetObjectStoreRequest)(nil),               // 292: kcore.controller.GetObjectStoreRequest
+	(*GetObjectStoreResponse)(nil),              // 293: kcore.controller.GetObjectStoreResponse
+	(*ListObjectStoresRequest)(nil),             // 294: kcore.controller.ListObjectStoresRequest
+	(*ListObjectStoresResponse)(nil),            // 295: kcore.controller.ListObjectStoresResponse
+	(*DeleteObjectStoreRequest)(nil),            // 296: kcore.controller.DeleteObjectStoreRequest
+	(*DeleteObjectStoreResponse)(nil),           // 297: kcore.controller.DeleteObjectStoreResponse
+	(*ObjectUserSpec)(nil),                      // 298: kcore.controller.ObjectUserSpec
+	(*ObjectUser)(nil),                          // 299: kcore.controller.ObjectUser
+	(*CreateObjectUserRequest)(nil),             // 300: kcore.controller.CreateObjectUserRequest
+	(*CreateObjectUserResponse)(nil),            // 301: kcore.controller.CreateObjectUserResponse
+	(*DeleteObjectUserRequest)(nil),             // 302: kcore.controller.DeleteObjectUserRequest
+	(*DeleteObjectUserResponse)(nil),            // 303: kcore.controller.DeleteObjectUserResponse
+	(*CertificateInfo)(nil),                     // 304: kcore.controller.CertificateInfo
+	(*SignNodeCsrRequest)(nil),                  // 305: kcore.controller.SignNodeCsrRequest
+	(*SignNodeCsrResponse)(nil),                 // 306: kcore.controller.SignNodeCsrResponse
+	(*RotateNodeCertsRequest)(nil),              // 307: kcore.controller.RotateNodeCertsRequest
+	(*NodeCertRotationResult)(nil),              // 308: kcore.controller.NodeCertRotationResult
+	(*RotateNodeCertsResponse)(nil),             // 309: kcore.controller.RotateNodeCertsResponse
+	(*ListCertificatesRequest)(nil),             // 310: kcore.controller.ListCertificatesRequest
+	(*ListCertificatesResponse)(nil),            // 311: kcore.controller.ListCertificatesResponse
+	(*RevokeCertificateRequest)(nil),            // 312: kcore.controller.RevokeCertificateRequest
+	(*RevokeCertificateResponse)(nil),           // 313: kcore.controller.RevokeCertificateResponse
+	(*GetCrlRequest)(nil),                       // 314: kcore.controller.GetCrlRequest
+	(*GetCrlResponse)(nil),                      // 315: kcore.controller.GetCrlResponse
+	(*GetPkiStatusRequest)(nil),                 // 316: kcore.controller.GetPkiStatusRequest
+	(*GetPkiStatusResponse)(nil),                // 317: kcore.controller.GetPkiStatusResponse
+	nil,                                         // 318: kcore.controller.ContainerSpec.EnvEntry
+	(*timestamppb.Timestamp)(nil),               // 319: google.protobuf.Timestamp
 }
 var file_controller_proto_depIdxs = []int32{
 	29,  // 0: kcore.controller.RegisterNodeRequest.capacity:type_name -> kcore.controller.NodeCapacity
@@ -21590,10 +21722,10 @@ var file_controller_proto_depIdxs = []int32{
 	30,  // 2: kcore.controller.HeartbeatRequest.usage:type_name -> kcore.controller.NodeUsage
 	79,  // 3: kcore.controller.SyncVmStateRequest.vms:type_name -> kcore.controller.VmInfo
 	33,  // 4: kcore.controller.SyncWorkloadStateRequest.workloads:type_name -> kcore.controller.WorkloadRuntimeInfo
-	317, // 5: kcore.controller.ContainerSpec.env:type_name -> kcore.controller.ContainerSpec.EnvEntry
+	318, // 5: kcore.controller.ContainerSpec.env:type_name -> kcore.controller.ContainerSpec.EnvEntry
 	2,   // 6: kcore.controller.ContainerSpec.desired_state:type_name -> kcore.controller.WorkloadDesiredState
 	3,   // 7: kcore.controller.ContainerInfo.state:type_name -> kcore.controller.ContainerState
-	318, // 8: kcore.controller.ContainerInfo.created_at:type_name -> google.protobuf.Timestamp
+	319, // 8: kcore.controller.ContainerInfo.created_at:type_name -> google.protobuf.Timestamp
 	1,   // 9: kcore.controller.WorkloadRuntimeInfo.kind:type_name -> kcore.controller.WorkloadKind
 	7,   // 10: kcore.controller.WorkloadRuntimeInfo.vm_state:type_name -> kcore.controller.VmState
 	3,   // 11: kcore.controller.WorkloadRuntimeInfo.container_state:type_name -> kcore.controller.ContainerState
@@ -21632,7 +21764,7 @@ var file_controller_proto_depIdxs = []int32{
 	4,   // 44: kcore.controller.CreateNetworkResponse.action:type_name -> kcore.controller.ApplyAction
 	63,  // 45: kcore.controller.ListNetworksResponse.networks:type_name -> kcore.controller.NetworkInfo
 	64,  // 46: kcore.controller.SecurityGroup.rules:type_name -> kcore.controller.SecurityGroupRule
-	318, // 47: kcore.controller.SecurityGroup.created_at:type_name -> google.protobuf.Timestamp
+	319, // 47: kcore.controller.SecurityGroup.created_at:type_name -> google.protobuf.Timestamp
 	6,   // 48: kcore.controller.SecurityGroupAttachment.target_kind:type_name -> kcore.controller.SecurityGroupTargetKind
 	65,  // 49: kcore.controller.CreateSecurityGroupRequest.security_group:type_name -> kcore.controller.SecurityGroup
 	65,  // 50: kcore.controller.CreateSecurityGroupResponse.security_group:type_name -> kcore.controller.SecurityGroup
@@ -21643,19 +21775,19 @@ var file_controller_proto_depIdxs = []int32{
 	6,   // 55: kcore.controller.AttachSecurityGroupRequest.target_kind:type_name -> kcore.controller.SecurityGroupTargetKind
 	6,   // 56: kcore.controller.DetachSecurityGroupRequest.target_kind:type_name -> kcore.controller.SecurityGroupTargetKind
 	7,   // 57: kcore.controller.VmInfo.state:type_name -> kcore.controller.VmState
-	318, // 58: kcore.controller.VmInfo.created_at:type_name -> google.protobuf.Timestamp
+	319, // 58: kcore.controller.VmInfo.created_at:type_name -> google.protobuf.Timestamp
 	82,  // 59: kcore.controller.ListNodesResponse.nodes:type_name -> kcore.controller.NodeInfo
 	29,  // 60: kcore.controller.NodeInfo.capacity:type_name -> kcore.controller.NodeCapacity
 	30,  // 61: kcore.controller.NodeInfo.usage:type_name -> kcore.controller.NodeUsage
-	318, // 62: kcore.controller.NodeInfo.last_heartbeat:type_name -> google.protobuf.Timestamp
+	319, // 62: kcore.controller.NodeInfo.last_heartbeat:type_name -> google.protobuf.Timestamp
 	0,   // 63: kcore.controller.NodeInfo.storage_backend:type_name -> kcore.controller.StorageBackendType
 	82,  // 64: kcore.controller.GetNodeResponse.node:type_name -> kcore.controller.NodeInfo
 	86,  // 65: kcore.controller.VmSpec.disks:type_name -> kcore.controller.Disk
 	87,  // 66: kcore.controller.VmSpec.nics:type_name -> kcore.controller.Nic
 	5,   // 67: kcore.controller.VmSpec.desired_state:type_name -> kcore.controller.VmDesiredState
 	7,   // 68: kcore.controller.VmStatus.state:type_name -> kcore.controller.VmState
-	318, // 69: kcore.controller.VmStatus.created_at:type_name -> google.protobuf.Timestamp
-	318, // 70: kcore.controller.VmStatus.updated_at:type_name -> google.protobuf.Timestamp
+	319, // 69: kcore.controller.VmStatus.created_at:type_name -> google.protobuf.Timestamp
+	319, // 70: kcore.controller.VmStatus.updated_at:type_name -> google.protobuf.Timestamp
 	92,  // 71: kcore.controller.GetReplicationEventsResponse.events:type_name -> kcore.controller.ReplicationEvent
 	97,  // 72: kcore.controller.GetReplicationStatusResponse.outgoing:type_name -> kcore.controller.ReplicationOutgoingStatus
 	98,  // 73: kcore.controller.GetReplicationStatusResponse.incoming:type_name -> kcore.controller.ReplicationIncomingStatus
@@ -21663,13 +21795,13 @@ var file_controller_proto_depIdxs = []int32{
 	4,   // 75: kcore.controller.CreateSshKeyResponse.action:type_name -> kcore.controller.ApplyAction
 	113, // 76: kcore.controller.ListSshKeysResponse.keys:type_name -> kcore.controller.SshKeyInfo
 	113, // 77: kcore.controller.GetSshKeyResponse.key:type_name -> kcore.controller.SshKeyInfo
-	318, // 78: kcore.controller.SshKeyInfo.created_at:type_name -> google.protobuf.Timestamp
+	319, // 78: kcore.controller.SshKeyInfo.created_at:type_name -> google.protobuf.Timestamp
 	119, // 79: kcore.controller.NodeLiveMigrateReceiveStatus.state:type_name -> kcore.controller.LiveMigrateReceiveState
 	120, // 80: kcore.controller.GetLiveMigrateReceiveStatusResponse.nodes:type_name -> kcore.controller.NodeLiveMigrateReceiveStatus
 	119, // 81: kcore.controller.ResetLiveMigrateReceiveResponse.observed:type_name -> kcore.controller.LiveMigrateReceiveState
 	150, // 82: kcore.controller.ListAuditEventsResponse.events:type_name -> kcore.controller.AuditEvent
-	318, // 83: kcore.controller.Operator.created_at:type_name -> google.protobuf.Timestamp
-	318, // 84: kcore.controller.Operator.updated_at:type_name -> google.protobuf.Timestamp
+	319, // 83: kcore.controller.Operator.created_at:type_name -> google.protobuf.Timestamp
+	319, // 84: kcore.controller.Operator.updated_at:type_name -> google.protobuf.Timestamp
 	8,   // 85: kcore.controller.Operator.roles:type_name -> kcore.controller.OperatorRoleKind
 	157, // 86: kcore.controller.CreateOperatorResponse.operator:type_name -> kcore.controller.Operator
 	157, // 87: kcore.controller.ListOperatorsResponse.operators:type_name -> kcore.controller.Operator
@@ -21694,13 +21826,13 @@ var file_controller_proto_depIdxs = []int32{
 	186, // 106: kcore.controller.GetVolumeResponse.volume:type_name -> kcore.controller.VolumeInfo
 	186, // 107: kcore.controller.AttachVolumeResponse.volume:type_name -> kcore.controller.VolumeInfo
 	186, // 108: kcore.controller.DetachVolumeResponse.volume:type_name -> kcore.controller.VolumeInfo
-	318, // 109: kcore.controller.VmOperation.started_at:type_name -> google.protobuf.Timestamp
-	318, // 110: kcore.controller.VmOperation.updated_at:type_name -> google.protobuf.Timestamp
-	318, // 111: kcore.controller.VmOperation.finished_at:type_name -> google.protobuf.Timestamp
+	319, // 109: kcore.controller.VmOperation.started_at:type_name -> google.protobuf.Timestamp
+	319, // 110: kcore.controller.VmOperation.updated_at:type_name -> google.protobuf.Timestamp
+	319, // 111: kcore.controller.VmOperation.finished_at:type_name -> google.protobuf.Timestamp
 	197, // 112: kcore.controller.ListVmOperationsResponse.operations:type_name -> kcore.controller.VmOperation
 	197, // 113: kcore.controller.GetVmOperationResponse.operation:type_name -> kcore.controller.VmOperation
 	197, // 114: kcore.controller.CancelVmOperationResponse.operation:type_name -> kcore.controller.VmOperation
-	318, // 115: kcore.controller.VolumeSnapshotInfo.created_at:type_name -> google.protobuf.Timestamp
+	319, // 115: kcore.controller.VolumeSnapshotInfo.created_at:type_name -> google.protobuf.Timestamp
 	204, // 116: kcore.controller.CreateVolumeSnapshotResponse.snapshot:type_name -> kcore.controller.VolumeSnapshotInfo
 	204, // 117: kcore.controller.ListVolumeSnapshotsResponse.snapshots:type_name -> kcore.controller.VolumeSnapshotInfo
 	215, // 118: kcore.controller.CreateSnapshotPolicyRequest.policy:type_name -> kcore.controller.SnapshotPolicy
@@ -21709,10 +21841,10 @@ var file_controller_proto_depIdxs = []int32{
 	215, // 121: kcore.controller.ListSnapshotPoliciesResponse.policies:type_name -> kcore.controller.SnapshotPolicy
 	186, // 122: kcore.controller.ResizeVolumeResponse.volume:type_name -> kcore.controller.VolumeInfo
 	186, // 123: kcore.controller.EncryptVolumeResponse.volume:type_name -> kcore.controller.VolumeInfo
-	318, // 124: kcore.controller.DiskLayout.created_at:type_name -> google.protobuf.Timestamp
-	318, // 125: kcore.controller.DiskLayout.updated_at:type_name -> google.protobuf.Timestamp
+	319, // 124: kcore.controller.DiskLayout.created_at:type_name -> google.protobuf.Timestamp
+	319, // 125: kcore.controller.DiskLayout.updated_at:type_name -> google.protobuf.Timestamp
 	9,   // 126: kcore.controller.DiskLayoutStatus.phase:type_name -> kcore.controller.DiskLayoutPhase
-	318, // 127: kcore.controller.DiskLayoutStatus.last_transition_at:type_name -> google.protobuf.Timestamp
+	319, // 127: kcore.controller.DiskLayoutStatus.last_transition_at:type_name -> google.protobuf.Timestamp
 	228, // 128: kcore.controller.CreateDiskLayoutRequest.disk_layout:type_name -> kcore.controller.DiskLayout
 	228, // 129: kcore.controller.CreateDiskLayoutResponse.disk_layout:type_name -> kcore.controller.DiskLayout
 	4,   // 130: kcore.controller.CreateDiskLayoutResponse.action:type_name -> kcore.controller.ApplyAction
@@ -21728,322 +21860,323 @@ var file_controller_proto_depIdxs = []int32{
 	243, // 140: kcore.controller.ClusterUpdateSpec.strategy:type_name -> kcore.controller.ClusterUpdateStrategy
 	12,  // 141: kcore.controller.ClusterUpdateSpec.activation_mode:type_name -> kcore.controller.ClusterUpdateActivationMode
 	11,  // 142: kcore.controller.ClusterUpdateSpec.approval_policy:type_name -> kcore.controller.ClusterUpdateApprovalPolicy
-	244, // 143: kcore.controller.ClusterUpdate.spec:type_name -> kcore.controller.ClusterUpdateSpec
-	13,  // 144: kcore.controller.ClusterUpdate.phase:type_name -> kcore.controller.ClusterUpdatePhase
-	14,  // 145: kcore.controller.ClusterUpdate.approval_status:type_name -> kcore.controller.ClusterUpdateApprovalStatus
-	318, // 146: kcore.controller.ClusterUpdate.created_at:type_name -> google.protobuf.Timestamp
-	318, // 147: kcore.controller.ClusterUpdate.updated_at:type_name -> google.protobuf.Timestamp
-	15,  // 148: kcore.controller.NodeUpdateStatus.phase:type_name -> kcore.controller.NodeUpdatePhase
-	318, // 149: kcore.controller.NodeUpdateStatus.last_transition_at:type_name -> google.protobuf.Timestamp
-	244, // 150: kcore.controller.CreateClusterUpdateRequest.spec:type_name -> kcore.controller.ClusterUpdateSpec
-	245, // 151: kcore.controller.CreateClusterUpdateResponse.cluster_update:type_name -> kcore.controller.ClusterUpdate
-	4,   // 152: kcore.controller.CreateClusterUpdateResponse.action:type_name -> kcore.controller.ApplyAction
-	245, // 153: kcore.controller.GetClusterUpdateResponse.cluster_update:type_name -> kcore.controller.ClusterUpdate
-	246, // 154: kcore.controller.GetClusterUpdateResponse.node_statuses:type_name -> kcore.controller.NodeUpdateStatus
-	245, // 155: kcore.controller.ListClusterUpdatesResponse.cluster_updates:type_name -> kcore.controller.ClusterUpdate
-	244, // 156: kcore.controller.PlanClusterUpdateRequest.spec:type_name -> kcore.controller.ClusterUpdateSpec
-	254, // 157: kcore.controller.PlanClusterUpdateResponse.issues:type_name -> kcore.controller.PlanIssue
-	245, // 158: kcore.controller.ApproveClusterUpdateResponse.cluster_update:type_name -> kcore.controller.ClusterUpdate
-	245, // 159: kcore.controller.CancelClusterUpdateResponse.cluster_update:type_name -> kcore.controller.ClusterUpdate
-	245, // 160: kcore.controller.RollbackClusterUpdateResponse.cluster_update:type_name -> kcore.controller.ClusterUpdate
-	262, // 161: kcore.controller.CephClusterSpec.nodes:type_name -> kcore.controller.CephClusterNodeSpec
-	16,  // 162: kcore.controller.CephClusterStatus.phase:type_name -> kcore.controller.CephClusterPhase
-	318, // 163: kcore.controller.CephClusterStatus.last_transition_at:type_name -> google.protobuf.Timestamp
-	263, // 164: kcore.controller.CephCluster.spec:type_name -> kcore.controller.CephClusterSpec
-	264, // 165: kcore.controller.CephCluster.status:type_name -> kcore.controller.CephClusterStatus
-	318, // 166: kcore.controller.CephCluster.created_at:type_name -> google.protobuf.Timestamp
-	318, // 167: kcore.controller.CephCluster.updated_at:type_name -> google.protobuf.Timestamp
-	265, // 168: kcore.controller.CreateCephClusterRequest.ceph_cluster:type_name -> kcore.controller.CephCluster
-	265, // 169: kcore.controller.CreateCephClusterResponse.ceph_cluster:type_name -> kcore.controller.CephCluster
-	4,   // 170: kcore.controller.CreateCephClusterResponse.action:type_name -> kcore.controller.ApplyAction
-	265, // 171: kcore.controller.GetCephClusterResponse.ceph_cluster:type_name -> kcore.controller.CephCluster
-	265, // 172: kcore.controller.ListCephClustersResponse.ceph_clusters:type_name -> kcore.controller.CephCluster
-	274, // 173: kcore.controller.SharedFilesystemSpec.clients:type_name -> kcore.controller.SharedFilesystemClientSpec
-	17,  // 174: kcore.controller.SharedFilesystemStatus.phase:type_name -> kcore.controller.SharedFilesystemPhase
-	318, // 175: kcore.controller.SharedFilesystemStatus.last_transition_at:type_name -> google.protobuf.Timestamp
-	275, // 176: kcore.controller.SharedFilesystem.spec:type_name -> kcore.controller.SharedFilesystemSpec
-	276, // 177: kcore.controller.SharedFilesystem.status:type_name -> kcore.controller.SharedFilesystemStatus
-	318, // 178: kcore.controller.SharedFilesystem.created_at:type_name -> google.protobuf.Timestamp
-	318, // 179: kcore.controller.SharedFilesystem.updated_at:type_name -> google.protobuf.Timestamp
-	277, // 180: kcore.controller.CreateSharedFilesystemRequest.shared_filesystem:type_name -> kcore.controller.SharedFilesystem
-	277, // 181: kcore.controller.CreateSharedFilesystemResponse.shared_filesystem:type_name -> kcore.controller.SharedFilesystem
-	4,   // 182: kcore.controller.CreateSharedFilesystemResponse.action:type_name -> kcore.controller.ApplyAction
-	277, // 183: kcore.controller.GetSharedFilesystemResponse.shared_filesystem:type_name -> kcore.controller.SharedFilesystem
-	277, // 184: kcore.controller.ListSharedFilesystemsResponse.shared_filesystems:type_name -> kcore.controller.SharedFilesystem
-	18,  // 185: kcore.controller.ObjectStoreStatus.phase:type_name -> kcore.controller.ObjectStorePhase
-	318, // 186: kcore.controller.ObjectStoreStatus.last_transition_at:type_name -> google.protobuf.Timestamp
-	286, // 187: kcore.controller.ObjectStore.spec:type_name -> kcore.controller.ObjectStoreSpec
-	287, // 188: kcore.controller.ObjectStore.status:type_name -> kcore.controller.ObjectStoreStatus
-	318, // 189: kcore.controller.ObjectStore.created_at:type_name -> google.protobuf.Timestamp
-	318, // 190: kcore.controller.ObjectStore.updated_at:type_name -> google.protobuf.Timestamp
-	288, // 191: kcore.controller.CreateObjectStoreRequest.object_store:type_name -> kcore.controller.ObjectStore
-	288, // 192: kcore.controller.CreateObjectStoreResponse.object_store:type_name -> kcore.controller.ObjectStore
-	4,   // 193: kcore.controller.CreateObjectStoreResponse.action:type_name -> kcore.controller.ApplyAction
-	288, // 194: kcore.controller.GetObjectStoreResponse.object_store:type_name -> kcore.controller.ObjectStore
-	288, // 195: kcore.controller.ListObjectStoresResponse.object_stores:type_name -> kcore.controller.ObjectStore
-	297, // 196: kcore.controller.ObjectUser.spec:type_name -> kcore.controller.ObjectUserSpec
-	318, // 197: kcore.controller.ObjectUser.created_at:type_name -> google.protobuf.Timestamp
-	298, // 198: kcore.controller.CreateObjectUserRequest.object_user:type_name -> kcore.controller.ObjectUser
-	298, // 199: kcore.controller.CreateObjectUserResponse.object_user:type_name -> kcore.controller.ObjectUser
-	318, // 200: kcore.controller.CertificateInfo.not_before:type_name -> google.protobuf.Timestamp
-	318, // 201: kcore.controller.CertificateInfo.not_after:type_name -> google.protobuf.Timestamp
-	318, // 202: kcore.controller.CertificateInfo.issued_at:type_name -> google.protobuf.Timestamp
-	20,  // 203: kcore.controller.CertificateInfo.status:type_name -> kcore.controller.CertificateStatus
-	19,  // 204: kcore.controller.CertificateInfo.revocation_reason:type_name -> kcore.controller.RevocationReason
-	318, // 205: kcore.controller.CertificateInfo.revoked_at:type_name -> google.protobuf.Timestamp
-	318, // 206: kcore.controller.SignNodeCsrResponse.not_after:type_name -> google.protobuf.Timestamp
-	307, // 207: kcore.controller.RotateNodeCertsResponse.results:type_name -> kcore.controller.NodeCertRotationResult
-	20,  // 208: kcore.controller.ListCertificatesRequest.status:type_name -> kcore.controller.CertificateStatus
-	303, // 209: kcore.controller.ListCertificatesResponse.certificates:type_name -> kcore.controller.CertificateInfo
-	19,  // 210: kcore.controller.RevokeCertificateRequest.reason:type_name -> kcore.controller.RevocationReason
-	303, // 211: kcore.controller.RevokeCertificateResponse.revoked:type_name -> kcore.controller.CertificateInfo
-	318, // 212: kcore.controller.GetCrlResponse.this_update:type_name -> google.protobuf.Timestamp
-	318, // 213: kcore.controller.GetCrlResponse.next_update:type_name -> google.protobuf.Timestamp
-	318, // 214: kcore.controller.GetPkiStatusResponse.crl_this_update:type_name -> google.protobuf.Timestamp
-	318, // 215: kcore.controller.GetPkiStatusResponse.crl_next_update:type_name -> google.protobuf.Timestamp
-	318, // 216: kcore.controller.GetPkiStatusResponse.sub_ca_not_after:type_name -> google.protobuf.Timestamp
-	303, // 217: kcore.controller.GetPkiStatusResponse.soonest_expiring:type_name -> kcore.controller.CertificateInfo
-	21,  // 218: kcore.controller.Controller.RegisterNode:input_type -> kcore.controller.RegisterNodeRequest
-	23,  // 219: kcore.controller.Controller.Heartbeat:input_type -> kcore.controller.HeartbeatRequest
-	25,  // 220: kcore.controller.Controller.SyncVmState:input_type -> kcore.controller.SyncVmStateRequest
-	27,  // 221: kcore.controller.Controller.SyncWorkloadState:input_type -> kcore.controller.SyncWorkloadStateRequest
-	34,  // 222: kcore.controller.Controller.CreateVm:input_type -> kcore.controller.CreateVmRequest
-	36,  // 223: kcore.controller.Controller.UpdateVm:input_type -> kcore.controller.UpdateVmRequest
-	38,  // 224: kcore.controller.Controller.DeleteVm:input_type -> kcore.controller.DeleteVmRequest
-	40,  // 225: kcore.controller.Controller.SetVmDesiredState:input_type -> kcore.controller.SetVmDesiredStateRequest
-	42,  // 226: kcore.controller.Controller.GetVm:input_type -> kcore.controller.GetVmRequest
-	44,  // 227: kcore.controller.Controller.ListVms:input_type -> kcore.controller.ListVmsRequest
-	46,  // 228: kcore.controller.Controller.AttachVmConsole:input_type -> kcore.controller.ConsoleMessage
-	47,  // 229: kcore.controller.Controller.CreateWorkload:input_type -> kcore.controller.CreateWorkloadRequest
-	49,  // 230: kcore.controller.Controller.DeleteWorkload:input_type -> kcore.controller.DeleteWorkloadRequest
-	51,  // 231: kcore.controller.Controller.SetWorkloadDesiredState:input_type -> kcore.controller.SetWorkloadDesiredStateRequest
-	53,  // 232: kcore.controller.Controller.GetWorkload:input_type -> kcore.controller.GetWorkloadRequest
-	55,  // 233: kcore.controller.Controller.ListWorkloads:input_type -> kcore.controller.ListWorkloadsRequest
-	57,  // 234: kcore.controller.Controller.CreateNetwork:input_type -> kcore.controller.CreateNetworkRequest
-	59,  // 235: kcore.controller.Controller.DeleteNetwork:input_type -> kcore.controller.DeleteNetworkRequest
-	61,  // 236: kcore.controller.Controller.ListNetworks:input_type -> kcore.controller.ListNetworksRequest
-	67,  // 237: kcore.controller.Controller.CreateSecurityGroup:input_type -> kcore.controller.CreateSecurityGroupRequest
-	69,  // 238: kcore.controller.Controller.GetSecurityGroup:input_type -> kcore.controller.GetSecurityGroupRequest
-	71,  // 239: kcore.controller.Controller.ListSecurityGroups:input_type -> kcore.controller.ListSecurityGroupsRequest
-	73,  // 240: kcore.controller.Controller.DeleteSecurityGroup:input_type -> kcore.controller.DeleteSecurityGroupRequest
-	75,  // 241: kcore.controller.Controller.AttachSecurityGroup:input_type -> kcore.controller.AttachSecurityGroupRequest
-	77,  // 242: kcore.controller.Controller.DetachSecurityGroup:input_type -> kcore.controller.DetachSecurityGroupRequest
-	80,  // 243: kcore.controller.Controller.ListNodes:input_type -> kcore.controller.ListNodesRequest
-	83,  // 244: kcore.controller.Controller.GetNode:input_type -> kcore.controller.GetNodeRequest
-	105, // 245: kcore.controller.Controller.CreateSshKey:input_type -> kcore.controller.CreateSshKeyRequest
-	107, // 246: kcore.controller.Controller.DeleteSshKey:input_type -> kcore.controller.DeleteSshKeyRequest
-	109, // 247: kcore.controller.Controller.ListSshKeys:input_type -> kcore.controller.ListSshKeysRequest
-	111, // 248: kcore.controller.Controller.GetSshKey:input_type -> kcore.controller.GetSshKeyRequest
-	114, // 249: kcore.controller.Controller.DrainNode:input_type -> kcore.controller.DrainNodeRequest
-	116, // 250: kcore.controller.Controller.MigrateVm:input_type -> kcore.controller.MigrateVmRequest
-	118, // 251: kcore.controller.Controller.GetLiveMigrateReceiveStatus:input_type -> kcore.controller.GetLiveMigrateReceiveStatusRequest
-	122, // 252: kcore.controller.Controller.ResetLiveMigrateReceive:input_type -> kcore.controller.ResetLiveMigrateReceiveRequest
-	124, // 253: kcore.controller.Controller.ApproveNode:input_type -> kcore.controller.ApproveNodeRequest
-	126, // 254: kcore.controller.Controller.RejectNode:input_type -> kcore.controller.RejectNodeRequest
-	128, // 255: kcore.controller.Controller.CordonNode:input_type -> kcore.controller.CordonNodeRequest
-	130, // 256: kcore.controller.Controller.UncordonNode:input_type -> kcore.controller.UncordonNodeRequest
-	132, // 257: kcore.controller.Controller.DeleteNode:input_type -> kcore.controller.DeleteNodeRequest
-	134, // 258: kcore.controller.Controller.GetClusterHealth:input_type -> kcore.controller.GetClusterHealthRequest
-	136, // 259: kcore.controller.Controller.BackupCluster:input_type -> kcore.controller.BackupClusterRequest
-	138, // 260: kcore.controller.Controller.RestoreCluster:input_type -> kcore.controller.RestoreClusterRequest
-	140, // 261: kcore.controller.Controller.RenewNodeCert:input_type -> kcore.controller.RenewNodeCertRequest
-	142, // 262: kcore.controller.Controller.IssueNodeBootstrapCert:input_type -> kcore.controller.IssueNodeBootstrapCertRequest
-	144, // 263: kcore.controller.Controller.RotateSubCa:input_type -> kcore.controller.RotateSubCaRequest
-	146, // 264: kcore.controller.Controller.ReloadTls:input_type -> kcore.controller.ReloadTlsRequest
-	304, // 265: kcore.controller.Controller.SignNodeCsr:input_type -> kcore.controller.SignNodeCsrRequest
-	306, // 266: kcore.controller.Controller.RotateNodeCerts:input_type -> kcore.controller.RotateNodeCertsRequest
-	309, // 267: kcore.controller.Controller.ListCertificates:input_type -> kcore.controller.ListCertificatesRequest
-	311, // 268: kcore.controller.Controller.RevokeCertificate:input_type -> kcore.controller.RevokeCertificateRequest
-	313, // 269: kcore.controller.Controller.GetCrl:input_type -> kcore.controller.GetCrlRequest
-	315, // 270: kcore.controller.Controller.GetPkiStatus:input_type -> kcore.controller.GetPkiStatusRequest
-	148, // 271: kcore.controller.Controller.GetComplianceReport:input_type -> kcore.controller.GetComplianceReportRequest
-	152, // 272: kcore.controller.Controller.GetCryptoConfig:input_type -> kcore.controller.GetCryptoConfigRequest
-	154, // 273: kcore.controller.Controller.ExportSbom:input_type -> kcore.controller.ExportSbomRequest
-	149, // 274: kcore.controller.Controller.ListAuditEvents:input_type -> kcore.controller.ListAuditEventsRequest
-	173, // 275: kcore.controller.Controller.GetNetworkOverview:input_type -> kcore.controller.GetNetworkOverviewRequest
-	177, // 276: kcore.controller.Controller.GetStorageOverview:input_type -> kcore.controller.GetStorageOverviewRequest
-	184, // 277: kcore.controller.Controller.ListVolumes:input_type -> kcore.controller.ListVolumesRequest
-	187, // 278: kcore.controller.Controller.CreateVolume:input_type -> kcore.controller.CreateVolumeRequest
-	189, // 279: kcore.controller.Controller.GetVolume:input_type -> kcore.controller.GetVolumeRequest
-	191, // 280: kcore.controller.Controller.AttachVolume:input_type -> kcore.controller.AttachVolumeRequest
-	193, // 281: kcore.controller.Controller.DetachVolume:input_type -> kcore.controller.DetachVolumeRequest
-	195, // 282: kcore.controller.Controller.DeleteVolume:input_type -> kcore.controller.DeleteVolumeRequest
-	198, // 283: kcore.controller.Controller.ListVmOperations:input_type -> kcore.controller.ListVmOperationsRequest
-	200, // 284: kcore.controller.Controller.GetVmOperation:input_type -> kcore.controller.GetVmOperationRequest
-	202, // 285: kcore.controller.Controller.CancelVmOperation:input_type -> kcore.controller.CancelVmOperationRequest
-	205, // 286: kcore.controller.Controller.CreateVolumeSnapshot:input_type -> kcore.controller.CreateVolumeSnapshotRequest
-	207, // 287: kcore.controller.Controller.ListVolumeSnapshots:input_type -> kcore.controller.ListVolumeSnapshotsRequest
-	209, // 288: kcore.controller.Controller.DeleteVolumeSnapshot:input_type -> kcore.controller.DeleteVolumeSnapshotRequest
-	211, // 289: kcore.controller.Controller.RestoreVolume:input_type -> kcore.controller.RestoreVolumeRequest
-	213, // 290: kcore.controller.Controller.FlattenVolume:input_type -> kcore.controller.FlattenVolumeRequest
-	224, // 291: kcore.controller.Controller.ResizeVolume:input_type -> kcore.controller.ResizeVolumeRequest
-	226, // 292: kcore.controller.Controller.EncryptVolume:input_type -> kcore.controller.EncryptVolumeRequest
-	216, // 293: kcore.controller.Controller.CreateSnapshotPolicy:input_type -> kcore.controller.CreateSnapshotPolicyRequest
-	218, // 294: kcore.controller.Controller.GetSnapshotPolicy:input_type -> kcore.controller.GetSnapshotPolicyRequest
-	220, // 295: kcore.controller.Controller.ListSnapshotPolicies:input_type -> kcore.controller.ListSnapshotPoliciesRequest
-	222, // 296: kcore.controller.Controller.DeleteSnapshotPolicy:input_type -> kcore.controller.DeleteSnapshotPolicyRequest
-	230, // 297: kcore.controller.Controller.CreateDiskLayout:input_type -> kcore.controller.CreateDiskLayoutRequest
-	232, // 298: kcore.controller.Controller.GetDiskLayout:input_type -> kcore.controller.GetDiskLayoutRequest
-	234, // 299: kcore.controller.Controller.ListDiskLayouts:input_type -> kcore.controller.ListDiskLayoutsRequest
-	237, // 300: kcore.controller.Controller.DeleteDiskLayout:input_type -> kcore.controller.DeleteDiskLayoutRequest
-	239, // 301: kcore.controller.Controller.ClassifyDiskLayout:input_type -> kcore.controller.ClassifyDiskLayoutRequest
-	247, // 302: kcore.controller.Controller.CreateClusterUpdate:input_type -> kcore.controller.CreateClusterUpdateRequest
-	249, // 303: kcore.controller.Controller.GetClusterUpdate:input_type -> kcore.controller.GetClusterUpdateRequest
-	251, // 304: kcore.controller.Controller.ListClusterUpdates:input_type -> kcore.controller.ListClusterUpdatesRequest
-	253, // 305: kcore.controller.Controller.PlanClusterUpdate:input_type -> kcore.controller.PlanClusterUpdateRequest
-	256, // 306: kcore.controller.Controller.ApproveClusterUpdate:input_type -> kcore.controller.ApproveClusterUpdateRequest
-	258, // 307: kcore.controller.Controller.CancelClusterUpdate:input_type -> kcore.controller.CancelClusterUpdateRequest
-	260, // 308: kcore.controller.Controller.RollbackClusterUpdate:input_type -> kcore.controller.RollbackClusterUpdateRequest
-	266, // 309: kcore.controller.Controller.CreateCephCluster:input_type -> kcore.controller.CreateCephClusterRequest
-	268, // 310: kcore.controller.Controller.GetCephCluster:input_type -> kcore.controller.GetCephClusterRequest
-	270, // 311: kcore.controller.Controller.ListCephClusters:input_type -> kcore.controller.ListCephClustersRequest
-	272, // 312: kcore.controller.Controller.DeleteCephCluster:input_type -> kcore.controller.DeleteCephClusterRequest
-	278, // 313: kcore.controller.Controller.CreateSharedFilesystem:input_type -> kcore.controller.CreateSharedFilesystemRequest
-	280, // 314: kcore.controller.Controller.GetSharedFilesystem:input_type -> kcore.controller.GetSharedFilesystemRequest
-	282, // 315: kcore.controller.Controller.ListSharedFilesystems:input_type -> kcore.controller.ListSharedFilesystemsRequest
-	284, // 316: kcore.controller.Controller.DeleteSharedFilesystem:input_type -> kcore.controller.DeleteSharedFilesystemRequest
-	289, // 317: kcore.controller.Controller.CreateObjectStore:input_type -> kcore.controller.CreateObjectStoreRequest
-	291, // 318: kcore.controller.Controller.GetObjectStore:input_type -> kcore.controller.GetObjectStoreRequest
-	293, // 319: kcore.controller.Controller.ListObjectStores:input_type -> kcore.controller.ListObjectStoresRequest
-	295, // 320: kcore.controller.Controller.DeleteObjectStore:input_type -> kcore.controller.DeleteObjectStoreRequest
-	299, // 321: kcore.controller.Controller.CreateObjectUser:input_type -> kcore.controller.CreateObjectUserRequest
-	301, // 322: kcore.controller.Controller.DeleteObjectUser:input_type -> kcore.controller.DeleteObjectUserRequest
-	158, // 323: kcore.controller.Controller.CreateOperator:input_type -> kcore.controller.CreateOperatorRequest
-	160, // 324: kcore.controller.Controller.DeleteOperator:input_type -> kcore.controller.DeleteOperatorRequest
-	162, // 325: kcore.controller.Controller.ListOperators:input_type -> kcore.controller.ListOperatorsRequest
-	164, // 326: kcore.controller.Controller.GetOperator:input_type -> kcore.controller.GetOperatorRequest
-	166, // 327: kcore.controller.Controller.GrantOperatorRole:input_type -> kcore.controller.GrantOperatorRoleRequest
-	168, // 328: kcore.controller.Controller.RevokeOperatorRole:input_type -> kcore.controller.RevokeOperatorRoleRequest
-	170, // 329: kcore.controller.Controller.IssueOperatorCert:input_type -> kcore.controller.IssueOperatorCertRequest
-	89,  // 330: kcore.controller.ControllerAdmin.ApplyNixConfig:input_type -> kcore.controller.ApplyNixConfigRequest
-	91,  // 331: kcore.controller.ControllerAdmin.GetReplicationEvents:input_type -> kcore.controller.GetReplicationEventsRequest
-	94,  // 332: kcore.controller.ControllerAdmin.AckReplicationEvents:input_type -> kcore.controller.AckReplicationEventsRequest
-	96,  // 333: kcore.controller.ControllerAdmin.GetReplicationStatus:input_type -> kcore.controller.GetReplicationStatusRequest
-	100, // 334: kcore.controller.ControllerAdmin.ListReplicationConflicts:input_type -> kcore.controller.ListReplicationConflictsRequest
-	103, // 335: kcore.controller.ControllerAdmin.ResolveReplicationConflict:input_type -> kcore.controller.ResolveReplicationConflictRequest
-	22,  // 336: kcore.controller.Controller.RegisterNode:output_type -> kcore.controller.RegisterNodeResponse
-	24,  // 337: kcore.controller.Controller.Heartbeat:output_type -> kcore.controller.HeartbeatResponse
-	26,  // 338: kcore.controller.Controller.SyncVmState:output_type -> kcore.controller.SyncVmStateResponse
-	28,  // 339: kcore.controller.Controller.SyncWorkloadState:output_type -> kcore.controller.SyncWorkloadStateResponse
-	35,  // 340: kcore.controller.Controller.CreateVm:output_type -> kcore.controller.CreateVmResponse
-	37,  // 341: kcore.controller.Controller.UpdateVm:output_type -> kcore.controller.UpdateVmResponse
-	39,  // 342: kcore.controller.Controller.DeleteVm:output_type -> kcore.controller.DeleteVmResponse
-	41,  // 343: kcore.controller.Controller.SetVmDesiredState:output_type -> kcore.controller.SetVmDesiredStateResponse
-	43,  // 344: kcore.controller.Controller.GetVm:output_type -> kcore.controller.GetVmResponse
-	45,  // 345: kcore.controller.Controller.ListVms:output_type -> kcore.controller.ListVmsResponse
-	46,  // 346: kcore.controller.Controller.AttachVmConsole:output_type -> kcore.controller.ConsoleMessage
-	48,  // 347: kcore.controller.Controller.CreateWorkload:output_type -> kcore.controller.CreateWorkloadResponse
-	50,  // 348: kcore.controller.Controller.DeleteWorkload:output_type -> kcore.controller.DeleteWorkloadResponse
-	52,  // 349: kcore.controller.Controller.SetWorkloadDesiredState:output_type -> kcore.controller.SetWorkloadDesiredStateResponse
-	54,  // 350: kcore.controller.Controller.GetWorkload:output_type -> kcore.controller.GetWorkloadResponse
-	56,  // 351: kcore.controller.Controller.ListWorkloads:output_type -> kcore.controller.ListWorkloadsResponse
-	58,  // 352: kcore.controller.Controller.CreateNetwork:output_type -> kcore.controller.CreateNetworkResponse
-	60,  // 353: kcore.controller.Controller.DeleteNetwork:output_type -> kcore.controller.DeleteNetworkResponse
-	62,  // 354: kcore.controller.Controller.ListNetworks:output_type -> kcore.controller.ListNetworksResponse
-	68,  // 355: kcore.controller.Controller.CreateSecurityGroup:output_type -> kcore.controller.CreateSecurityGroupResponse
-	70,  // 356: kcore.controller.Controller.GetSecurityGroup:output_type -> kcore.controller.GetSecurityGroupResponse
-	72,  // 357: kcore.controller.Controller.ListSecurityGroups:output_type -> kcore.controller.ListSecurityGroupsResponse
-	74,  // 358: kcore.controller.Controller.DeleteSecurityGroup:output_type -> kcore.controller.DeleteSecurityGroupResponse
-	76,  // 359: kcore.controller.Controller.AttachSecurityGroup:output_type -> kcore.controller.AttachSecurityGroupResponse
-	78,  // 360: kcore.controller.Controller.DetachSecurityGroup:output_type -> kcore.controller.DetachSecurityGroupResponse
-	81,  // 361: kcore.controller.Controller.ListNodes:output_type -> kcore.controller.ListNodesResponse
-	84,  // 362: kcore.controller.Controller.GetNode:output_type -> kcore.controller.GetNodeResponse
-	106, // 363: kcore.controller.Controller.CreateSshKey:output_type -> kcore.controller.CreateSshKeyResponse
-	108, // 364: kcore.controller.Controller.DeleteSshKey:output_type -> kcore.controller.DeleteSshKeyResponse
-	110, // 365: kcore.controller.Controller.ListSshKeys:output_type -> kcore.controller.ListSshKeysResponse
-	112, // 366: kcore.controller.Controller.GetSshKey:output_type -> kcore.controller.GetSshKeyResponse
-	115, // 367: kcore.controller.Controller.DrainNode:output_type -> kcore.controller.DrainNodeResponse
-	117, // 368: kcore.controller.Controller.MigrateVm:output_type -> kcore.controller.MigrateVmResponse
-	121, // 369: kcore.controller.Controller.GetLiveMigrateReceiveStatus:output_type -> kcore.controller.GetLiveMigrateReceiveStatusResponse
-	123, // 370: kcore.controller.Controller.ResetLiveMigrateReceive:output_type -> kcore.controller.ResetLiveMigrateReceiveResponse
-	125, // 371: kcore.controller.Controller.ApproveNode:output_type -> kcore.controller.ApproveNodeResponse
-	127, // 372: kcore.controller.Controller.RejectNode:output_type -> kcore.controller.RejectNodeResponse
-	129, // 373: kcore.controller.Controller.CordonNode:output_type -> kcore.controller.CordonNodeResponse
-	131, // 374: kcore.controller.Controller.UncordonNode:output_type -> kcore.controller.UncordonNodeResponse
-	133, // 375: kcore.controller.Controller.DeleteNode:output_type -> kcore.controller.DeleteNodeResponse
-	135, // 376: kcore.controller.Controller.GetClusterHealth:output_type -> kcore.controller.GetClusterHealthResponse
-	137, // 377: kcore.controller.Controller.BackupCluster:output_type -> kcore.controller.BackupClusterResponse
-	139, // 378: kcore.controller.Controller.RestoreCluster:output_type -> kcore.controller.RestoreClusterResponse
-	141, // 379: kcore.controller.Controller.RenewNodeCert:output_type -> kcore.controller.RenewNodeCertResponse
-	143, // 380: kcore.controller.Controller.IssueNodeBootstrapCert:output_type -> kcore.controller.IssueNodeBootstrapCertResponse
-	145, // 381: kcore.controller.Controller.RotateSubCa:output_type -> kcore.controller.RotateSubCaResponse
-	147, // 382: kcore.controller.Controller.ReloadTls:output_type -> kcore.controller.ReloadTlsResponse
-	305, // 383: kcore.controller.Controller.SignNodeCsr:output_type -> kcore.controller.SignNodeCsrResponse
-	308, // 384: kcore.controller.Controller.RotateNodeCerts:output_type -> kcore.controller.RotateNodeCertsResponse
-	310, // 385: kcore.controller.Controller.ListCertificates:output_type -> kcore.controller.ListCertificatesResponse
-	312, // 386: kcore.controller.Controller.RevokeCertificate:output_type -> kcore.controller.RevokeCertificateResponse
-	314, // 387: kcore.controller.Controller.GetCrl:output_type -> kcore.controller.GetCrlResponse
-	316, // 388: kcore.controller.Controller.GetPkiStatus:output_type -> kcore.controller.GetPkiStatusResponse
-	172, // 389: kcore.controller.Controller.GetComplianceReport:output_type -> kcore.controller.GetComplianceReportResponse
-	153, // 390: kcore.controller.Controller.GetCryptoConfig:output_type -> kcore.controller.GetCryptoConfigResponse
-	155, // 391: kcore.controller.Controller.ExportSbom:output_type -> kcore.controller.ExportSbomResponse
-	151, // 392: kcore.controller.Controller.ListAuditEvents:output_type -> kcore.controller.ListAuditEventsResponse
-	176, // 393: kcore.controller.Controller.GetNetworkOverview:output_type -> kcore.controller.GetNetworkOverviewResponse
-	183, // 394: kcore.controller.Controller.GetStorageOverview:output_type -> kcore.controller.GetStorageOverviewResponse
-	185, // 395: kcore.controller.Controller.ListVolumes:output_type -> kcore.controller.ListVolumesResponse
-	188, // 396: kcore.controller.Controller.CreateVolume:output_type -> kcore.controller.CreateVolumeResponse
-	190, // 397: kcore.controller.Controller.GetVolume:output_type -> kcore.controller.GetVolumeResponse
-	192, // 398: kcore.controller.Controller.AttachVolume:output_type -> kcore.controller.AttachVolumeResponse
-	194, // 399: kcore.controller.Controller.DetachVolume:output_type -> kcore.controller.DetachVolumeResponse
-	196, // 400: kcore.controller.Controller.DeleteVolume:output_type -> kcore.controller.DeleteVolumeResponse
-	199, // 401: kcore.controller.Controller.ListVmOperations:output_type -> kcore.controller.ListVmOperationsResponse
-	201, // 402: kcore.controller.Controller.GetVmOperation:output_type -> kcore.controller.GetVmOperationResponse
-	203, // 403: kcore.controller.Controller.CancelVmOperation:output_type -> kcore.controller.CancelVmOperationResponse
-	206, // 404: kcore.controller.Controller.CreateVolumeSnapshot:output_type -> kcore.controller.CreateVolumeSnapshotResponse
-	208, // 405: kcore.controller.Controller.ListVolumeSnapshots:output_type -> kcore.controller.ListVolumeSnapshotsResponse
-	210, // 406: kcore.controller.Controller.DeleteVolumeSnapshot:output_type -> kcore.controller.DeleteVolumeSnapshotResponse
-	212, // 407: kcore.controller.Controller.RestoreVolume:output_type -> kcore.controller.RestoreVolumeResponse
-	214, // 408: kcore.controller.Controller.FlattenVolume:output_type -> kcore.controller.FlattenVolumeResponse
-	225, // 409: kcore.controller.Controller.ResizeVolume:output_type -> kcore.controller.ResizeVolumeResponse
-	227, // 410: kcore.controller.Controller.EncryptVolume:output_type -> kcore.controller.EncryptVolumeResponse
-	217, // 411: kcore.controller.Controller.CreateSnapshotPolicy:output_type -> kcore.controller.CreateSnapshotPolicyResponse
-	219, // 412: kcore.controller.Controller.GetSnapshotPolicy:output_type -> kcore.controller.GetSnapshotPolicyResponse
-	221, // 413: kcore.controller.Controller.ListSnapshotPolicies:output_type -> kcore.controller.ListSnapshotPoliciesResponse
-	223, // 414: kcore.controller.Controller.DeleteSnapshotPolicy:output_type -> kcore.controller.DeleteSnapshotPolicyResponse
-	231, // 415: kcore.controller.Controller.CreateDiskLayout:output_type -> kcore.controller.CreateDiskLayoutResponse
-	233, // 416: kcore.controller.Controller.GetDiskLayout:output_type -> kcore.controller.GetDiskLayoutResponse
-	236, // 417: kcore.controller.Controller.ListDiskLayouts:output_type -> kcore.controller.ListDiskLayoutsResponse
-	238, // 418: kcore.controller.Controller.DeleteDiskLayout:output_type -> kcore.controller.DeleteDiskLayoutResponse
-	240, // 419: kcore.controller.Controller.ClassifyDiskLayout:output_type -> kcore.controller.ClassifyDiskLayoutResponse
-	248, // 420: kcore.controller.Controller.CreateClusterUpdate:output_type -> kcore.controller.CreateClusterUpdateResponse
-	250, // 421: kcore.controller.Controller.GetClusterUpdate:output_type -> kcore.controller.GetClusterUpdateResponse
-	252, // 422: kcore.controller.Controller.ListClusterUpdates:output_type -> kcore.controller.ListClusterUpdatesResponse
-	255, // 423: kcore.controller.Controller.PlanClusterUpdate:output_type -> kcore.controller.PlanClusterUpdateResponse
-	257, // 424: kcore.controller.Controller.ApproveClusterUpdate:output_type -> kcore.controller.ApproveClusterUpdateResponse
-	259, // 425: kcore.controller.Controller.CancelClusterUpdate:output_type -> kcore.controller.CancelClusterUpdateResponse
-	261, // 426: kcore.controller.Controller.RollbackClusterUpdate:output_type -> kcore.controller.RollbackClusterUpdateResponse
-	267, // 427: kcore.controller.Controller.CreateCephCluster:output_type -> kcore.controller.CreateCephClusterResponse
-	269, // 428: kcore.controller.Controller.GetCephCluster:output_type -> kcore.controller.GetCephClusterResponse
-	271, // 429: kcore.controller.Controller.ListCephClusters:output_type -> kcore.controller.ListCephClustersResponse
-	273, // 430: kcore.controller.Controller.DeleteCephCluster:output_type -> kcore.controller.DeleteCephClusterResponse
-	279, // 431: kcore.controller.Controller.CreateSharedFilesystem:output_type -> kcore.controller.CreateSharedFilesystemResponse
-	281, // 432: kcore.controller.Controller.GetSharedFilesystem:output_type -> kcore.controller.GetSharedFilesystemResponse
-	283, // 433: kcore.controller.Controller.ListSharedFilesystems:output_type -> kcore.controller.ListSharedFilesystemsResponse
-	285, // 434: kcore.controller.Controller.DeleteSharedFilesystem:output_type -> kcore.controller.DeleteSharedFilesystemResponse
-	290, // 435: kcore.controller.Controller.CreateObjectStore:output_type -> kcore.controller.CreateObjectStoreResponse
-	292, // 436: kcore.controller.Controller.GetObjectStore:output_type -> kcore.controller.GetObjectStoreResponse
-	294, // 437: kcore.controller.Controller.ListObjectStores:output_type -> kcore.controller.ListObjectStoresResponse
-	296, // 438: kcore.controller.Controller.DeleteObjectStore:output_type -> kcore.controller.DeleteObjectStoreResponse
-	300, // 439: kcore.controller.Controller.CreateObjectUser:output_type -> kcore.controller.CreateObjectUserResponse
-	302, // 440: kcore.controller.Controller.DeleteObjectUser:output_type -> kcore.controller.DeleteObjectUserResponse
-	159, // 441: kcore.controller.Controller.CreateOperator:output_type -> kcore.controller.CreateOperatorResponse
-	161, // 442: kcore.controller.Controller.DeleteOperator:output_type -> kcore.controller.DeleteOperatorResponse
-	163, // 443: kcore.controller.Controller.ListOperators:output_type -> kcore.controller.ListOperatorsResponse
-	165, // 444: kcore.controller.Controller.GetOperator:output_type -> kcore.controller.GetOperatorResponse
-	167, // 445: kcore.controller.Controller.GrantOperatorRole:output_type -> kcore.controller.GrantOperatorRoleResponse
-	169, // 446: kcore.controller.Controller.RevokeOperatorRole:output_type -> kcore.controller.RevokeOperatorRoleResponse
-	171, // 447: kcore.controller.Controller.IssueOperatorCert:output_type -> kcore.controller.IssueOperatorCertResponse
-	90,  // 448: kcore.controller.ControllerAdmin.ApplyNixConfig:output_type -> kcore.controller.ApplyNixConfigResponse
-	93,  // 449: kcore.controller.ControllerAdmin.GetReplicationEvents:output_type -> kcore.controller.GetReplicationEventsResponse
-	95,  // 450: kcore.controller.ControllerAdmin.AckReplicationEvents:output_type -> kcore.controller.AckReplicationEventsResponse
-	99,  // 451: kcore.controller.ControllerAdmin.GetReplicationStatus:output_type -> kcore.controller.GetReplicationStatusResponse
-	102, // 452: kcore.controller.ControllerAdmin.ListReplicationConflicts:output_type -> kcore.controller.ListReplicationConflictsResponse
-	104, // 453: kcore.controller.ControllerAdmin.ResolveReplicationConflict:output_type -> kcore.controller.ResolveReplicationConflictResponse
-	336, // [336:454] is the sub-list for method output_type
-	218, // [218:336] is the sub-list for method input_type
-	218, // [218:218] is the sub-list for extension type_name
-	218, // [218:218] is the sub-list for extension extendee
-	0,   // [0:218] is the sub-list for field type_name
+	244, // 143: kcore.controller.ClusterUpdateSpec.tested_os_pins:type_name -> kcore.controller.TestedOsPin
+	245, // 144: kcore.controller.ClusterUpdate.spec:type_name -> kcore.controller.ClusterUpdateSpec
+	13,  // 145: kcore.controller.ClusterUpdate.phase:type_name -> kcore.controller.ClusterUpdatePhase
+	14,  // 146: kcore.controller.ClusterUpdate.approval_status:type_name -> kcore.controller.ClusterUpdateApprovalStatus
+	319, // 147: kcore.controller.ClusterUpdate.created_at:type_name -> google.protobuf.Timestamp
+	319, // 148: kcore.controller.ClusterUpdate.updated_at:type_name -> google.protobuf.Timestamp
+	15,  // 149: kcore.controller.NodeUpdateStatus.phase:type_name -> kcore.controller.NodeUpdatePhase
+	319, // 150: kcore.controller.NodeUpdateStatus.last_transition_at:type_name -> google.protobuf.Timestamp
+	245, // 151: kcore.controller.CreateClusterUpdateRequest.spec:type_name -> kcore.controller.ClusterUpdateSpec
+	246, // 152: kcore.controller.CreateClusterUpdateResponse.cluster_update:type_name -> kcore.controller.ClusterUpdate
+	4,   // 153: kcore.controller.CreateClusterUpdateResponse.action:type_name -> kcore.controller.ApplyAction
+	246, // 154: kcore.controller.GetClusterUpdateResponse.cluster_update:type_name -> kcore.controller.ClusterUpdate
+	247, // 155: kcore.controller.GetClusterUpdateResponse.node_statuses:type_name -> kcore.controller.NodeUpdateStatus
+	246, // 156: kcore.controller.ListClusterUpdatesResponse.cluster_updates:type_name -> kcore.controller.ClusterUpdate
+	245, // 157: kcore.controller.PlanClusterUpdateRequest.spec:type_name -> kcore.controller.ClusterUpdateSpec
+	255, // 158: kcore.controller.PlanClusterUpdateResponse.issues:type_name -> kcore.controller.PlanIssue
+	246, // 159: kcore.controller.ApproveClusterUpdateResponse.cluster_update:type_name -> kcore.controller.ClusterUpdate
+	246, // 160: kcore.controller.CancelClusterUpdateResponse.cluster_update:type_name -> kcore.controller.ClusterUpdate
+	246, // 161: kcore.controller.RollbackClusterUpdateResponse.cluster_update:type_name -> kcore.controller.ClusterUpdate
+	263, // 162: kcore.controller.CephClusterSpec.nodes:type_name -> kcore.controller.CephClusterNodeSpec
+	16,  // 163: kcore.controller.CephClusterStatus.phase:type_name -> kcore.controller.CephClusterPhase
+	319, // 164: kcore.controller.CephClusterStatus.last_transition_at:type_name -> google.protobuf.Timestamp
+	264, // 165: kcore.controller.CephCluster.spec:type_name -> kcore.controller.CephClusterSpec
+	265, // 166: kcore.controller.CephCluster.status:type_name -> kcore.controller.CephClusterStatus
+	319, // 167: kcore.controller.CephCluster.created_at:type_name -> google.protobuf.Timestamp
+	319, // 168: kcore.controller.CephCluster.updated_at:type_name -> google.protobuf.Timestamp
+	266, // 169: kcore.controller.CreateCephClusterRequest.ceph_cluster:type_name -> kcore.controller.CephCluster
+	266, // 170: kcore.controller.CreateCephClusterResponse.ceph_cluster:type_name -> kcore.controller.CephCluster
+	4,   // 171: kcore.controller.CreateCephClusterResponse.action:type_name -> kcore.controller.ApplyAction
+	266, // 172: kcore.controller.GetCephClusterResponse.ceph_cluster:type_name -> kcore.controller.CephCluster
+	266, // 173: kcore.controller.ListCephClustersResponse.ceph_clusters:type_name -> kcore.controller.CephCluster
+	275, // 174: kcore.controller.SharedFilesystemSpec.clients:type_name -> kcore.controller.SharedFilesystemClientSpec
+	17,  // 175: kcore.controller.SharedFilesystemStatus.phase:type_name -> kcore.controller.SharedFilesystemPhase
+	319, // 176: kcore.controller.SharedFilesystemStatus.last_transition_at:type_name -> google.protobuf.Timestamp
+	276, // 177: kcore.controller.SharedFilesystem.spec:type_name -> kcore.controller.SharedFilesystemSpec
+	277, // 178: kcore.controller.SharedFilesystem.status:type_name -> kcore.controller.SharedFilesystemStatus
+	319, // 179: kcore.controller.SharedFilesystem.created_at:type_name -> google.protobuf.Timestamp
+	319, // 180: kcore.controller.SharedFilesystem.updated_at:type_name -> google.protobuf.Timestamp
+	278, // 181: kcore.controller.CreateSharedFilesystemRequest.shared_filesystem:type_name -> kcore.controller.SharedFilesystem
+	278, // 182: kcore.controller.CreateSharedFilesystemResponse.shared_filesystem:type_name -> kcore.controller.SharedFilesystem
+	4,   // 183: kcore.controller.CreateSharedFilesystemResponse.action:type_name -> kcore.controller.ApplyAction
+	278, // 184: kcore.controller.GetSharedFilesystemResponse.shared_filesystem:type_name -> kcore.controller.SharedFilesystem
+	278, // 185: kcore.controller.ListSharedFilesystemsResponse.shared_filesystems:type_name -> kcore.controller.SharedFilesystem
+	18,  // 186: kcore.controller.ObjectStoreStatus.phase:type_name -> kcore.controller.ObjectStorePhase
+	319, // 187: kcore.controller.ObjectStoreStatus.last_transition_at:type_name -> google.protobuf.Timestamp
+	287, // 188: kcore.controller.ObjectStore.spec:type_name -> kcore.controller.ObjectStoreSpec
+	288, // 189: kcore.controller.ObjectStore.status:type_name -> kcore.controller.ObjectStoreStatus
+	319, // 190: kcore.controller.ObjectStore.created_at:type_name -> google.protobuf.Timestamp
+	319, // 191: kcore.controller.ObjectStore.updated_at:type_name -> google.protobuf.Timestamp
+	289, // 192: kcore.controller.CreateObjectStoreRequest.object_store:type_name -> kcore.controller.ObjectStore
+	289, // 193: kcore.controller.CreateObjectStoreResponse.object_store:type_name -> kcore.controller.ObjectStore
+	4,   // 194: kcore.controller.CreateObjectStoreResponse.action:type_name -> kcore.controller.ApplyAction
+	289, // 195: kcore.controller.GetObjectStoreResponse.object_store:type_name -> kcore.controller.ObjectStore
+	289, // 196: kcore.controller.ListObjectStoresResponse.object_stores:type_name -> kcore.controller.ObjectStore
+	298, // 197: kcore.controller.ObjectUser.spec:type_name -> kcore.controller.ObjectUserSpec
+	319, // 198: kcore.controller.ObjectUser.created_at:type_name -> google.protobuf.Timestamp
+	299, // 199: kcore.controller.CreateObjectUserRequest.object_user:type_name -> kcore.controller.ObjectUser
+	299, // 200: kcore.controller.CreateObjectUserResponse.object_user:type_name -> kcore.controller.ObjectUser
+	319, // 201: kcore.controller.CertificateInfo.not_before:type_name -> google.protobuf.Timestamp
+	319, // 202: kcore.controller.CertificateInfo.not_after:type_name -> google.protobuf.Timestamp
+	319, // 203: kcore.controller.CertificateInfo.issued_at:type_name -> google.protobuf.Timestamp
+	20,  // 204: kcore.controller.CertificateInfo.status:type_name -> kcore.controller.CertificateStatus
+	19,  // 205: kcore.controller.CertificateInfo.revocation_reason:type_name -> kcore.controller.RevocationReason
+	319, // 206: kcore.controller.CertificateInfo.revoked_at:type_name -> google.protobuf.Timestamp
+	319, // 207: kcore.controller.SignNodeCsrResponse.not_after:type_name -> google.protobuf.Timestamp
+	308, // 208: kcore.controller.RotateNodeCertsResponse.results:type_name -> kcore.controller.NodeCertRotationResult
+	20,  // 209: kcore.controller.ListCertificatesRequest.status:type_name -> kcore.controller.CertificateStatus
+	304, // 210: kcore.controller.ListCertificatesResponse.certificates:type_name -> kcore.controller.CertificateInfo
+	19,  // 211: kcore.controller.RevokeCertificateRequest.reason:type_name -> kcore.controller.RevocationReason
+	304, // 212: kcore.controller.RevokeCertificateResponse.revoked:type_name -> kcore.controller.CertificateInfo
+	319, // 213: kcore.controller.GetCrlResponse.this_update:type_name -> google.protobuf.Timestamp
+	319, // 214: kcore.controller.GetCrlResponse.next_update:type_name -> google.protobuf.Timestamp
+	319, // 215: kcore.controller.GetPkiStatusResponse.crl_this_update:type_name -> google.protobuf.Timestamp
+	319, // 216: kcore.controller.GetPkiStatusResponse.crl_next_update:type_name -> google.protobuf.Timestamp
+	319, // 217: kcore.controller.GetPkiStatusResponse.sub_ca_not_after:type_name -> google.protobuf.Timestamp
+	304, // 218: kcore.controller.GetPkiStatusResponse.soonest_expiring:type_name -> kcore.controller.CertificateInfo
+	21,  // 219: kcore.controller.Controller.RegisterNode:input_type -> kcore.controller.RegisterNodeRequest
+	23,  // 220: kcore.controller.Controller.Heartbeat:input_type -> kcore.controller.HeartbeatRequest
+	25,  // 221: kcore.controller.Controller.SyncVmState:input_type -> kcore.controller.SyncVmStateRequest
+	27,  // 222: kcore.controller.Controller.SyncWorkloadState:input_type -> kcore.controller.SyncWorkloadStateRequest
+	34,  // 223: kcore.controller.Controller.CreateVm:input_type -> kcore.controller.CreateVmRequest
+	36,  // 224: kcore.controller.Controller.UpdateVm:input_type -> kcore.controller.UpdateVmRequest
+	38,  // 225: kcore.controller.Controller.DeleteVm:input_type -> kcore.controller.DeleteVmRequest
+	40,  // 226: kcore.controller.Controller.SetVmDesiredState:input_type -> kcore.controller.SetVmDesiredStateRequest
+	42,  // 227: kcore.controller.Controller.GetVm:input_type -> kcore.controller.GetVmRequest
+	44,  // 228: kcore.controller.Controller.ListVms:input_type -> kcore.controller.ListVmsRequest
+	46,  // 229: kcore.controller.Controller.AttachVmConsole:input_type -> kcore.controller.ConsoleMessage
+	47,  // 230: kcore.controller.Controller.CreateWorkload:input_type -> kcore.controller.CreateWorkloadRequest
+	49,  // 231: kcore.controller.Controller.DeleteWorkload:input_type -> kcore.controller.DeleteWorkloadRequest
+	51,  // 232: kcore.controller.Controller.SetWorkloadDesiredState:input_type -> kcore.controller.SetWorkloadDesiredStateRequest
+	53,  // 233: kcore.controller.Controller.GetWorkload:input_type -> kcore.controller.GetWorkloadRequest
+	55,  // 234: kcore.controller.Controller.ListWorkloads:input_type -> kcore.controller.ListWorkloadsRequest
+	57,  // 235: kcore.controller.Controller.CreateNetwork:input_type -> kcore.controller.CreateNetworkRequest
+	59,  // 236: kcore.controller.Controller.DeleteNetwork:input_type -> kcore.controller.DeleteNetworkRequest
+	61,  // 237: kcore.controller.Controller.ListNetworks:input_type -> kcore.controller.ListNetworksRequest
+	67,  // 238: kcore.controller.Controller.CreateSecurityGroup:input_type -> kcore.controller.CreateSecurityGroupRequest
+	69,  // 239: kcore.controller.Controller.GetSecurityGroup:input_type -> kcore.controller.GetSecurityGroupRequest
+	71,  // 240: kcore.controller.Controller.ListSecurityGroups:input_type -> kcore.controller.ListSecurityGroupsRequest
+	73,  // 241: kcore.controller.Controller.DeleteSecurityGroup:input_type -> kcore.controller.DeleteSecurityGroupRequest
+	75,  // 242: kcore.controller.Controller.AttachSecurityGroup:input_type -> kcore.controller.AttachSecurityGroupRequest
+	77,  // 243: kcore.controller.Controller.DetachSecurityGroup:input_type -> kcore.controller.DetachSecurityGroupRequest
+	80,  // 244: kcore.controller.Controller.ListNodes:input_type -> kcore.controller.ListNodesRequest
+	83,  // 245: kcore.controller.Controller.GetNode:input_type -> kcore.controller.GetNodeRequest
+	105, // 246: kcore.controller.Controller.CreateSshKey:input_type -> kcore.controller.CreateSshKeyRequest
+	107, // 247: kcore.controller.Controller.DeleteSshKey:input_type -> kcore.controller.DeleteSshKeyRequest
+	109, // 248: kcore.controller.Controller.ListSshKeys:input_type -> kcore.controller.ListSshKeysRequest
+	111, // 249: kcore.controller.Controller.GetSshKey:input_type -> kcore.controller.GetSshKeyRequest
+	114, // 250: kcore.controller.Controller.DrainNode:input_type -> kcore.controller.DrainNodeRequest
+	116, // 251: kcore.controller.Controller.MigrateVm:input_type -> kcore.controller.MigrateVmRequest
+	118, // 252: kcore.controller.Controller.GetLiveMigrateReceiveStatus:input_type -> kcore.controller.GetLiveMigrateReceiveStatusRequest
+	122, // 253: kcore.controller.Controller.ResetLiveMigrateReceive:input_type -> kcore.controller.ResetLiveMigrateReceiveRequest
+	124, // 254: kcore.controller.Controller.ApproveNode:input_type -> kcore.controller.ApproveNodeRequest
+	126, // 255: kcore.controller.Controller.RejectNode:input_type -> kcore.controller.RejectNodeRequest
+	128, // 256: kcore.controller.Controller.CordonNode:input_type -> kcore.controller.CordonNodeRequest
+	130, // 257: kcore.controller.Controller.UncordonNode:input_type -> kcore.controller.UncordonNodeRequest
+	132, // 258: kcore.controller.Controller.DeleteNode:input_type -> kcore.controller.DeleteNodeRequest
+	134, // 259: kcore.controller.Controller.GetClusterHealth:input_type -> kcore.controller.GetClusterHealthRequest
+	136, // 260: kcore.controller.Controller.BackupCluster:input_type -> kcore.controller.BackupClusterRequest
+	138, // 261: kcore.controller.Controller.RestoreCluster:input_type -> kcore.controller.RestoreClusterRequest
+	140, // 262: kcore.controller.Controller.RenewNodeCert:input_type -> kcore.controller.RenewNodeCertRequest
+	142, // 263: kcore.controller.Controller.IssueNodeBootstrapCert:input_type -> kcore.controller.IssueNodeBootstrapCertRequest
+	144, // 264: kcore.controller.Controller.RotateSubCa:input_type -> kcore.controller.RotateSubCaRequest
+	146, // 265: kcore.controller.Controller.ReloadTls:input_type -> kcore.controller.ReloadTlsRequest
+	305, // 266: kcore.controller.Controller.SignNodeCsr:input_type -> kcore.controller.SignNodeCsrRequest
+	307, // 267: kcore.controller.Controller.RotateNodeCerts:input_type -> kcore.controller.RotateNodeCertsRequest
+	310, // 268: kcore.controller.Controller.ListCertificates:input_type -> kcore.controller.ListCertificatesRequest
+	312, // 269: kcore.controller.Controller.RevokeCertificate:input_type -> kcore.controller.RevokeCertificateRequest
+	314, // 270: kcore.controller.Controller.GetCrl:input_type -> kcore.controller.GetCrlRequest
+	316, // 271: kcore.controller.Controller.GetPkiStatus:input_type -> kcore.controller.GetPkiStatusRequest
+	148, // 272: kcore.controller.Controller.GetComplianceReport:input_type -> kcore.controller.GetComplianceReportRequest
+	152, // 273: kcore.controller.Controller.GetCryptoConfig:input_type -> kcore.controller.GetCryptoConfigRequest
+	154, // 274: kcore.controller.Controller.ExportSbom:input_type -> kcore.controller.ExportSbomRequest
+	149, // 275: kcore.controller.Controller.ListAuditEvents:input_type -> kcore.controller.ListAuditEventsRequest
+	173, // 276: kcore.controller.Controller.GetNetworkOverview:input_type -> kcore.controller.GetNetworkOverviewRequest
+	177, // 277: kcore.controller.Controller.GetStorageOverview:input_type -> kcore.controller.GetStorageOverviewRequest
+	184, // 278: kcore.controller.Controller.ListVolumes:input_type -> kcore.controller.ListVolumesRequest
+	187, // 279: kcore.controller.Controller.CreateVolume:input_type -> kcore.controller.CreateVolumeRequest
+	189, // 280: kcore.controller.Controller.GetVolume:input_type -> kcore.controller.GetVolumeRequest
+	191, // 281: kcore.controller.Controller.AttachVolume:input_type -> kcore.controller.AttachVolumeRequest
+	193, // 282: kcore.controller.Controller.DetachVolume:input_type -> kcore.controller.DetachVolumeRequest
+	195, // 283: kcore.controller.Controller.DeleteVolume:input_type -> kcore.controller.DeleteVolumeRequest
+	198, // 284: kcore.controller.Controller.ListVmOperations:input_type -> kcore.controller.ListVmOperationsRequest
+	200, // 285: kcore.controller.Controller.GetVmOperation:input_type -> kcore.controller.GetVmOperationRequest
+	202, // 286: kcore.controller.Controller.CancelVmOperation:input_type -> kcore.controller.CancelVmOperationRequest
+	205, // 287: kcore.controller.Controller.CreateVolumeSnapshot:input_type -> kcore.controller.CreateVolumeSnapshotRequest
+	207, // 288: kcore.controller.Controller.ListVolumeSnapshots:input_type -> kcore.controller.ListVolumeSnapshotsRequest
+	209, // 289: kcore.controller.Controller.DeleteVolumeSnapshot:input_type -> kcore.controller.DeleteVolumeSnapshotRequest
+	211, // 290: kcore.controller.Controller.RestoreVolume:input_type -> kcore.controller.RestoreVolumeRequest
+	213, // 291: kcore.controller.Controller.FlattenVolume:input_type -> kcore.controller.FlattenVolumeRequest
+	224, // 292: kcore.controller.Controller.ResizeVolume:input_type -> kcore.controller.ResizeVolumeRequest
+	226, // 293: kcore.controller.Controller.EncryptVolume:input_type -> kcore.controller.EncryptVolumeRequest
+	216, // 294: kcore.controller.Controller.CreateSnapshotPolicy:input_type -> kcore.controller.CreateSnapshotPolicyRequest
+	218, // 295: kcore.controller.Controller.GetSnapshotPolicy:input_type -> kcore.controller.GetSnapshotPolicyRequest
+	220, // 296: kcore.controller.Controller.ListSnapshotPolicies:input_type -> kcore.controller.ListSnapshotPoliciesRequest
+	222, // 297: kcore.controller.Controller.DeleteSnapshotPolicy:input_type -> kcore.controller.DeleteSnapshotPolicyRequest
+	230, // 298: kcore.controller.Controller.CreateDiskLayout:input_type -> kcore.controller.CreateDiskLayoutRequest
+	232, // 299: kcore.controller.Controller.GetDiskLayout:input_type -> kcore.controller.GetDiskLayoutRequest
+	234, // 300: kcore.controller.Controller.ListDiskLayouts:input_type -> kcore.controller.ListDiskLayoutsRequest
+	237, // 301: kcore.controller.Controller.DeleteDiskLayout:input_type -> kcore.controller.DeleteDiskLayoutRequest
+	239, // 302: kcore.controller.Controller.ClassifyDiskLayout:input_type -> kcore.controller.ClassifyDiskLayoutRequest
+	248, // 303: kcore.controller.Controller.CreateClusterUpdate:input_type -> kcore.controller.CreateClusterUpdateRequest
+	250, // 304: kcore.controller.Controller.GetClusterUpdate:input_type -> kcore.controller.GetClusterUpdateRequest
+	252, // 305: kcore.controller.Controller.ListClusterUpdates:input_type -> kcore.controller.ListClusterUpdatesRequest
+	254, // 306: kcore.controller.Controller.PlanClusterUpdate:input_type -> kcore.controller.PlanClusterUpdateRequest
+	257, // 307: kcore.controller.Controller.ApproveClusterUpdate:input_type -> kcore.controller.ApproveClusterUpdateRequest
+	259, // 308: kcore.controller.Controller.CancelClusterUpdate:input_type -> kcore.controller.CancelClusterUpdateRequest
+	261, // 309: kcore.controller.Controller.RollbackClusterUpdate:input_type -> kcore.controller.RollbackClusterUpdateRequest
+	267, // 310: kcore.controller.Controller.CreateCephCluster:input_type -> kcore.controller.CreateCephClusterRequest
+	269, // 311: kcore.controller.Controller.GetCephCluster:input_type -> kcore.controller.GetCephClusterRequest
+	271, // 312: kcore.controller.Controller.ListCephClusters:input_type -> kcore.controller.ListCephClustersRequest
+	273, // 313: kcore.controller.Controller.DeleteCephCluster:input_type -> kcore.controller.DeleteCephClusterRequest
+	279, // 314: kcore.controller.Controller.CreateSharedFilesystem:input_type -> kcore.controller.CreateSharedFilesystemRequest
+	281, // 315: kcore.controller.Controller.GetSharedFilesystem:input_type -> kcore.controller.GetSharedFilesystemRequest
+	283, // 316: kcore.controller.Controller.ListSharedFilesystems:input_type -> kcore.controller.ListSharedFilesystemsRequest
+	285, // 317: kcore.controller.Controller.DeleteSharedFilesystem:input_type -> kcore.controller.DeleteSharedFilesystemRequest
+	290, // 318: kcore.controller.Controller.CreateObjectStore:input_type -> kcore.controller.CreateObjectStoreRequest
+	292, // 319: kcore.controller.Controller.GetObjectStore:input_type -> kcore.controller.GetObjectStoreRequest
+	294, // 320: kcore.controller.Controller.ListObjectStores:input_type -> kcore.controller.ListObjectStoresRequest
+	296, // 321: kcore.controller.Controller.DeleteObjectStore:input_type -> kcore.controller.DeleteObjectStoreRequest
+	300, // 322: kcore.controller.Controller.CreateObjectUser:input_type -> kcore.controller.CreateObjectUserRequest
+	302, // 323: kcore.controller.Controller.DeleteObjectUser:input_type -> kcore.controller.DeleteObjectUserRequest
+	158, // 324: kcore.controller.Controller.CreateOperator:input_type -> kcore.controller.CreateOperatorRequest
+	160, // 325: kcore.controller.Controller.DeleteOperator:input_type -> kcore.controller.DeleteOperatorRequest
+	162, // 326: kcore.controller.Controller.ListOperators:input_type -> kcore.controller.ListOperatorsRequest
+	164, // 327: kcore.controller.Controller.GetOperator:input_type -> kcore.controller.GetOperatorRequest
+	166, // 328: kcore.controller.Controller.GrantOperatorRole:input_type -> kcore.controller.GrantOperatorRoleRequest
+	168, // 329: kcore.controller.Controller.RevokeOperatorRole:input_type -> kcore.controller.RevokeOperatorRoleRequest
+	170, // 330: kcore.controller.Controller.IssueOperatorCert:input_type -> kcore.controller.IssueOperatorCertRequest
+	89,  // 331: kcore.controller.ControllerAdmin.ApplyNixConfig:input_type -> kcore.controller.ApplyNixConfigRequest
+	91,  // 332: kcore.controller.ControllerAdmin.GetReplicationEvents:input_type -> kcore.controller.GetReplicationEventsRequest
+	94,  // 333: kcore.controller.ControllerAdmin.AckReplicationEvents:input_type -> kcore.controller.AckReplicationEventsRequest
+	96,  // 334: kcore.controller.ControllerAdmin.GetReplicationStatus:input_type -> kcore.controller.GetReplicationStatusRequest
+	100, // 335: kcore.controller.ControllerAdmin.ListReplicationConflicts:input_type -> kcore.controller.ListReplicationConflictsRequest
+	103, // 336: kcore.controller.ControllerAdmin.ResolveReplicationConflict:input_type -> kcore.controller.ResolveReplicationConflictRequest
+	22,  // 337: kcore.controller.Controller.RegisterNode:output_type -> kcore.controller.RegisterNodeResponse
+	24,  // 338: kcore.controller.Controller.Heartbeat:output_type -> kcore.controller.HeartbeatResponse
+	26,  // 339: kcore.controller.Controller.SyncVmState:output_type -> kcore.controller.SyncVmStateResponse
+	28,  // 340: kcore.controller.Controller.SyncWorkloadState:output_type -> kcore.controller.SyncWorkloadStateResponse
+	35,  // 341: kcore.controller.Controller.CreateVm:output_type -> kcore.controller.CreateVmResponse
+	37,  // 342: kcore.controller.Controller.UpdateVm:output_type -> kcore.controller.UpdateVmResponse
+	39,  // 343: kcore.controller.Controller.DeleteVm:output_type -> kcore.controller.DeleteVmResponse
+	41,  // 344: kcore.controller.Controller.SetVmDesiredState:output_type -> kcore.controller.SetVmDesiredStateResponse
+	43,  // 345: kcore.controller.Controller.GetVm:output_type -> kcore.controller.GetVmResponse
+	45,  // 346: kcore.controller.Controller.ListVms:output_type -> kcore.controller.ListVmsResponse
+	46,  // 347: kcore.controller.Controller.AttachVmConsole:output_type -> kcore.controller.ConsoleMessage
+	48,  // 348: kcore.controller.Controller.CreateWorkload:output_type -> kcore.controller.CreateWorkloadResponse
+	50,  // 349: kcore.controller.Controller.DeleteWorkload:output_type -> kcore.controller.DeleteWorkloadResponse
+	52,  // 350: kcore.controller.Controller.SetWorkloadDesiredState:output_type -> kcore.controller.SetWorkloadDesiredStateResponse
+	54,  // 351: kcore.controller.Controller.GetWorkload:output_type -> kcore.controller.GetWorkloadResponse
+	56,  // 352: kcore.controller.Controller.ListWorkloads:output_type -> kcore.controller.ListWorkloadsResponse
+	58,  // 353: kcore.controller.Controller.CreateNetwork:output_type -> kcore.controller.CreateNetworkResponse
+	60,  // 354: kcore.controller.Controller.DeleteNetwork:output_type -> kcore.controller.DeleteNetworkResponse
+	62,  // 355: kcore.controller.Controller.ListNetworks:output_type -> kcore.controller.ListNetworksResponse
+	68,  // 356: kcore.controller.Controller.CreateSecurityGroup:output_type -> kcore.controller.CreateSecurityGroupResponse
+	70,  // 357: kcore.controller.Controller.GetSecurityGroup:output_type -> kcore.controller.GetSecurityGroupResponse
+	72,  // 358: kcore.controller.Controller.ListSecurityGroups:output_type -> kcore.controller.ListSecurityGroupsResponse
+	74,  // 359: kcore.controller.Controller.DeleteSecurityGroup:output_type -> kcore.controller.DeleteSecurityGroupResponse
+	76,  // 360: kcore.controller.Controller.AttachSecurityGroup:output_type -> kcore.controller.AttachSecurityGroupResponse
+	78,  // 361: kcore.controller.Controller.DetachSecurityGroup:output_type -> kcore.controller.DetachSecurityGroupResponse
+	81,  // 362: kcore.controller.Controller.ListNodes:output_type -> kcore.controller.ListNodesResponse
+	84,  // 363: kcore.controller.Controller.GetNode:output_type -> kcore.controller.GetNodeResponse
+	106, // 364: kcore.controller.Controller.CreateSshKey:output_type -> kcore.controller.CreateSshKeyResponse
+	108, // 365: kcore.controller.Controller.DeleteSshKey:output_type -> kcore.controller.DeleteSshKeyResponse
+	110, // 366: kcore.controller.Controller.ListSshKeys:output_type -> kcore.controller.ListSshKeysResponse
+	112, // 367: kcore.controller.Controller.GetSshKey:output_type -> kcore.controller.GetSshKeyResponse
+	115, // 368: kcore.controller.Controller.DrainNode:output_type -> kcore.controller.DrainNodeResponse
+	117, // 369: kcore.controller.Controller.MigrateVm:output_type -> kcore.controller.MigrateVmResponse
+	121, // 370: kcore.controller.Controller.GetLiveMigrateReceiveStatus:output_type -> kcore.controller.GetLiveMigrateReceiveStatusResponse
+	123, // 371: kcore.controller.Controller.ResetLiveMigrateReceive:output_type -> kcore.controller.ResetLiveMigrateReceiveResponse
+	125, // 372: kcore.controller.Controller.ApproveNode:output_type -> kcore.controller.ApproveNodeResponse
+	127, // 373: kcore.controller.Controller.RejectNode:output_type -> kcore.controller.RejectNodeResponse
+	129, // 374: kcore.controller.Controller.CordonNode:output_type -> kcore.controller.CordonNodeResponse
+	131, // 375: kcore.controller.Controller.UncordonNode:output_type -> kcore.controller.UncordonNodeResponse
+	133, // 376: kcore.controller.Controller.DeleteNode:output_type -> kcore.controller.DeleteNodeResponse
+	135, // 377: kcore.controller.Controller.GetClusterHealth:output_type -> kcore.controller.GetClusterHealthResponse
+	137, // 378: kcore.controller.Controller.BackupCluster:output_type -> kcore.controller.BackupClusterResponse
+	139, // 379: kcore.controller.Controller.RestoreCluster:output_type -> kcore.controller.RestoreClusterResponse
+	141, // 380: kcore.controller.Controller.RenewNodeCert:output_type -> kcore.controller.RenewNodeCertResponse
+	143, // 381: kcore.controller.Controller.IssueNodeBootstrapCert:output_type -> kcore.controller.IssueNodeBootstrapCertResponse
+	145, // 382: kcore.controller.Controller.RotateSubCa:output_type -> kcore.controller.RotateSubCaResponse
+	147, // 383: kcore.controller.Controller.ReloadTls:output_type -> kcore.controller.ReloadTlsResponse
+	306, // 384: kcore.controller.Controller.SignNodeCsr:output_type -> kcore.controller.SignNodeCsrResponse
+	309, // 385: kcore.controller.Controller.RotateNodeCerts:output_type -> kcore.controller.RotateNodeCertsResponse
+	311, // 386: kcore.controller.Controller.ListCertificates:output_type -> kcore.controller.ListCertificatesResponse
+	313, // 387: kcore.controller.Controller.RevokeCertificate:output_type -> kcore.controller.RevokeCertificateResponse
+	315, // 388: kcore.controller.Controller.GetCrl:output_type -> kcore.controller.GetCrlResponse
+	317, // 389: kcore.controller.Controller.GetPkiStatus:output_type -> kcore.controller.GetPkiStatusResponse
+	172, // 390: kcore.controller.Controller.GetComplianceReport:output_type -> kcore.controller.GetComplianceReportResponse
+	153, // 391: kcore.controller.Controller.GetCryptoConfig:output_type -> kcore.controller.GetCryptoConfigResponse
+	155, // 392: kcore.controller.Controller.ExportSbom:output_type -> kcore.controller.ExportSbomResponse
+	151, // 393: kcore.controller.Controller.ListAuditEvents:output_type -> kcore.controller.ListAuditEventsResponse
+	176, // 394: kcore.controller.Controller.GetNetworkOverview:output_type -> kcore.controller.GetNetworkOverviewResponse
+	183, // 395: kcore.controller.Controller.GetStorageOverview:output_type -> kcore.controller.GetStorageOverviewResponse
+	185, // 396: kcore.controller.Controller.ListVolumes:output_type -> kcore.controller.ListVolumesResponse
+	188, // 397: kcore.controller.Controller.CreateVolume:output_type -> kcore.controller.CreateVolumeResponse
+	190, // 398: kcore.controller.Controller.GetVolume:output_type -> kcore.controller.GetVolumeResponse
+	192, // 399: kcore.controller.Controller.AttachVolume:output_type -> kcore.controller.AttachVolumeResponse
+	194, // 400: kcore.controller.Controller.DetachVolume:output_type -> kcore.controller.DetachVolumeResponse
+	196, // 401: kcore.controller.Controller.DeleteVolume:output_type -> kcore.controller.DeleteVolumeResponse
+	199, // 402: kcore.controller.Controller.ListVmOperations:output_type -> kcore.controller.ListVmOperationsResponse
+	201, // 403: kcore.controller.Controller.GetVmOperation:output_type -> kcore.controller.GetVmOperationResponse
+	203, // 404: kcore.controller.Controller.CancelVmOperation:output_type -> kcore.controller.CancelVmOperationResponse
+	206, // 405: kcore.controller.Controller.CreateVolumeSnapshot:output_type -> kcore.controller.CreateVolumeSnapshotResponse
+	208, // 406: kcore.controller.Controller.ListVolumeSnapshots:output_type -> kcore.controller.ListVolumeSnapshotsResponse
+	210, // 407: kcore.controller.Controller.DeleteVolumeSnapshot:output_type -> kcore.controller.DeleteVolumeSnapshotResponse
+	212, // 408: kcore.controller.Controller.RestoreVolume:output_type -> kcore.controller.RestoreVolumeResponse
+	214, // 409: kcore.controller.Controller.FlattenVolume:output_type -> kcore.controller.FlattenVolumeResponse
+	225, // 410: kcore.controller.Controller.ResizeVolume:output_type -> kcore.controller.ResizeVolumeResponse
+	227, // 411: kcore.controller.Controller.EncryptVolume:output_type -> kcore.controller.EncryptVolumeResponse
+	217, // 412: kcore.controller.Controller.CreateSnapshotPolicy:output_type -> kcore.controller.CreateSnapshotPolicyResponse
+	219, // 413: kcore.controller.Controller.GetSnapshotPolicy:output_type -> kcore.controller.GetSnapshotPolicyResponse
+	221, // 414: kcore.controller.Controller.ListSnapshotPolicies:output_type -> kcore.controller.ListSnapshotPoliciesResponse
+	223, // 415: kcore.controller.Controller.DeleteSnapshotPolicy:output_type -> kcore.controller.DeleteSnapshotPolicyResponse
+	231, // 416: kcore.controller.Controller.CreateDiskLayout:output_type -> kcore.controller.CreateDiskLayoutResponse
+	233, // 417: kcore.controller.Controller.GetDiskLayout:output_type -> kcore.controller.GetDiskLayoutResponse
+	236, // 418: kcore.controller.Controller.ListDiskLayouts:output_type -> kcore.controller.ListDiskLayoutsResponse
+	238, // 419: kcore.controller.Controller.DeleteDiskLayout:output_type -> kcore.controller.DeleteDiskLayoutResponse
+	240, // 420: kcore.controller.Controller.ClassifyDiskLayout:output_type -> kcore.controller.ClassifyDiskLayoutResponse
+	249, // 421: kcore.controller.Controller.CreateClusterUpdate:output_type -> kcore.controller.CreateClusterUpdateResponse
+	251, // 422: kcore.controller.Controller.GetClusterUpdate:output_type -> kcore.controller.GetClusterUpdateResponse
+	253, // 423: kcore.controller.Controller.ListClusterUpdates:output_type -> kcore.controller.ListClusterUpdatesResponse
+	256, // 424: kcore.controller.Controller.PlanClusterUpdate:output_type -> kcore.controller.PlanClusterUpdateResponse
+	258, // 425: kcore.controller.Controller.ApproveClusterUpdate:output_type -> kcore.controller.ApproveClusterUpdateResponse
+	260, // 426: kcore.controller.Controller.CancelClusterUpdate:output_type -> kcore.controller.CancelClusterUpdateResponse
+	262, // 427: kcore.controller.Controller.RollbackClusterUpdate:output_type -> kcore.controller.RollbackClusterUpdateResponse
+	268, // 428: kcore.controller.Controller.CreateCephCluster:output_type -> kcore.controller.CreateCephClusterResponse
+	270, // 429: kcore.controller.Controller.GetCephCluster:output_type -> kcore.controller.GetCephClusterResponse
+	272, // 430: kcore.controller.Controller.ListCephClusters:output_type -> kcore.controller.ListCephClustersResponse
+	274, // 431: kcore.controller.Controller.DeleteCephCluster:output_type -> kcore.controller.DeleteCephClusterResponse
+	280, // 432: kcore.controller.Controller.CreateSharedFilesystem:output_type -> kcore.controller.CreateSharedFilesystemResponse
+	282, // 433: kcore.controller.Controller.GetSharedFilesystem:output_type -> kcore.controller.GetSharedFilesystemResponse
+	284, // 434: kcore.controller.Controller.ListSharedFilesystems:output_type -> kcore.controller.ListSharedFilesystemsResponse
+	286, // 435: kcore.controller.Controller.DeleteSharedFilesystem:output_type -> kcore.controller.DeleteSharedFilesystemResponse
+	291, // 436: kcore.controller.Controller.CreateObjectStore:output_type -> kcore.controller.CreateObjectStoreResponse
+	293, // 437: kcore.controller.Controller.GetObjectStore:output_type -> kcore.controller.GetObjectStoreResponse
+	295, // 438: kcore.controller.Controller.ListObjectStores:output_type -> kcore.controller.ListObjectStoresResponse
+	297, // 439: kcore.controller.Controller.DeleteObjectStore:output_type -> kcore.controller.DeleteObjectStoreResponse
+	301, // 440: kcore.controller.Controller.CreateObjectUser:output_type -> kcore.controller.CreateObjectUserResponse
+	303, // 441: kcore.controller.Controller.DeleteObjectUser:output_type -> kcore.controller.DeleteObjectUserResponse
+	159, // 442: kcore.controller.Controller.CreateOperator:output_type -> kcore.controller.CreateOperatorResponse
+	161, // 443: kcore.controller.Controller.DeleteOperator:output_type -> kcore.controller.DeleteOperatorResponse
+	163, // 444: kcore.controller.Controller.ListOperators:output_type -> kcore.controller.ListOperatorsResponse
+	165, // 445: kcore.controller.Controller.GetOperator:output_type -> kcore.controller.GetOperatorResponse
+	167, // 446: kcore.controller.Controller.GrantOperatorRole:output_type -> kcore.controller.GrantOperatorRoleResponse
+	169, // 447: kcore.controller.Controller.RevokeOperatorRole:output_type -> kcore.controller.RevokeOperatorRoleResponse
+	171, // 448: kcore.controller.Controller.IssueOperatorCert:output_type -> kcore.controller.IssueOperatorCertResponse
+	90,  // 449: kcore.controller.ControllerAdmin.ApplyNixConfig:output_type -> kcore.controller.ApplyNixConfigResponse
+	93,  // 450: kcore.controller.ControllerAdmin.GetReplicationEvents:output_type -> kcore.controller.GetReplicationEventsResponse
+	95,  // 451: kcore.controller.ControllerAdmin.AckReplicationEvents:output_type -> kcore.controller.AckReplicationEventsResponse
+	99,  // 452: kcore.controller.ControllerAdmin.GetReplicationStatus:output_type -> kcore.controller.GetReplicationStatusResponse
+	102, // 453: kcore.controller.ControllerAdmin.ListReplicationConflicts:output_type -> kcore.controller.ListReplicationConflictsResponse
+	104, // 454: kcore.controller.ControllerAdmin.ResolveReplicationConflict:output_type -> kcore.controller.ResolveReplicationConflictResponse
+	337, // [337:455] is the sub-list for method output_type
+	219, // [219:337] is the sub-list for method input_type
+	219, // [219:219] is the sub-list for extension type_name
+	219, // [219:219] is the sub-list for extension extendee
+	0,   // [0:219] is the sub-list for field type_name
 }
 
 func init() { file_controller_proto_init() }
@@ -22057,7 +22190,7 @@ func file_controller_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_controller_proto_rawDesc), len(file_controller_proto_rawDesc)),
 			NumEnums:      21,
-			NumMessages:   297,
+			NumMessages:   298,
 			NumExtensions: 0,
 			NumServices:   2,
 		},
