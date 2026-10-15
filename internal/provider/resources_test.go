@@ -29,6 +29,7 @@ func TestResourcesCoverKctlCreateSurface(t *testing.T) {
 		"kcore_operator",
 		"kcore_cluster_update",
 		"kcore_workload",
+		"kcore_kubernetes_cluster",
 	}
 	for _, name := range want {
 		if _, ok := p.ResourcesMap[name]; !ok {

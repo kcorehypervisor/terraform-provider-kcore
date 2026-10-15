@@ -19682,6 +19682,1707 @@ func (x *GetPkiStatusResponse) GetSoonestExpiring() []*CertificateInfo {
 	return nil
 }
 
+type CiliumConfig struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	Mode                 string                 `protobuf:"bytes,1,opt,name=mode,proto3" json:"mode,omitempty"`                                                                  // "native-routing", "tunnel"
+	Mtu                  int32                  `protobuf:"varint,2,opt,name=mtu,proto3" json:"mtu,omitempty"`                                                                   // Default 1500
+	Tunnel               string                 `protobuf:"bytes,3,opt,name=tunnel,proto3" json:"tunnel,omitempty"`                                                              // "disabled", "vxlan", "geneve"
+	AutoDirectNodeRoutes bool                   `protobuf:"varint,4,opt,name=auto_direct_node_routes,json=autoDirectNodeRoutes,proto3" json:"auto_direct_node_routes,omitempty"` // true for native routing
+	LoadBalancerIpPools  []string               `protobuf:"bytes,5,rep,name=load_balancer_ip_pools,json=loadBalancerIpPools,proto3" json:"load_balancer_ip_pools,omitempty"`     // CIDR strings like "192.168.40.220/29"
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *CiliumConfig) Reset() {
+	*x = CiliumConfig{}
+	mi := &file_controller_proto_msgTypes[297]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CiliumConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CiliumConfig) ProtoMessage() {}
+
+func (x *CiliumConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[297]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CiliumConfig.ProtoReflect.Descriptor instead.
+func (*CiliumConfig) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{297}
+}
+
+func (x *CiliumConfig) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
+func (x *CiliumConfig) GetMtu() int32 {
+	if x != nil {
+		return x.Mtu
+	}
+	return 0
+}
+
+func (x *CiliumConfig) GetTunnel() string {
+	if x != nil {
+		return x.Tunnel
+	}
+	return ""
+}
+
+func (x *CiliumConfig) GetAutoDirectNodeRoutes() bool {
+	if x != nil {
+		return x.AutoDirectNodeRoutes
+	}
+	return false
+}
+
+func (x *CiliumConfig) GetLoadBalancerIpPools() []string {
+	if x != nil {
+		return x.LoadBalancerIpPools
+	}
+	return nil
+}
+
+type KubernetesNodeSpec struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	NodeId           string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	Role             string                 `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`                                                 // "control-plane" or "worker"
+	AdvertiseAddress string                 `protobuf:"bytes,3,opt,name=advertise_address,json=advertiseAddress,proto3" json:"advertise_address,omitempty"` // Static IP for this node
+	Iface            string                 `protobuf:"bytes,4,opt,name=iface,proto3" json:"iface,omitempty"`                                               // Physical NIC (e.g., enp6s0)
+	InitialCluster   bool                   `protobuf:"varint,5,opt,name=initial_cluster,json=initialCluster,proto3" json:"initial_cluster,omitempty"`      // true for the first control plane (etcd bootstrap)
+	JoinExisting     bool                   `protobuf:"varint,6,opt,name=join_existing,json=joinExisting,proto3" json:"join_existing,omitempty"`            // true for additional control planes
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *KubernetesNodeSpec) Reset() {
+	*x = KubernetesNodeSpec{}
+	mi := &file_controller_proto_msgTypes[298]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KubernetesNodeSpec) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KubernetesNodeSpec) ProtoMessage() {}
+
+func (x *KubernetesNodeSpec) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[298]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KubernetesNodeSpec.ProtoReflect.Descriptor instead.
+func (*KubernetesNodeSpec) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{298}
+}
+
+func (x *KubernetesNodeSpec) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *KubernetesNodeSpec) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *KubernetesNodeSpec) GetAdvertiseAddress() string {
+	if x != nil {
+		return x.AdvertiseAddress
+	}
+	return ""
+}
+
+func (x *KubernetesNodeSpec) GetIface() string {
+	if x != nil {
+		return x.Iface
+	}
+	return ""
+}
+
+func (x *KubernetesNodeSpec) GetInitialCluster() bool {
+	if x != nil {
+		return x.InitialCluster
+	}
+	return false
+}
+
+func (x *KubernetesNodeSpec) GetJoinExisting() bool {
+	if x != nil {
+		return x.JoinExisting
+	}
+	return false
+}
+
+type HighAvailabilityConfig struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Enabled       bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	VipAddress    string                 `protobuf:"bytes,2,opt,name=vip_address,json=vipAddress,proto3" json:"vip_address,omitempty"`       // Virtual IP for kube-apiserver
+	VipInterface  string                 `protobuf:"bytes,3,opt,name=vip_interface,json=vipInterface,proto3" json:"vip_interface,omitempty"` // NIC to bind VIP
+	Method        string                 `protobuf:"bytes,4,opt,name=method,proto3" json:"method,omitempty"`                                 // "keepalived" (kcore-managed)
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HighAvailabilityConfig) Reset() {
+	*x = HighAvailabilityConfig{}
+	mi := &file_controller_proto_msgTypes[299]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HighAvailabilityConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HighAvailabilityConfig) ProtoMessage() {}
+
+func (x *HighAvailabilityConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[299]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HighAvailabilityConfig.ProtoReflect.Descriptor instead.
+func (*HighAvailabilityConfig) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{299}
+}
+
+func (x *HighAvailabilityConfig) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+func (x *HighAvailabilityConfig) GetVipAddress() string {
+	if x != nil {
+		return x.VipAddress
+	}
+	return ""
+}
+
+func (x *HighAvailabilityConfig) GetVipInterface() string {
+	if x != nil {
+		return x.VipInterface
+	}
+	return ""
+}
+
+func (x *HighAvailabilityConfig) GetMethod() string {
+	if x != nil {
+		return x.Method
+	}
+	return ""
+}
+
+// One LVM logical volume or ZFS zvol that the local-path provisioner uses.
+type KubernetesHostVolume struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Name         string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"` // LV or zvol name on the node
+	NodeId       string                 `protobuf:"bytes,2,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	StorageClass string                 `protobuf:"bytes,3,opt,name=storage_class,json=storageClass,proto3" json:"storage_class,omitempty"` // "lvm" or "zfs"
+	SizeBytes    int64                  `protobuf:"varint,4,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	FsType       string                 `protobuf:"bytes,5,opt,name=fs_type,json=fsType,proto3" json:"fs_type,omitempty"`          // "ext4" or "xfs"; empty means ext4
+	MountPath    string                 `protobuf:"bytes,6,opt,name=mount_path,json=mountPath,proto3" json:"mount_path,omitempty"` // empty means /mnt/kcore/<cluster>/<name>
+	// "filesystem" (default): format and mount this volume. Many
+	// PersistentVolumeClaims are directories on that one filesystem.
+	// "pool": an LVM thin pool of size_bytes. kcore creates the pool and
+	// does not carve claims from it.
+	Role string `protobuf:"bytes,7,opt,name=role,proto3" json:"role,omitempty"`
+	// Volume group that holds a pool. Required when role is "pool".
+	VolumeGroup   string `protobuf:"bytes,8,opt,name=volume_group,json=volumeGroup,proto3" json:"volume_group,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KubernetesHostVolume) Reset() {
+	*x = KubernetesHostVolume{}
+	mi := &file_controller_proto_msgTypes[300]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KubernetesHostVolume) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KubernetesHostVolume) ProtoMessage() {}
+
+func (x *KubernetesHostVolume) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[300]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KubernetesHostVolume.ProtoReflect.Descriptor instead.
+func (*KubernetesHostVolume) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{300}
+}
+
+func (x *KubernetesHostVolume) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *KubernetesHostVolume) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *KubernetesHostVolume) GetStorageClass() string {
+	if x != nil {
+		return x.StorageClass
+	}
+	return ""
+}
+
+func (x *KubernetesHostVolume) GetSizeBytes() int64 {
+	if x != nil {
+		return x.SizeBytes
+	}
+	return 0
+}
+
+func (x *KubernetesHostVolume) GetFsType() string {
+	if x != nil {
+		return x.FsType
+	}
+	return ""
+}
+
+func (x *KubernetesHostVolume) GetMountPath() string {
+	if x != nil {
+		return x.MountPath
+	}
+	return ""
+}
+
+func (x *KubernetesHostVolume) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *KubernetesHostVolume) GetVolumeGroup() string {
+	if x != nil {
+		return x.VolumeGroup
+	}
+	return ""
+}
+
+// Host storage for PersistentVolumeClaims.
+// mode "shared" (default) is the Rancher local-path provisioner: claims are
+// directories on a formatted volume.
+// mode "lvm" creates one LVM thin pool on each declared node and does not
+// install a volume provisioner.
+type KubernetesLocalProvisioner struct {
+	state            protoimpl.MessageState  `protogen:"open.v1"`
+	Enabled          bool                    `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	StorageClassName string                  `protobuf:"bytes,2,opt,name=storage_class_name,json=storageClassName,proto3" json:"storage_class_name,omitempty"` // empty means "local-path"
+	Volumes          []*KubernetesHostVolume `protobuf:"bytes,3,rep,name=volumes,proto3" json:"volumes,omitempty"`
+	Mode             string                  `protobuf:"bytes,4,opt,name=mode,proto3" json:"mode,omitempty"` // "shared" or "lvm"; empty means shared
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *KubernetesLocalProvisioner) Reset() {
+	*x = KubernetesLocalProvisioner{}
+	mi := &file_controller_proto_msgTypes[301]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KubernetesLocalProvisioner) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KubernetesLocalProvisioner) ProtoMessage() {}
+
+func (x *KubernetesLocalProvisioner) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[301]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KubernetesLocalProvisioner.ProtoReflect.Descriptor instead.
+func (*KubernetesLocalProvisioner) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{301}
+}
+
+func (x *KubernetesLocalProvisioner) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+func (x *KubernetesLocalProvisioner) GetStorageClassName() string {
+	if x != nil {
+		return x.StorageClassName
+	}
+	return ""
+}
+
+func (x *KubernetesLocalProvisioner) GetVolumes() []*KubernetesHostVolume {
+	if x != nil {
+		return x.Volumes
+	}
+	return nil
+}
+
+func (x *KubernetesLocalProvisioner) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
+type KubernetesClusterSpec struct {
+	state             protoimpl.MessageState      `protogen:"open.v1"`
+	ClusterCidr       string                      `protobuf:"bytes,1,opt,name=cluster_cidr,json=clusterCidr,proto3" json:"cluster_cidr,omitempty"`
+	ServiceCidr       string                      `protobuf:"bytes,2,opt,name=service_cidr,json=serviceCidr,proto3" json:"service_cidr,omitempty"`
+	ClusterDns        string                      `protobuf:"bytes,3,opt,name=cluster_dns,json=clusterDns,proto3" json:"cluster_dns,omitempty"`
+	ApiServerEndpoint string                      `protobuf:"bytes,4,opt,name=api_server_endpoint,json=apiServerEndpoint,proto3" json:"api_server_endpoint,omitempty"` // VIP:port
+	Cni               string                      `protobuf:"bytes,5,opt,name=cni,proto3" json:"cni,omitempty"`                                                        // "cilium"
+	CiliumConfig      *CiliumConfig               `protobuf:"bytes,6,opt,name=cilium_config,json=ciliumConfig,proto3" json:"cilium_config,omitempty"`
+	ControlPlaneNodes []*KubernetesNodeSpec       `protobuf:"bytes,7,rep,name=control_plane_nodes,json=controlPlaneNodes,proto3" json:"control_plane_nodes,omitempty"`
+	WorkerNodes       []*KubernetesNodeSpec       `protobuf:"bytes,8,rep,name=worker_nodes,json=workerNodes,proto3" json:"worker_nodes,omitempty"`
+	HighAvailability  *HighAvailabilityConfig     `protobuf:"bytes,9,opt,name=high_availability,json=highAvailability,proto3" json:"high_availability,omitempty"`
+	LocalProvisioner  *KubernetesLocalProvisioner `protobuf:"bytes,10,opt,name=local_provisioner,json=localProvisioner,proto3" json:"local_provisioner,omitempty"`
+	// Control-plane nodes also accept pods. A cluster can list no separate
+	// worker nodes and still schedule workloads on the masters.
+	ScheduleOnControlPlane bool `protobuf:"varint,11,opt,name=schedule_on_control_plane,json=scheduleOnControlPlane,proto3" json:"schedule_on_control_plane,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *KubernetesClusterSpec) Reset() {
+	*x = KubernetesClusterSpec{}
+	mi := &file_controller_proto_msgTypes[302]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KubernetesClusterSpec) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KubernetesClusterSpec) ProtoMessage() {}
+
+func (x *KubernetesClusterSpec) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[302]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KubernetesClusterSpec.ProtoReflect.Descriptor instead.
+func (*KubernetesClusterSpec) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{302}
+}
+
+func (x *KubernetesClusterSpec) GetClusterCidr() string {
+	if x != nil {
+		return x.ClusterCidr
+	}
+	return ""
+}
+
+func (x *KubernetesClusterSpec) GetServiceCidr() string {
+	if x != nil {
+		return x.ServiceCidr
+	}
+	return ""
+}
+
+func (x *KubernetesClusterSpec) GetClusterDns() string {
+	if x != nil {
+		return x.ClusterDns
+	}
+	return ""
+}
+
+func (x *KubernetesClusterSpec) GetApiServerEndpoint() string {
+	if x != nil {
+		return x.ApiServerEndpoint
+	}
+	return ""
+}
+
+func (x *KubernetesClusterSpec) GetCni() string {
+	if x != nil {
+		return x.Cni
+	}
+	return ""
+}
+
+func (x *KubernetesClusterSpec) GetCiliumConfig() *CiliumConfig {
+	if x != nil {
+		return x.CiliumConfig
+	}
+	return nil
+}
+
+func (x *KubernetesClusterSpec) GetControlPlaneNodes() []*KubernetesNodeSpec {
+	if x != nil {
+		return x.ControlPlaneNodes
+	}
+	return nil
+}
+
+func (x *KubernetesClusterSpec) GetWorkerNodes() []*KubernetesNodeSpec {
+	if x != nil {
+		return x.WorkerNodes
+	}
+	return nil
+}
+
+func (x *KubernetesClusterSpec) GetHighAvailability() *HighAvailabilityConfig {
+	if x != nil {
+		return x.HighAvailability
+	}
+	return nil
+}
+
+func (x *KubernetesClusterSpec) GetLocalProvisioner() *KubernetesLocalProvisioner {
+	if x != nil {
+		return x.LocalProvisioner
+	}
+	return nil
+}
+
+func (x *KubernetesClusterSpec) GetScheduleOnControlPlane() bool {
+	if x != nil {
+		return x.ScheduleOnControlPlane
+	}
+	return false
+}
+
+type KubernetesClusterStatus struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Phase              string                 `protobuf:"bytes,1,opt,name=phase,proto3" json:"phase,omitempty"` // pending, bootstrapping, scaling, ready, degraded, failed
+	Message            string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	ReadyControlPlanes int32                  `protobuf:"varint,3,opt,name=ready_control_planes,json=readyControlPlanes,proto3" json:"ready_control_planes,omitempty"`
+	ReadyWorkers       int32                  `protobuf:"varint,4,opt,name=ready_workers,json=readyWorkers,proto3" json:"ready_workers,omitempty"`
+	LastUpdated        *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=last_updated,json=lastUpdated,proto3" json:"last_updated,omitempty"`
+	ActiveNodeIds      []string               `protobuf:"bytes,6,rep,name=active_node_ids,json=activeNodeIds,proto3" json:"active_node_ids,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *KubernetesClusterStatus) Reset() {
+	*x = KubernetesClusterStatus{}
+	mi := &file_controller_proto_msgTypes[303]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KubernetesClusterStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KubernetesClusterStatus) ProtoMessage() {}
+
+func (x *KubernetesClusterStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[303]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KubernetesClusterStatus.ProtoReflect.Descriptor instead.
+func (*KubernetesClusterStatus) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{303}
+}
+
+func (x *KubernetesClusterStatus) GetPhase() string {
+	if x != nil {
+		return x.Phase
+	}
+	return ""
+}
+
+func (x *KubernetesClusterStatus) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *KubernetesClusterStatus) GetReadyControlPlanes() int32 {
+	if x != nil {
+		return x.ReadyControlPlanes
+	}
+	return 0
+}
+
+func (x *KubernetesClusterStatus) GetReadyWorkers() int32 {
+	if x != nil {
+		return x.ReadyWorkers
+	}
+	return 0
+}
+
+func (x *KubernetesClusterStatus) GetLastUpdated() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LastUpdated
+	}
+	return nil
+}
+
+func (x *KubernetesClusterStatus) GetActiveNodeIds() []string {
+	if x != nil {
+		return x.ActiveNodeIds
+	}
+	return nil
+}
+
+type KubernetesCluster struct {
+	state         protoimpl.MessageState   `protogen:"open.v1"`
+	Name          string                   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Generation    int64                    `protobuf:"varint,2,opt,name=generation,proto3" json:"generation,omitempty"`
+	Spec          *KubernetesClusterSpec   `protobuf:"bytes,3,opt,name=spec,proto3" json:"spec,omitempty"`
+	Status        *KubernetesClusterStatus `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KubernetesCluster) Reset() {
+	*x = KubernetesCluster{}
+	mi := &file_controller_proto_msgTypes[304]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KubernetesCluster) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KubernetesCluster) ProtoMessage() {}
+
+func (x *KubernetesCluster) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[304]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KubernetesCluster.ProtoReflect.Descriptor instead.
+func (*KubernetesCluster) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{304}
+}
+
+func (x *KubernetesCluster) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *KubernetesCluster) GetGeneration() int64 {
+	if x != nil {
+		return x.Generation
+	}
+	return 0
+}
+
+func (x *KubernetesCluster) GetSpec() *KubernetesClusterSpec {
+	if x != nil {
+		return x.Spec
+	}
+	return nil
+}
+
+func (x *KubernetesCluster) GetStatus() *KubernetesClusterStatus {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+type PlanKubernetesClusterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Spec          *KubernetesClusterSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PlanKubernetesClusterRequest) Reset() {
+	*x = PlanKubernetesClusterRequest{}
+	mi := &file_controller_proto_msgTypes[305]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlanKubernetesClusterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlanKubernetesClusterRequest) ProtoMessage() {}
+
+func (x *PlanKubernetesClusterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[305]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlanKubernetesClusterRequest.ProtoReflect.Descriptor instead.
+func (*PlanKubernetesClusterRequest) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{305}
+}
+
+func (x *PlanKubernetesClusterRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *PlanKubernetesClusterRequest) GetSpec() *KubernetesClusterSpec {
+	if x != nil {
+		return x.Spec
+	}
+	return nil
+}
+
+type NodePlanResult struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	NodeId          string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	PreflightPassed bool                   `protobuf:"varint,2,opt,name=preflight_passed,json=preflightPassed,proto3" json:"preflight_passed,omitempty"`
+	Issues          []string               `protobuf:"bytes,3,rep,name=issues,proto3" json:"issues,omitempty"`
+	NixAction       string                 `protobuf:"bytes,4,opt,name=nix_action,json=nixAction,proto3" json:"nix_action,omitempty"` // "build", "rebuild", "no-change"
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *NodePlanResult) Reset() {
+	*x = NodePlanResult{}
+	mi := &file_controller_proto_msgTypes[306]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NodePlanResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NodePlanResult) ProtoMessage() {}
+
+func (x *NodePlanResult) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[306]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NodePlanResult.ProtoReflect.Descriptor instead.
+func (*NodePlanResult) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{306}
+}
+
+func (x *NodePlanResult) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *NodePlanResult) GetPreflightPassed() bool {
+	if x != nil {
+		return x.PreflightPassed
+	}
+	return false
+}
+
+func (x *NodePlanResult) GetIssues() []string {
+	if x != nil {
+		return x.Issues
+	}
+	return nil
+}
+
+func (x *NodePlanResult) GetNixAction() string {
+	if x != nil {
+		return x.NixAction
+	}
+	return ""
+}
+
+type PlanKubernetesClusterResponse struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Action             string                 `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"` // "create", "update", "replace", "unchanged"
+	BlockingIssues     []string               `protobuf:"bytes,2,rep,name=blocking_issues,json=blockingIssues,proto3" json:"blocking_issues,omitempty"`
+	Warnings           []string               `protobuf:"bytes,3,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	NodePlans          []*NodePlanResult      `protobuf:"bytes,4,rep,name=node_plans,json=nodePlans,proto3" json:"node_plans,omitempty"`
+	RenderedNixPreview string                 `protobuf:"bytes,5,opt,name=rendered_nix_preview,json=renderedNixPreview,proto3" json:"rendered_nix_preview,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *PlanKubernetesClusterResponse) Reset() {
+	*x = PlanKubernetesClusterResponse{}
+	mi := &file_controller_proto_msgTypes[307]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlanKubernetesClusterResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlanKubernetesClusterResponse) ProtoMessage() {}
+
+func (x *PlanKubernetesClusterResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[307]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlanKubernetesClusterResponse.ProtoReflect.Descriptor instead.
+func (*PlanKubernetesClusterResponse) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{307}
+}
+
+func (x *PlanKubernetesClusterResponse) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *PlanKubernetesClusterResponse) GetBlockingIssues() []string {
+	if x != nil {
+		return x.BlockingIssues
+	}
+	return nil
+}
+
+func (x *PlanKubernetesClusterResponse) GetWarnings() []string {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+func (x *PlanKubernetesClusterResponse) GetNodePlans() []*NodePlanResult {
+	if x != nil {
+		return x.NodePlans
+	}
+	return nil
+}
+
+func (x *PlanKubernetesClusterResponse) GetRenderedNixPreview() string {
+	if x != nil {
+		return x.RenderedNixPreview
+	}
+	return ""
+}
+
+type CreateKubernetesClusterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Spec          *KubernetesClusterSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	Confirm       bool                   `protobuf:"varint,3,opt,name=confirm,proto3" json:"confirm,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateKubernetesClusterRequest) Reset() {
+	*x = CreateKubernetesClusterRequest{}
+	mi := &file_controller_proto_msgTypes[308]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateKubernetesClusterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateKubernetesClusterRequest) ProtoMessage() {}
+
+func (x *CreateKubernetesClusterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[308]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateKubernetesClusterRequest.ProtoReflect.Descriptor instead.
+func (*CreateKubernetesClusterRequest) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{308}
+}
+
+func (x *CreateKubernetesClusterRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateKubernetesClusterRequest) GetSpec() *KubernetesClusterSpec {
+	if x != nil {
+		return x.Spec
+	}
+	return nil
+}
+
+func (x *CreateKubernetesClusterRequest) GetConfirm() bool {
+	if x != nil {
+		return x.Confirm
+	}
+	return false
+}
+
+type CreateKubernetesClusterResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cluster       *KubernetesCluster     `protobuf:"bytes,1,opt,name=cluster,proto3" json:"cluster,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateKubernetesClusterResponse) Reset() {
+	*x = CreateKubernetesClusterResponse{}
+	mi := &file_controller_proto_msgTypes[309]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateKubernetesClusterResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateKubernetesClusterResponse) ProtoMessage() {}
+
+func (x *CreateKubernetesClusterResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[309]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateKubernetesClusterResponse.ProtoReflect.Descriptor instead.
+func (*CreateKubernetesClusterResponse) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{309}
+}
+
+func (x *CreateKubernetesClusterResponse) GetCluster() *KubernetesCluster {
+	if x != nil {
+		return x.Cluster
+	}
+	return nil
+}
+
+type UpdateKubernetesClusterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Spec          *KubernetesClusterSpec `protobuf:"bytes,2,opt,name=spec,proto3" json:"spec,omitempty"`
+	Confirm       bool                   `protobuf:"varint,3,opt,name=confirm,proto3" json:"confirm,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateKubernetesClusterRequest) Reset() {
+	*x = UpdateKubernetesClusterRequest{}
+	mi := &file_controller_proto_msgTypes[310]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateKubernetesClusterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateKubernetesClusterRequest) ProtoMessage() {}
+
+func (x *UpdateKubernetesClusterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[310]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateKubernetesClusterRequest.ProtoReflect.Descriptor instead.
+func (*UpdateKubernetesClusterRequest) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{310}
+}
+
+func (x *UpdateKubernetesClusterRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateKubernetesClusterRequest) GetSpec() *KubernetesClusterSpec {
+	if x != nil {
+		return x.Spec
+	}
+	return nil
+}
+
+func (x *UpdateKubernetesClusterRequest) GetConfirm() bool {
+	if x != nil {
+		return x.Confirm
+	}
+	return false
+}
+
+type UpdateKubernetesClusterResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cluster       *KubernetesCluster     `protobuf:"bytes,1,opt,name=cluster,proto3" json:"cluster,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateKubernetesClusterResponse) Reset() {
+	*x = UpdateKubernetesClusterResponse{}
+	mi := &file_controller_proto_msgTypes[311]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateKubernetesClusterResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateKubernetesClusterResponse) ProtoMessage() {}
+
+func (x *UpdateKubernetesClusterResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[311]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateKubernetesClusterResponse.ProtoReflect.Descriptor instead.
+func (*UpdateKubernetesClusterResponse) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{311}
+}
+
+func (x *UpdateKubernetesClusterResponse) GetCluster() *KubernetesCluster {
+	if x != nil {
+		return x.Cluster
+	}
+	return nil
+}
+
+type GetKubernetesClusterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetKubernetesClusterRequest) Reset() {
+	*x = GetKubernetesClusterRequest{}
+	mi := &file_controller_proto_msgTypes[312]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetKubernetesClusterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetKubernetesClusterRequest) ProtoMessage() {}
+
+func (x *GetKubernetesClusterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[312]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetKubernetesClusterRequest.ProtoReflect.Descriptor instead.
+func (*GetKubernetesClusterRequest) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{312}
+}
+
+func (x *GetKubernetesClusterRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type GetKubernetesClusterResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cluster       *KubernetesCluster     `protobuf:"bytes,1,opt,name=cluster,proto3" json:"cluster,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetKubernetesClusterResponse) Reset() {
+	*x = GetKubernetesClusterResponse{}
+	mi := &file_controller_proto_msgTypes[313]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetKubernetesClusterResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetKubernetesClusterResponse) ProtoMessage() {}
+
+func (x *GetKubernetesClusterResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[313]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetKubernetesClusterResponse.ProtoReflect.Descriptor instead.
+func (*GetKubernetesClusterResponse) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{313}
+}
+
+func (x *GetKubernetesClusterResponse) GetCluster() *KubernetesCluster {
+	if x != nil {
+		return x.Cluster
+	}
+	return nil
+}
+
+type ListKubernetesClustersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListKubernetesClustersRequest) Reset() {
+	*x = ListKubernetesClustersRequest{}
+	mi := &file_controller_proto_msgTypes[314]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListKubernetesClustersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListKubernetesClustersRequest) ProtoMessage() {}
+
+func (x *ListKubernetesClustersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[314]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListKubernetesClustersRequest.ProtoReflect.Descriptor instead.
+func (*ListKubernetesClustersRequest) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{314}
+}
+
+type ListKubernetesClustersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Clusters      []*KubernetesCluster   `protobuf:"bytes,1,rep,name=clusters,proto3" json:"clusters,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListKubernetesClustersResponse) Reset() {
+	*x = ListKubernetesClustersResponse{}
+	mi := &file_controller_proto_msgTypes[315]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListKubernetesClustersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListKubernetesClustersResponse) ProtoMessage() {}
+
+func (x *ListKubernetesClustersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[315]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListKubernetesClustersResponse.ProtoReflect.Descriptor instead.
+func (*ListKubernetesClustersResponse) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{315}
+}
+
+func (x *ListKubernetesClustersResponse) GetClusters() []*KubernetesCluster {
+	if x != nil {
+		return x.Clusters
+	}
+	return nil
+}
+
+type DeleteKubernetesClusterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Confirm       bool                   `protobuf:"varint,2,opt,name=confirm,proto3" json:"confirm,omitempty"`
+	Force         bool                   `protobuf:"varint,3,opt,name=force,proto3" json:"force,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteKubernetesClusterRequest) Reset() {
+	*x = DeleteKubernetesClusterRequest{}
+	mi := &file_controller_proto_msgTypes[316]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteKubernetesClusterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteKubernetesClusterRequest) ProtoMessage() {}
+
+func (x *DeleteKubernetesClusterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[316]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteKubernetesClusterRequest.ProtoReflect.Descriptor instead.
+func (*DeleteKubernetesClusterRequest) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{316}
+}
+
+func (x *DeleteKubernetesClusterRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DeleteKubernetesClusterRequest) GetConfirm() bool {
+	if x != nil {
+		return x.Confirm
+	}
+	return false
+}
+
+func (x *DeleteKubernetesClusterRequest) GetForce() bool {
+	if x != nil {
+		return x.Force
+	}
+	return false
+}
+
+type DeleteKubernetesClusterResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteKubernetesClusterResponse) Reset() {
+	*x = DeleteKubernetesClusterResponse{}
+	mi := &file_controller_proto_msgTypes[317]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteKubernetesClusterResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteKubernetesClusterResponse) ProtoMessage() {}
+
+func (x *DeleteKubernetesClusterResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[317]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteKubernetesClusterResponse.ProtoReflect.Descriptor instead.
+func (*DeleteKubernetesClusterResponse) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{317}
+}
+
+func (x *DeleteKubernetesClusterResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type ScaleKubernetesClusterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	AddNodes      []*KubernetesNodeSpec  `protobuf:"bytes,2,rep,name=add_nodes,json=addNodes,proto3" json:"add_nodes,omitempty"`
+	RemoveNodeIds []string               `protobuf:"bytes,3,rep,name=remove_node_ids,json=removeNodeIds,proto3" json:"remove_node_ids,omitempty"`
+	Confirm       bool                   `protobuf:"varint,4,opt,name=confirm,proto3" json:"confirm,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ScaleKubernetesClusterRequest) Reset() {
+	*x = ScaleKubernetesClusterRequest{}
+	mi := &file_controller_proto_msgTypes[318]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScaleKubernetesClusterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScaleKubernetesClusterRequest) ProtoMessage() {}
+
+func (x *ScaleKubernetesClusterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[318]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScaleKubernetesClusterRequest.ProtoReflect.Descriptor instead.
+func (*ScaleKubernetesClusterRequest) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{318}
+}
+
+func (x *ScaleKubernetesClusterRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ScaleKubernetesClusterRequest) GetAddNodes() []*KubernetesNodeSpec {
+	if x != nil {
+		return x.AddNodes
+	}
+	return nil
+}
+
+func (x *ScaleKubernetesClusterRequest) GetRemoveNodeIds() []string {
+	if x != nil {
+		return x.RemoveNodeIds
+	}
+	return nil
+}
+
+func (x *ScaleKubernetesClusterRequest) GetConfirm() bool {
+	if x != nil {
+		return x.Confirm
+	}
+	return false
+}
+
+type ScaleKubernetesClusterResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cluster       *KubernetesCluster     `protobuf:"bytes,1,opt,name=cluster,proto3" json:"cluster,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ScaleKubernetesClusterResponse) Reset() {
+	*x = ScaleKubernetesClusterResponse{}
+	mi := &file_controller_proto_msgTypes[319]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScaleKubernetesClusterResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScaleKubernetesClusterResponse) ProtoMessage() {}
+
+func (x *ScaleKubernetesClusterResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[319]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScaleKubernetesClusterResponse.ProtoReflect.Descriptor instead.
+func (*ScaleKubernetesClusterResponse) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{319}
+}
+
+func (x *ScaleKubernetesClusterResponse) GetCluster() *KubernetesCluster {
+	if x != nil {
+		return x.Cluster
+	}
+	return nil
+}
+
+type GetKubernetesClusterHealthRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetKubernetesClusterHealthRequest) Reset() {
+	*x = GetKubernetesClusterHealthRequest{}
+	mi := &file_controller_proto_msgTypes[320]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetKubernetesClusterHealthRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetKubernetesClusterHealthRequest) ProtoMessage() {}
+
+func (x *GetKubernetesClusterHealthRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[320]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetKubernetesClusterHealthRequest.ProtoReflect.Descriptor instead.
+func (*GetKubernetesClusterHealthRequest) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{320}
+}
+
+func (x *GetKubernetesClusterHealthRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type NodeHealth struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	NodeId           string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	KubernetesStatus string                 `protobuf:"bytes,2,opt,name=kubernetes_status,json=kubernetesStatus,proto3" json:"kubernetes_status,omitempty"` // "Ready", "NotReady", "Unknown"
+	KubeletActive    bool                   `protobuf:"varint,3,opt,name=kubelet_active,json=kubeletActive,proto3" json:"kubelet_active,omitempty"`
+	EtcdActive       bool                   `protobuf:"varint,4,opt,name=etcd_active,json=etcdActive,proto3" json:"etcd_active,omitempty"`
+	ApiServerActive  bool                   `protobuf:"varint,5,opt,name=api_server_active,json=apiServerActive,proto3" json:"api_server_active,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *NodeHealth) Reset() {
+	*x = NodeHealth{}
+	mi := &file_controller_proto_msgTypes[321]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NodeHealth) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NodeHealth) ProtoMessage() {}
+
+func (x *NodeHealth) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[321]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NodeHealth.ProtoReflect.Descriptor instead.
+func (*NodeHealth) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{321}
+}
+
+func (x *NodeHealth) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *NodeHealth) GetKubernetesStatus() string {
+	if x != nil {
+		return x.KubernetesStatus
+	}
+	return ""
+}
+
+func (x *NodeHealth) GetKubeletActive() bool {
+	if x != nil {
+		return x.KubeletActive
+	}
+	return false
+}
+
+func (x *NodeHealth) GetEtcdActive() bool {
+	if x != nil {
+		return x.EtcdActive
+	}
+	return false
+}
+
+func (x *NodeHealth) GetApiServerActive() bool {
+	if x != nil {
+		return x.ApiServerActive
+	}
+	return false
+}
+
+type GetKubernetesClusterHealthResponse struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	OverallHealth      string                 `protobuf:"bytes,1,opt,name=overall_health,json=overallHealth,proto3" json:"overall_health,omitempty"` // "healthy", "degraded", "critical"
+	ReadyControlPlanes int32                  `protobuf:"varint,2,opt,name=ready_control_planes,json=readyControlPlanes,proto3" json:"ready_control_planes,omitempty"`
+	TotalControlPlanes int32                  `protobuf:"varint,3,opt,name=total_control_planes,json=totalControlPlanes,proto3" json:"total_control_planes,omitempty"`
+	ReadyWorkers       int32                  `protobuf:"varint,4,opt,name=ready_workers,json=readyWorkers,proto3" json:"ready_workers,omitempty"`
+	TotalWorkers       int32                  `protobuf:"varint,5,opt,name=total_workers,json=totalWorkers,proto3" json:"total_workers,omitempty"`
+	EtcdHealthy        bool                   `protobuf:"varint,6,opt,name=etcd_healthy,json=etcdHealthy,proto3" json:"etcd_healthy,omitempty"`
+	EtcdMemberCount    int32                  `protobuf:"varint,7,opt,name=etcd_member_count,json=etcdMemberCount,proto3" json:"etcd_member_count,omitempty"`
+	ApiServerReachable bool                   `protobuf:"varint,8,opt,name=api_server_reachable,json=apiServerReachable,proto3" json:"api_server_reachable,omitempty"`
+	NodeHealth         []*NodeHealth          `protobuf:"bytes,9,rep,name=node_health,json=nodeHealth,proto3" json:"node_health,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *GetKubernetesClusterHealthResponse) Reset() {
+	*x = GetKubernetesClusterHealthResponse{}
+	mi := &file_controller_proto_msgTypes[322]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetKubernetesClusterHealthResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetKubernetesClusterHealthResponse) ProtoMessage() {}
+
+func (x *GetKubernetesClusterHealthResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[322]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetKubernetesClusterHealthResponse.ProtoReflect.Descriptor instead.
+func (*GetKubernetesClusterHealthResponse) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{322}
+}
+
+func (x *GetKubernetesClusterHealthResponse) GetOverallHealth() string {
+	if x != nil {
+		return x.OverallHealth
+	}
+	return ""
+}
+
+func (x *GetKubernetesClusterHealthResponse) GetReadyControlPlanes() int32 {
+	if x != nil {
+		return x.ReadyControlPlanes
+	}
+	return 0
+}
+
+func (x *GetKubernetesClusterHealthResponse) GetTotalControlPlanes() int32 {
+	if x != nil {
+		return x.TotalControlPlanes
+	}
+	return 0
+}
+
+func (x *GetKubernetesClusterHealthResponse) GetReadyWorkers() int32 {
+	if x != nil {
+		return x.ReadyWorkers
+	}
+	return 0
+}
+
+func (x *GetKubernetesClusterHealthResponse) GetTotalWorkers() int32 {
+	if x != nil {
+		return x.TotalWorkers
+	}
+	return 0
+}
+
+func (x *GetKubernetesClusterHealthResponse) GetEtcdHealthy() bool {
+	if x != nil {
+		return x.EtcdHealthy
+	}
+	return false
+}
+
+func (x *GetKubernetesClusterHealthResponse) GetEtcdMemberCount() int32 {
+	if x != nil {
+		return x.EtcdMemberCount
+	}
+	return 0
+}
+
+func (x *GetKubernetesClusterHealthResponse) GetApiServerReachable() bool {
+	if x != nil {
+		return x.ApiServerReachable
+	}
+	return false
+}
+
+func (x *GetKubernetesClusterHealthResponse) GetNodeHealth() []*NodeHealth {
+	if x != nil {
+		return x.NodeHealth
+	}
+	return nil
+}
+
 var File_controller_proto protoreflect.FileDescriptor
 
 const file_controller_proto_rawDesc = "" +
@@ -21127,7 +22828,139 @@ const file_controller_proto_rawDesc = "" +
 	"\x10sub_ca_not_after\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\rsubCaNotAfter\x120\n" +
 	"\x14revocation_fail_mode\x18\x0f \x01(\tR\x12revocationFailMode\x12)\n" +
 	"\x11pki_http_base_url\x18\x10 \x01(\tR\x0epkiHttpBaseUrl\x12L\n" +
-	"\x10soonest_expiring\x18\x11 \x03(\v2!.kcore.controller.CertificateInfoR\x0fsoonestExpiring*\xba\x01\n" +
+	"\x10soonest_expiring\x18\x11 \x03(\v2!.kcore.controller.CertificateInfoR\x0fsoonestExpiring\"\xb8\x01\n" +
+	"\fCiliumConfig\x12\x12\n" +
+	"\x04mode\x18\x01 \x01(\tR\x04mode\x12\x10\n" +
+	"\x03mtu\x18\x02 \x01(\x05R\x03mtu\x12\x16\n" +
+	"\x06tunnel\x18\x03 \x01(\tR\x06tunnel\x125\n" +
+	"\x17auto_direct_node_routes\x18\x04 \x01(\bR\x14autoDirectNodeRoutes\x123\n" +
+	"\x16load_balancer_ip_pools\x18\x05 \x03(\tR\x13loadBalancerIpPools\"\xd2\x01\n" +
+	"\x12KubernetesNodeSpec\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x12\n" +
+	"\x04role\x18\x02 \x01(\tR\x04role\x12+\n" +
+	"\x11advertise_address\x18\x03 \x01(\tR\x10advertiseAddress\x12\x14\n" +
+	"\x05iface\x18\x04 \x01(\tR\x05iface\x12'\n" +
+	"\x0finitial_cluster\x18\x05 \x01(\bR\x0einitialCluster\x12#\n" +
+	"\rjoin_existing\x18\x06 \x01(\bR\fjoinExisting\"\x90\x01\n" +
+	"\x16HighAvailabilityConfig\x12\x18\n" +
+	"\aenabled\x18\x01 \x01(\bR\aenabled\x12\x1f\n" +
+	"\vvip_address\x18\x02 \x01(\tR\n" +
+	"vipAddress\x12#\n" +
+	"\rvip_interface\x18\x03 \x01(\tR\fvipInterface\x12\x16\n" +
+	"\x06method\x18\x04 \x01(\tR\x06method\"\xf6\x01\n" +
+	"\x14KubernetesHostVolume\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x17\n" +
+	"\anode_id\x18\x02 \x01(\tR\x06nodeId\x12#\n" +
+	"\rstorage_class\x18\x03 \x01(\tR\fstorageClass\x12\x1d\n" +
+	"\n" +
+	"size_bytes\x18\x04 \x01(\x03R\tsizeBytes\x12\x17\n" +
+	"\afs_type\x18\x05 \x01(\tR\x06fsType\x12\x1d\n" +
+	"\n" +
+	"mount_path\x18\x06 \x01(\tR\tmountPath\x12\x12\n" +
+	"\x04role\x18\a \x01(\tR\x04role\x12!\n" +
+	"\fvolume_group\x18\b \x01(\tR\vvolumeGroup\"\xba\x01\n" +
+	"\x1aKubernetesLocalProvisioner\x12\x18\n" +
+	"\aenabled\x18\x01 \x01(\bR\aenabled\x12,\n" +
+	"\x12storage_class_name\x18\x02 \x01(\tR\x10storageClassName\x12@\n" +
+	"\avolumes\x18\x03 \x03(\v2&.kcore.controller.KubernetesHostVolumeR\avolumes\x12\x12\n" +
+	"\x04mode\x18\x04 \x01(\tR\x04mode\"\x91\x05\n" +
+	"\x15KubernetesClusterSpec\x12!\n" +
+	"\fcluster_cidr\x18\x01 \x01(\tR\vclusterCidr\x12!\n" +
+	"\fservice_cidr\x18\x02 \x01(\tR\vserviceCidr\x12\x1f\n" +
+	"\vcluster_dns\x18\x03 \x01(\tR\n" +
+	"clusterDns\x12.\n" +
+	"\x13api_server_endpoint\x18\x04 \x01(\tR\x11apiServerEndpoint\x12\x10\n" +
+	"\x03cni\x18\x05 \x01(\tR\x03cni\x12C\n" +
+	"\rcilium_config\x18\x06 \x01(\v2\x1e.kcore.controller.CiliumConfigR\fciliumConfig\x12T\n" +
+	"\x13control_plane_nodes\x18\a \x03(\v2$.kcore.controller.KubernetesNodeSpecR\x11controlPlaneNodes\x12G\n" +
+	"\fworker_nodes\x18\b \x03(\v2$.kcore.controller.KubernetesNodeSpecR\vworkerNodes\x12U\n" +
+	"\x11high_availability\x18\t \x01(\v2(.kcore.controller.HighAvailabilityConfigR\x10highAvailability\x12Y\n" +
+	"\x11local_provisioner\x18\n" +
+	" \x01(\v2,.kcore.controller.KubernetesLocalProvisionerR\x10localProvisioner\x129\n" +
+	"\x19schedule_on_control_plane\x18\v \x01(\bR\x16scheduleOnControlPlane\"\x87\x02\n" +
+	"\x17KubernetesClusterStatus\x12\x14\n" +
+	"\x05phase\x18\x01 \x01(\tR\x05phase\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x120\n" +
+	"\x14ready_control_planes\x18\x03 \x01(\x05R\x12readyControlPlanes\x12#\n" +
+	"\rready_workers\x18\x04 \x01(\x05R\freadyWorkers\x12=\n" +
+	"\flast_updated\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vlastUpdated\x12&\n" +
+	"\x0factive_node_ids\x18\x06 \x03(\tR\ractiveNodeIds\"\xc7\x01\n" +
+	"\x11KubernetesCluster\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1e\n" +
+	"\n" +
+	"generation\x18\x02 \x01(\x03R\n" +
+	"generation\x12;\n" +
+	"\x04spec\x18\x03 \x01(\v2'.kcore.controller.KubernetesClusterSpecR\x04spec\x12A\n" +
+	"\x06status\x18\x04 \x01(\v2).kcore.controller.KubernetesClusterStatusR\x06status\"o\n" +
+	"\x1cPlanKubernetesClusterRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12;\n" +
+	"\x04spec\x18\x02 \x01(\v2'.kcore.controller.KubernetesClusterSpecR\x04spec\"\x8b\x01\n" +
+	"\x0eNodePlanResult\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12)\n" +
+	"\x10preflight_passed\x18\x02 \x01(\bR\x0fpreflightPassed\x12\x16\n" +
+	"\x06issues\x18\x03 \x03(\tR\x06issues\x12\x1d\n" +
+	"\n" +
+	"nix_action\x18\x04 \x01(\tR\tnixAction\"\xef\x01\n" +
+	"\x1dPlanKubernetesClusterResponse\x12\x16\n" +
+	"\x06action\x18\x01 \x01(\tR\x06action\x12'\n" +
+	"\x0fblocking_issues\x18\x02 \x03(\tR\x0eblockingIssues\x12\x1a\n" +
+	"\bwarnings\x18\x03 \x03(\tR\bwarnings\x12?\n" +
+	"\n" +
+	"node_plans\x18\x04 \x03(\v2 .kcore.controller.NodePlanResultR\tnodePlans\x120\n" +
+	"\x14rendered_nix_preview\x18\x05 \x01(\tR\x12renderedNixPreview\"\x8b\x01\n" +
+	"\x1eCreateKubernetesClusterRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12;\n" +
+	"\x04spec\x18\x02 \x01(\v2'.kcore.controller.KubernetesClusterSpecR\x04spec\x12\x18\n" +
+	"\aconfirm\x18\x03 \x01(\bR\aconfirm\"`\n" +
+	"\x1fCreateKubernetesClusterResponse\x12=\n" +
+	"\acluster\x18\x01 \x01(\v2#.kcore.controller.KubernetesClusterR\acluster\"\x8b\x01\n" +
+	"\x1eUpdateKubernetesClusterRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12;\n" +
+	"\x04spec\x18\x02 \x01(\v2'.kcore.controller.KubernetesClusterSpecR\x04spec\x12\x18\n" +
+	"\aconfirm\x18\x03 \x01(\bR\aconfirm\"`\n" +
+	"\x1fUpdateKubernetesClusterResponse\x12=\n" +
+	"\acluster\x18\x01 \x01(\v2#.kcore.controller.KubernetesClusterR\acluster\"1\n" +
+	"\x1bGetKubernetesClusterRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"]\n" +
+	"\x1cGetKubernetesClusterResponse\x12=\n" +
+	"\acluster\x18\x01 \x01(\v2#.kcore.controller.KubernetesClusterR\acluster\"\x1f\n" +
+	"\x1dListKubernetesClustersRequest\"a\n" +
+	"\x1eListKubernetesClustersResponse\x12?\n" +
+	"\bclusters\x18\x01 \x03(\v2#.kcore.controller.KubernetesClusterR\bclusters\"d\n" +
+	"\x1eDeleteKubernetesClusterRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
+	"\aconfirm\x18\x02 \x01(\bR\aconfirm\x12\x14\n" +
+	"\x05force\x18\x03 \x01(\bR\x05force\";\n" +
+	"\x1fDeleteKubernetesClusterResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\xb8\x01\n" +
+	"\x1dScaleKubernetesClusterRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12A\n" +
+	"\tadd_nodes\x18\x02 \x03(\v2$.kcore.controller.KubernetesNodeSpecR\baddNodes\x12&\n" +
+	"\x0fremove_node_ids\x18\x03 \x03(\tR\rremoveNodeIds\x12\x18\n" +
+	"\aconfirm\x18\x04 \x01(\bR\aconfirm\"_\n" +
+	"\x1eScaleKubernetesClusterResponse\x12=\n" +
+	"\acluster\x18\x01 \x01(\v2#.kcore.controller.KubernetesClusterR\acluster\"7\n" +
+	"!GetKubernetesClusterHealthRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"\xc6\x01\n" +
+	"\n" +
+	"NodeHealth\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12+\n" +
+	"\x11kubernetes_status\x18\x02 \x01(\tR\x10kubernetesStatus\x12%\n" +
+	"\x0ekubelet_active\x18\x03 \x01(\bR\rkubeletActive\x12\x1f\n" +
+	"\vetcd_active\x18\x04 \x01(\bR\n" +
+	"etcdActive\x12*\n" +
+	"\x11api_server_active\x18\x05 \x01(\bR\x0fapiServerActive\"\xb9\x03\n" +
+	"\"GetKubernetesClusterHealthResponse\x12%\n" +
+	"\x0eoverall_health\x18\x01 \x01(\tR\roverallHealth\x120\n" +
+	"\x14ready_control_planes\x18\x02 \x01(\x05R\x12readyControlPlanes\x120\n" +
+	"\x14total_control_planes\x18\x03 \x01(\x05R\x12totalControlPlanes\x12#\n" +
+	"\rready_workers\x18\x04 \x01(\x05R\freadyWorkers\x12#\n" +
+	"\rtotal_workers\x18\x05 \x01(\x05R\ftotalWorkers\x12!\n" +
+	"\fetcd_healthy\x18\x06 \x01(\bR\vetcdHealthy\x12*\n" +
+	"\x11etcd_member_count\x18\a \x01(\x05R\x0fetcdMemberCount\x120\n" +
+	"\x14api_server_reachable\x18\b \x01(\bR\x12apiServerReachable\x12=\n" +
+	"\vnode_health\x18\t \x03(\v2\x1c.kcore.controller.NodeHealthR\n" +
+	"nodeHealth*\xba\x01\n" +
 	"\x12StorageBackendType\x12$\n" +
 	" STORAGE_BACKEND_TYPE_UNSPECIFIED\x10\x00\x12#\n" +
 	"\x1fSTORAGE_BACKEND_TYPE_FILESYSTEM\x10\x01\x12\x1c\n" +
@@ -21253,7 +23086,7 @@ const file_controller_proto_rawDesc = "" +
 	"\x1eCERTIFICATE_STATUS_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19CERTIFICATE_STATUS_ACTIVE\x10\x01\x12\x1e\n" +
 	"\x1aCERTIFICATE_STATUS_ROTATED\x10\x02\x12\x1e\n" +
-	"\x1aCERTIFICATE_STATUS_REVOKED\x10\x032\xa3Z\n" +
+	"\x1aCERTIFICATE_STATUS_REVOKED\x10\x032\x98b\n" +
 	"\n" +
 	"Controller\x12]\n" +
 	"\fRegisterNode\x12%.kcore.controller.RegisterNodeRequest\x1a&.kcore.controller.RegisterNodeResponse\x12T\n" +
@@ -21371,7 +23204,15 @@ const file_controller_proto_rawDesc = "" +
 	"\vGetOperator\x12$.kcore.controller.GetOperatorRequest\x1a%.kcore.controller.GetOperatorResponse\x12l\n" +
 	"\x11GrantOperatorRole\x12*.kcore.controller.GrantOperatorRoleRequest\x1a+.kcore.controller.GrantOperatorRoleResponse\x12o\n" +
 	"\x12RevokeOperatorRole\x12+.kcore.controller.RevokeOperatorRoleRequest\x1a,.kcore.controller.RevokeOperatorRoleResponse\x12l\n" +
-	"\x11IssueOperatorCert\x12*.kcore.controller.IssueOperatorCertRequest\x1a+.kcore.controller.IssueOperatorCertResponse2\xe9\x05\n" +
+	"\x11IssueOperatorCert\x12*.kcore.controller.IssueOperatorCertRequest\x1a+.kcore.controller.IssueOperatorCertResponse\x12x\n" +
+	"\x15PlanKubernetesCluster\x12..kcore.controller.PlanKubernetesClusterRequest\x1a/.kcore.controller.PlanKubernetesClusterResponse\x12~\n" +
+	"\x17CreateKubernetesCluster\x120.kcore.controller.CreateKubernetesClusterRequest\x1a1.kcore.controller.CreateKubernetesClusterResponse\x12~\n" +
+	"\x17UpdateKubernetesCluster\x120.kcore.controller.UpdateKubernetesClusterRequest\x1a1.kcore.controller.UpdateKubernetesClusterResponse\x12u\n" +
+	"\x14GetKubernetesCluster\x12-.kcore.controller.GetKubernetesClusterRequest\x1a..kcore.controller.GetKubernetesClusterResponse\x12{\n" +
+	"\x16ListKubernetesClusters\x12/.kcore.controller.ListKubernetesClustersRequest\x1a0.kcore.controller.ListKubernetesClustersResponse\x12~\n" +
+	"\x17DeleteKubernetesCluster\x120.kcore.controller.DeleteKubernetesClusterRequest\x1a1.kcore.controller.DeleteKubernetesClusterResponse\x12{\n" +
+	"\x16ScaleKubernetesCluster\x12/.kcore.controller.ScaleKubernetesClusterRequest\x1a0.kcore.controller.ScaleKubernetesClusterResponse\x12\x87\x01\n" +
+	"\x1aGetKubernetesClusterHealth\x123.kcore.controller.GetKubernetesClusterHealthRequest\x1a4.kcore.controller.GetKubernetesClusterHealthResponse2\xe9\x05\n" +
 	"\x0fControllerAdmin\x12c\n" +
 	"\x0eApplyNixConfig\x12'.kcore.controller.ApplyNixConfigRequest\x1a(.kcore.controller.ApplyNixConfigResponse\x12u\n" +
 	"\x14GetReplicationEvents\x12-.kcore.controller.GetReplicationEventsRequest\x1a..kcore.controller.GetReplicationEventsResponse\x12u\n" +
@@ -21393,7 +23234,7 @@ func file_controller_proto_rawDescGZIP() []byte {
 }
 
 var file_controller_proto_enumTypes = make([]protoimpl.EnumInfo, 21)
-var file_controller_proto_msgTypes = make([]protoimpl.MessageInfo, 298)
+var file_controller_proto_msgTypes = make([]protoimpl.MessageInfo, 324)
 var file_controller_proto_goTypes = []any{
 	(StorageBackendType)(0),                     // 0: kcore.controller.StorageBackendType
 	(WorkloadKind)(0),                           // 1: kcore.controller.WorkloadKind
@@ -21713,8 +23554,34 @@ var file_controller_proto_goTypes = []any{
 	(*GetCrlResponse)(nil),                      // 315: kcore.controller.GetCrlResponse
 	(*GetPkiStatusRequest)(nil),                 // 316: kcore.controller.GetPkiStatusRequest
 	(*GetPkiStatusResponse)(nil),                // 317: kcore.controller.GetPkiStatusResponse
-	nil,                                         // 318: kcore.controller.ContainerSpec.EnvEntry
-	(*timestamppb.Timestamp)(nil),               // 319: google.protobuf.Timestamp
+	(*CiliumConfig)(nil),                        // 318: kcore.controller.CiliumConfig
+	(*KubernetesNodeSpec)(nil),                  // 319: kcore.controller.KubernetesNodeSpec
+	(*HighAvailabilityConfig)(nil),              // 320: kcore.controller.HighAvailabilityConfig
+	(*KubernetesHostVolume)(nil),                // 321: kcore.controller.KubernetesHostVolume
+	(*KubernetesLocalProvisioner)(nil),          // 322: kcore.controller.KubernetesLocalProvisioner
+	(*KubernetesClusterSpec)(nil),               // 323: kcore.controller.KubernetesClusterSpec
+	(*KubernetesClusterStatus)(nil),             // 324: kcore.controller.KubernetesClusterStatus
+	(*KubernetesCluster)(nil),                   // 325: kcore.controller.KubernetesCluster
+	(*PlanKubernetesClusterRequest)(nil),        // 326: kcore.controller.PlanKubernetesClusterRequest
+	(*NodePlanResult)(nil),                      // 327: kcore.controller.NodePlanResult
+	(*PlanKubernetesClusterResponse)(nil),       // 328: kcore.controller.PlanKubernetesClusterResponse
+	(*CreateKubernetesClusterRequest)(nil),      // 329: kcore.controller.CreateKubernetesClusterRequest
+	(*CreateKubernetesClusterResponse)(nil),     // 330: kcore.controller.CreateKubernetesClusterResponse
+	(*UpdateKubernetesClusterRequest)(nil),      // 331: kcore.controller.UpdateKubernetesClusterRequest
+	(*UpdateKubernetesClusterResponse)(nil),     // 332: kcore.controller.UpdateKubernetesClusterResponse
+	(*GetKubernetesClusterRequest)(nil),         // 333: kcore.controller.GetKubernetesClusterRequest
+	(*GetKubernetesClusterResponse)(nil),        // 334: kcore.controller.GetKubernetesClusterResponse
+	(*ListKubernetesClustersRequest)(nil),       // 335: kcore.controller.ListKubernetesClustersRequest
+	(*ListKubernetesClustersResponse)(nil),      // 336: kcore.controller.ListKubernetesClustersResponse
+	(*DeleteKubernetesClusterRequest)(nil),      // 337: kcore.controller.DeleteKubernetesClusterRequest
+	(*DeleteKubernetesClusterResponse)(nil),     // 338: kcore.controller.DeleteKubernetesClusterResponse
+	(*ScaleKubernetesClusterRequest)(nil),       // 339: kcore.controller.ScaleKubernetesClusterRequest
+	(*ScaleKubernetesClusterResponse)(nil),      // 340: kcore.controller.ScaleKubernetesClusterResponse
+	(*GetKubernetesClusterHealthRequest)(nil),   // 341: kcore.controller.GetKubernetesClusterHealthRequest
+	(*NodeHealth)(nil),                          // 342: kcore.controller.NodeHealth
+	(*GetKubernetesClusterHealthResponse)(nil),  // 343: kcore.controller.GetKubernetesClusterHealthResponse
+	nil,                           // 344: kcore.controller.ContainerSpec.EnvEntry
+	(*timestamppb.Timestamp)(nil), // 345: google.protobuf.Timestamp
 }
 var file_controller_proto_depIdxs = []int32{
 	29,  // 0: kcore.controller.RegisterNodeRequest.capacity:type_name -> kcore.controller.NodeCapacity
@@ -21722,10 +23589,10 @@ var file_controller_proto_depIdxs = []int32{
 	30,  // 2: kcore.controller.HeartbeatRequest.usage:type_name -> kcore.controller.NodeUsage
 	79,  // 3: kcore.controller.SyncVmStateRequest.vms:type_name -> kcore.controller.VmInfo
 	33,  // 4: kcore.controller.SyncWorkloadStateRequest.workloads:type_name -> kcore.controller.WorkloadRuntimeInfo
-	318, // 5: kcore.controller.ContainerSpec.env:type_name -> kcore.controller.ContainerSpec.EnvEntry
+	344, // 5: kcore.controller.ContainerSpec.env:type_name -> kcore.controller.ContainerSpec.EnvEntry
 	2,   // 6: kcore.controller.ContainerSpec.desired_state:type_name -> kcore.controller.WorkloadDesiredState
 	3,   // 7: kcore.controller.ContainerInfo.state:type_name -> kcore.controller.ContainerState
-	319, // 8: kcore.controller.ContainerInfo.created_at:type_name -> google.protobuf.Timestamp
+	345, // 8: kcore.controller.ContainerInfo.created_at:type_name -> google.protobuf.Timestamp
 	1,   // 9: kcore.controller.WorkloadRuntimeInfo.kind:type_name -> kcore.controller.WorkloadKind
 	7,   // 10: kcore.controller.WorkloadRuntimeInfo.vm_state:type_name -> kcore.controller.VmState
 	3,   // 11: kcore.controller.WorkloadRuntimeInfo.container_state:type_name -> kcore.controller.ContainerState
@@ -21764,7 +23631,7 @@ var file_controller_proto_depIdxs = []int32{
 	4,   // 44: kcore.controller.CreateNetworkResponse.action:type_name -> kcore.controller.ApplyAction
 	63,  // 45: kcore.controller.ListNetworksResponse.networks:type_name -> kcore.controller.NetworkInfo
 	64,  // 46: kcore.controller.SecurityGroup.rules:type_name -> kcore.controller.SecurityGroupRule
-	319, // 47: kcore.controller.SecurityGroup.created_at:type_name -> google.protobuf.Timestamp
+	345, // 47: kcore.controller.SecurityGroup.created_at:type_name -> google.protobuf.Timestamp
 	6,   // 48: kcore.controller.SecurityGroupAttachment.target_kind:type_name -> kcore.controller.SecurityGroupTargetKind
 	65,  // 49: kcore.controller.CreateSecurityGroupRequest.security_group:type_name -> kcore.controller.SecurityGroup
 	65,  // 50: kcore.controller.CreateSecurityGroupResponse.security_group:type_name -> kcore.controller.SecurityGroup
@@ -21775,19 +23642,19 @@ var file_controller_proto_depIdxs = []int32{
 	6,   // 55: kcore.controller.AttachSecurityGroupRequest.target_kind:type_name -> kcore.controller.SecurityGroupTargetKind
 	6,   // 56: kcore.controller.DetachSecurityGroupRequest.target_kind:type_name -> kcore.controller.SecurityGroupTargetKind
 	7,   // 57: kcore.controller.VmInfo.state:type_name -> kcore.controller.VmState
-	319, // 58: kcore.controller.VmInfo.created_at:type_name -> google.protobuf.Timestamp
+	345, // 58: kcore.controller.VmInfo.created_at:type_name -> google.protobuf.Timestamp
 	82,  // 59: kcore.controller.ListNodesResponse.nodes:type_name -> kcore.controller.NodeInfo
 	29,  // 60: kcore.controller.NodeInfo.capacity:type_name -> kcore.controller.NodeCapacity
 	30,  // 61: kcore.controller.NodeInfo.usage:type_name -> kcore.controller.NodeUsage
-	319, // 62: kcore.controller.NodeInfo.last_heartbeat:type_name -> google.protobuf.Timestamp
+	345, // 62: kcore.controller.NodeInfo.last_heartbeat:type_name -> google.protobuf.Timestamp
 	0,   // 63: kcore.controller.NodeInfo.storage_backend:type_name -> kcore.controller.StorageBackendType
 	82,  // 64: kcore.controller.GetNodeResponse.node:type_name -> kcore.controller.NodeInfo
 	86,  // 65: kcore.controller.VmSpec.disks:type_name -> kcore.controller.Disk
 	87,  // 66: kcore.controller.VmSpec.nics:type_name -> kcore.controller.Nic
 	5,   // 67: kcore.controller.VmSpec.desired_state:type_name -> kcore.controller.VmDesiredState
 	7,   // 68: kcore.controller.VmStatus.state:type_name -> kcore.controller.VmState
-	319, // 69: kcore.controller.VmStatus.created_at:type_name -> google.protobuf.Timestamp
-	319, // 70: kcore.controller.VmStatus.updated_at:type_name -> google.protobuf.Timestamp
+	345, // 69: kcore.controller.VmStatus.created_at:type_name -> google.protobuf.Timestamp
+	345, // 70: kcore.controller.VmStatus.updated_at:type_name -> google.protobuf.Timestamp
 	92,  // 71: kcore.controller.GetReplicationEventsResponse.events:type_name -> kcore.controller.ReplicationEvent
 	97,  // 72: kcore.controller.GetReplicationStatusResponse.outgoing:type_name -> kcore.controller.ReplicationOutgoingStatus
 	98,  // 73: kcore.controller.GetReplicationStatusResponse.incoming:type_name -> kcore.controller.ReplicationIncomingStatus
@@ -21795,13 +23662,13 @@ var file_controller_proto_depIdxs = []int32{
 	4,   // 75: kcore.controller.CreateSshKeyResponse.action:type_name -> kcore.controller.ApplyAction
 	113, // 76: kcore.controller.ListSshKeysResponse.keys:type_name -> kcore.controller.SshKeyInfo
 	113, // 77: kcore.controller.GetSshKeyResponse.key:type_name -> kcore.controller.SshKeyInfo
-	319, // 78: kcore.controller.SshKeyInfo.created_at:type_name -> google.protobuf.Timestamp
+	345, // 78: kcore.controller.SshKeyInfo.created_at:type_name -> google.protobuf.Timestamp
 	119, // 79: kcore.controller.NodeLiveMigrateReceiveStatus.state:type_name -> kcore.controller.LiveMigrateReceiveState
 	120, // 80: kcore.controller.GetLiveMigrateReceiveStatusResponse.nodes:type_name -> kcore.controller.NodeLiveMigrateReceiveStatus
 	119, // 81: kcore.controller.ResetLiveMigrateReceiveResponse.observed:type_name -> kcore.controller.LiveMigrateReceiveState
 	150, // 82: kcore.controller.ListAuditEventsResponse.events:type_name -> kcore.controller.AuditEvent
-	319, // 83: kcore.controller.Operator.created_at:type_name -> google.protobuf.Timestamp
-	319, // 84: kcore.controller.Operator.updated_at:type_name -> google.protobuf.Timestamp
+	345, // 83: kcore.controller.Operator.created_at:type_name -> google.protobuf.Timestamp
+	345, // 84: kcore.controller.Operator.updated_at:type_name -> google.protobuf.Timestamp
 	8,   // 85: kcore.controller.Operator.roles:type_name -> kcore.controller.OperatorRoleKind
 	157, // 86: kcore.controller.CreateOperatorResponse.operator:type_name -> kcore.controller.Operator
 	157, // 87: kcore.controller.ListOperatorsResponse.operators:type_name -> kcore.controller.Operator
@@ -21826,13 +23693,13 @@ var file_controller_proto_depIdxs = []int32{
 	186, // 106: kcore.controller.GetVolumeResponse.volume:type_name -> kcore.controller.VolumeInfo
 	186, // 107: kcore.controller.AttachVolumeResponse.volume:type_name -> kcore.controller.VolumeInfo
 	186, // 108: kcore.controller.DetachVolumeResponse.volume:type_name -> kcore.controller.VolumeInfo
-	319, // 109: kcore.controller.VmOperation.started_at:type_name -> google.protobuf.Timestamp
-	319, // 110: kcore.controller.VmOperation.updated_at:type_name -> google.protobuf.Timestamp
-	319, // 111: kcore.controller.VmOperation.finished_at:type_name -> google.protobuf.Timestamp
+	345, // 109: kcore.controller.VmOperation.started_at:type_name -> google.protobuf.Timestamp
+	345, // 110: kcore.controller.VmOperation.updated_at:type_name -> google.protobuf.Timestamp
+	345, // 111: kcore.controller.VmOperation.finished_at:type_name -> google.protobuf.Timestamp
 	197, // 112: kcore.controller.ListVmOperationsResponse.operations:type_name -> kcore.controller.VmOperation
 	197, // 113: kcore.controller.GetVmOperationResponse.operation:type_name -> kcore.controller.VmOperation
 	197, // 114: kcore.controller.CancelVmOperationResponse.operation:type_name -> kcore.controller.VmOperation
-	319, // 115: kcore.controller.VolumeSnapshotInfo.created_at:type_name -> google.protobuf.Timestamp
+	345, // 115: kcore.controller.VolumeSnapshotInfo.created_at:type_name -> google.protobuf.Timestamp
 	204, // 116: kcore.controller.CreateVolumeSnapshotResponse.snapshot:type_name -> kcore.controller.VolumeSnapshotInfo
 	204, // 117: kcore.controller.ListVolumeSnapshotsResponse.snapshots:type_name -> kcore.controller.VolumeSnapshotInfo
 	215, // 118: kcore.controller.CreateSnapshotPolicyRequest.policy:type_name -> kcore.controller.SnapshotPolicy
@@ -21841,10 +23708,10 @@ var file_controller_proto_depIdxs = []int32{
 	215, // 121: kcore.controller.ListSnapshotPoliciesResponse.policies:type_name -> kcore.controller.SnapshotPolicy
 	186, // 122: kcore.controller.ResizeVolumeResponse.volume:type_name -> kcore.controller.VolumeInfo
 	186, // 123: kcore.controller.EncryptVolumeResponse.volume:type_name -> kcore.controller.VolumeInfo
-	319, // 124: kcore.controller.DiskLayout.created_at:type_name -> google.protobuf.Timestamp
-	319, // 125: kcore.controller.DiskLayout.updated_at:type_name -> google.protobuf.Timestamp
+	345, // 124: kcore.controller.DiskLayout.created_at:type_name -> google.protobuf.Timestamp
+	345, // 125: kcore.controller.DiskLayout.updated_at:type_name -> google.protobuf.Timestamp
 	9,   // 126: kcore.controller.DiskLayoutStatus.phase:type_name -> kcore.controller.DiskLayoutPhase
-	319, // 127: kcore.controller.DiskLayoutStatus.last_transition_at:type_name -> google.protobuf.Timestamp
+	345, // 127: kcore.controller.DiskLayoutStatus.last_transition_at:type_name -> google.protobuf.Timestamp
 	228, // 128: kcore.controller.CreateDiskLayoutRequest.disk_layout:type_name -> kcore.controller.DiskLayout
 	228, // 129: kcore.controller.CreateDiskLayoutResponse.disk_layout:type_name -> kcore.controller.DiskLayout
 	4,   // 130: kcore.controller.CreateDiskLayoutResponse.action:type_name -> kcore.controller.ApplyAction
@@ -21864,10 +23731,10 @@ var file_controller_proto_depIdxs = []int32{
 	245, // 144: kcore.controller.ClusterUpdate.spec:type_name -> kcore.controller.ClusterUpdateSpec
 	13,  // 145: kcore.controller.ClusterUpdate.phase:type_name -> kcore.controller.ClusterUpdatePhase
 	14,  // 146: kcore.controller.ClusterUpdate.approval_status:type_name -> kcore.controller.ClusterUpdateApprovalStatus
-	319, // 147: kcore.controller.ClusterUpdate.created_at:type_name -> google.protobuf.Timestamp
-	319, // 148: kcore.controller.ClusterUpdate.updated_at:type_name -> google.protobuf.Timestamp
+	345, // 147: kcore.controller.ClusterUpdate.created_at:type_name -> google.protobuf.Timestamp
+	345, // 148: kcore.controller.ClusterUpdate.updated_at:type_name -> google.protobuf.Timestamp
 	15,  // 149: kcore.controller.NodeUpdateStatus.phase:type_name -> kcore.controller.NodeUpdatePhase
-	319, // 150: kcore.controller.NodeUpdateStatus.last_transition_at:type_name -> google.protobuf.Timestamp
+	345, // 150: kcore.controller.NodeUpdateStatus.last_transition_at:type_name -> google.protobuf.Timestamp
 	245, // 151: kcore.controller.CreateClusterUpdateRequest.spec:type_name -> kcore.controller.ClusterUpdateSpec
 	246, // 152: kcore.controller.CreateClusterUpdateResponse.cluster_update:type_name -> kcore.controller.ClusterUpdate
 	4,   // 153: kcore.controller.CreateClusterUpdateResponse.action:type_name -> kcore.controller.ApplyAction
@@ -21881,11 +23748,11 @@ var file_controller_proto_depIdxs = []int32{
 	246, // 161: kcore.controller.RollbackClusterUpdateResponse.cluster_update:type_name -> kcore.controller.ClusterUpdate
 	263, // 162: kcore.controller.CephClusterSpec.nodes:type_name -> kcore.controller.CephClusterNodeSpec
 	16,  // 163: kcore.controller.CephClusterStatus.phase:type_name -> kcore.controller.CephClusterPhase
-	319, // 164: kcore.controller.CephClusterStatus.last_transition_at:type_name -> google.protobuf.Timestamp
+	345, // 164: kcore.controller.CephClusterStatus.last_transition_at:type_name -> google.protobuf.Timestamp
 	264, // 165: kcore.controller.CephCluster.spec:type_name -> kcore.controller.CephClusterSpec
 	265, // 166: kcore.controller.CephCluster.status:type_name -> kcore.controller.CephClusterStatus
-	319, // 167: kcore.controller.CephCluster.created_at:type_name -> google.protobuf.Timestamp
-	319, // 168: kcore.controller.CephCluster.updated_at:type_name -> google.protobuf.Timestamp
+	345, // 167: kcore.controller.CephCluster.created_at:type_name -> google.protobuf.Timestamp
+	345, // 168: kcore.controller.CephCluster.updated_at:type_name -> google.protobuf.Timestamp
 	266, // 169: kcore.controller.CreateCephClusterRequest.ceph_cluster:type_name -> kcore.controller.CephCluster
 	266, // 170: kcore.controller.CreateCephClusterResponse.ceph_cluster:type_name -> kcore.controller.CephCluster
 	4,   // 171: kcore.controller.CreateCephClusterResponse.action:type_name -> kcore.controller.ApplyAction
@@ -21893,290 +23760,326 @@ var file_controller_proto_depIdxs = []int32{
 	266, // 173: kcore.controller.ListCephClustersResponse.ceph_clusters:type_name -> kcore.controller.CephCluster
 	275, // 174: kcore.controller.SharedFilesystemSpec.clients:type_name -> kcore.controller.SharedFilesystemClientSpec
 	17,  // 175: kcore.controller.SharedFilesystemStatus.phase:type_name -> kcore.controller.SharedFilesystemPhase
-	319, // 176: kcore.controller.SharedFilesystemStatus.last_transition_at:type_name -> google.protobuf.Timestamp
+	345, // 176: kcore.controller.SharedFilesystemStatus.last_transition_at:type_name -> google.protobuf.Timestamp
 	276, // 177: kcore.controller.SharedFilesystem.spec:type_name -> kcore.controller.SharedFilesystemSpec
 	277, // 178: kcore.controller.SharedFilesystem.status:type_name -> kcore.controller.SharedFilesystemStatus
-	319, // 179: kcore.controller.SharedFilesystem.created_at:type_name -> google.protobuf.Timestamp
-	319, // 180: kcore.controller.SharedFilesystem.updated_at:type_name -> google.protobuf.Timestamp
+	345, // 179: kcore.controller.SharedFilesystem.created_at:type_name -> google.protobuf.Timestamp
+	345, // 180: kcore.controller.SharedFilesystem.updated_at:type_name -> google.protobuf.Timestamp
 	278, // 181: kcore.controller.CreateSharedFilesystemRequest.shared_filesystem:type_name -> kcore.controller.SharedFilesystem
 	278, // 182: kcore.controller.CreateSharedFilesystemResponse.shared_filesystem:type_name -> kcore.controller.SharedFilesystem
 	4,   // 183: kcore.controller.CreateSharedFilesystemResponse.action:type_name -> kcore.controller.ApplyAction
 	278, // 184: kcore.controller.GetSharedFilesystemResponse.shared_filesystem:type_name -> kcore.controller.SharedFilesystem
 	278, // 185: kcore.controller.ListSharedFilesystemsResponse.shared_filesystems:type_name -> kcore.controller.SharedFilesystem
 	18,  // 186: kcore.controller.ObjectStoreStatus.phase:type_name -> kcore.controller.ObjectStorePhase
-	319, // 187: kcore.controller.ObjectStoreStatus.last_transition_at:type_name -> google.protobuf.Timestamp
+	345, // 187: kcore.controller.ObjectStoreStatus.last_transition_at:type_name -> google.protobuf.Timestamp
 	287, // 188: kcore.controller.ObjectStore.spec:type_name -> kcore.controller.ObjectStoreSpec
 	288, // 189: kcore.controller.ObjectStore.status:type_name -> kcore.controller.ObjectStoreStatus
-	319, // 190: kcore.controller.ObjectStore.created_at:type_name -> google.protobuf.Timestamp
-	319, // 191: kcore.controller.ObjectStore.updated_at:type_name -> google.protobuf.Timestamp
+	345, // 190: kcore.controller.ObjectStore.created_at:type_name -> google.protobuf.Timestamp
+	345, // 191: kcore.controller.ObjectStore.updated_at:type_name -> google.protobuf.Timestamp
 	289, // 192: kcore.controller.CreateObjectStoreRequest.object_store:type_name -> kcore.controller.ObjectStore
 	289, // 193: kcore.controller.CreateObjectStoreResponse.object_store:type_name -> kcore.controller.ObjectStore
 	4,   // 194: kcore.controller.CreateObjectStoreResponse.action:type_name -> kcore.controller.ApplyAction
 	289, // 195: kcore.controller.GetObjectStoreResponse.object_store:type_name -> kcore.controller.ObjectStore
 	289, // 196: kcore.controller.ListObjectStoresResponse.object_stores:type_name -> kcore.controller.ObjectStore
 	298, // 197: kcore.controller.ObjectUser.spec:type_name -> kcore.controller.ObjectUserSpec
-	319, // 198: kcore.controller.ObjectUser.created_at:type_name -> google.protobuf.Timestamp
+	345, // 198: kcore.controller.ObjectUser.created_at:type_name -> google.protobuf.Timestamp
 	299, // 199: kcore.controller.CreateObjectUserRequest.object_user:type_name -> kcore.controller.ObjectUser
 	299, // 200: kcore.controller.CreateObjectUserResponse.object_user:type_name -> kcore.controller.ObjectUser
-	319, // 201: kcore.controller.CertificateInfo.not_before:type_name -> google.protobuf.Timestamp
-	319, // 202: kcore.controller.CertificateInfo.not_after:type_name -> google.protobuf.Timestamp
-	319, // 203: kcore.controller.CertificateInfo.issued_at:type_name -> google.protobuf.Timestamp
+	345, // 201: kcore.controller.CertificateInfo.not_before:type_name -> google.protobuf.Timestamp
+	345, // 202: kcore.controller.CertificateInfo.not_after:type_name -> google.protobuf.Timestamp
+	345, // 203: kcore.controller.CertificateInfo.issued_at:type_name -> google.protobuf.Timestamp
 	20,  // 204: kcore.controller.CertificateInfo.status:type_name -> kcore.controller.CertificateStatus
 	19,  // 205: kcore.controller.CertificateInfo.revocation_reason:type_name -> kcore.controller.RevocationReason
-	319, // 206: kcore.controller.CertificateInfo.revoked_at:type_name -> google.protobuf.Timestamp
-	319, // 207: kcore.controller.SignNodeCsrResponse.not_after:type_name -> google.protobuf.Timestamp
+	345, // 206: kcore.controller.CertificateInfo.revoked_at:type_name -> google.protobuf.Timestamp
+	345, // 207: kcore.controller.SignNodeCsrResponse.not_after:type_name -> google.protobuf.Timestamp
 	308, // 208: kcore.controller.RotateNodeCertsResponse.results:type_name -> kcore.controller.NodeCertRotationResult
 	20,  // 209: kcore.controller.ListCertificatesRequest.status:type_name -> kcore.controller.CertificateStatus
 	304, // 210: kcore.controller.ListCertificatesResponse.certificates:type_name -> kcore.controller.CertificateInfo
 	19,  // 211: kcore.controller.RevokeCertificateRequest.reason:type_name -> kcore.controller.RevocationReason
 	304, // 212: kcore.controller.RevokeCertificateResponse.revoked:type_name -> kcore.controller.CertificateInfo
-	319, // 213: kcore.controller.GetCrlResponse.this_update:type_name -> google.protobuf.Timestamp
-	319, // 214: kcore.controller.GetCrlResponse.next_update:type_name -> google.protobuf.Timestamp
-	319, // 215: kcore.controller.GetPkiStatusResponse.crl_this_update:type_name -> google.protobuf.Timestamp
-	319, // 216: kcore.controller.GetPkiStatusResponse.crl_next_update:type_name -> google.protobuf.Timestamp
-	319, // 217: kcore.controller.GetPkiStatusResponse.sub_ca_not_after:type_name -> google.protobuf.Timestamp
+	345, // 213: kcore.controller.GetCrlResponse.this_update:type_name -> google.protobuf.Timestamp
+	345, // 214: kcore.controller.GetCrlResponse.next_update:type_name -> google.protobuf.Timestamp
+	345, // 215: kcore.controller.GetPkiStatusResponse.crl_this_update:type_name -> google.protobuf.Timestamp
+	345, // 216: kcore.controller.GetPkiStatusResponse.crl_next_update:type_name -> google.protobuf.Timestamp
+	345, // 217: kcore.controller.GetPkiStatusResponse.sub_ca_not_after:type_name -> google.protobuf.Timestamp
 	304, // 218: kcore.controller.GetPkiStatusResponse.soonest_expiring:type_name -> kcore.controller.CertificateInfo
-	21,  // 219: kcore.controller.Controller.RegisterNode:input_type -> kcore.controller.RegisterNodeRequest
-	23,  // 220: kcore.controller.Controller.Heartbeat:input_type -> kcore.controller.HeartbeatRequest
-	25,  // 221: kcore.controller.Controller.SyncVmState:input_type -> kcore.controller.SyncVmStateRequest
-	27,  // 222: kcore.controller.Controller.SyncWorkloadState:input_type -> kcore.controller.SyncWorkloadStateRequest
-	34,  // 223: kcore.controller.Controller.CreateVm:input_type -> kcore.controller.CreateVmRequest
-	36,  // 224: kcore.controller.Controller.UpdateVm:input_type -> kcore.controller.UpdateVmRequest
-	38,  // 225: kcore.controller.Controller.DeleteVm:input_type -> kcore.controller.DeleteVmRequest
-	40,  // 226: kcore.controller.Controller.SetVmDesiredState:input_type -> kcore.controller.SetVmDesiredStateRequest
-	42,  // 227: kcore.controller.Controller.GetVm:input_type -> kcore.controller.GetVmRequest
-	44,  // 228: kcore.controller.Controller.ListVms:input_type -> kcore.controller.ListVmsRequest
-	46,  // 229: kcore.controller.Controller.AttachVmConsole:input_type -> kcore.controller.ConsoleMessage
-	47,  // 230: kcore.controller.Controller.CreateWorkload:input_type -> kcore.controller.CreateWorkloadRequest
-	49,  // 231: kcore.controller.Controller.DeleteWorkload:input_type -> kcore.controller.DeleteWorkloadRequest
-	51,  // 232: kcore.controller.Controller.SetWorkloadDesiredState:input_type -> kcore.controller.SetWorkloadDesiredStateRequest
-	53,  // 233: kcore.controller.Controller.GetWorkload:input_type -> kcore.controller.GetWorkloadRequest
-	55,  // 234: kcore.controller.Controller.ListWorkloads:input_type -> kcore.controller.ListWorkloadsRequest
-	57,  // 235: kcore.controller.Controller.CreateNetwork:input_type -> kcore.controller.CreateNetworkRequest
-	59,  // 236: kcore.controller.Controller.DeleteNetwork:input_type -> kcore.controller.DeleteNetworkRequest
-	61,  // 237: kcore.controller.Controller.ListNetworks:input_type -> kcore.controller.ListNetworksRequest
-	67,  // 238: kcore.controller.Controller.CreateSecurityGroup:input_type -> kcore.controller.CreateSecurityGroupRequest
-	69,  // 239: kcore.controller.Controller.GetSecurityGroup:input_type -> kcore.controller.GetSecurityGroupRequest
-	71,  // 240: kcore.controller.Controller.ListSecurityGroups:input_type -> kcore.controller.ListSecurityGroupsRequest
-	73,  // 241: kcore.controller.Controller.DeleteSecurityGroup:input_type -> kcore.controller.DeleteSecurityGroupRequest
-	75,  // 242: kcore.controller.Controller.AttachSecurityGroup:input_type -> kcore.controller.AttachSecurityGroupRequest
-	77,  // 243: kcore.controller.Controller.DetachSecurityGroup:input_type -> kcore.controller.DetachSecurityGroupRequest
-	80,  // 244: kcore.controller.Controller.ListNodes:input_type -> kcore.controller.ListNodesRequest
-	83,  // 245: kcore.controller.Controller.GetNode:input_type -> kcore.controller.GetNodeRequest
-	105, // 246: kcore.controller.Controller.CreateSshKey:input_type -> kcore.controller.CreateSshKeyRequest
-	107, // 247: kcore.controller.Controller.DeleteSshKey:input_type -> kcore.controller.DeleteSshKeyRequest
-	109, // 248: kcore.controller.Controller.ListSshKeys:input_type -> kcore.controller.ListSshKeysRequest
-	111, // 249: kcore.controller.Controller.GetSshKey:input_type -> kcore.controller.GetSshKeyRequest
-	114, // 250: kcore.controller.Controller.DrainNode:input_type -> kcore.controller.DrainNodeRequest
-	116, // 251: kcore.controller.Controller.MigrateVm:input_type -> kcore.controller.MigrateVmRequest
-	118, // 252: kcore.controller.Controller.GetLiveMigrateReceiveStatus:input_type -> kcore.controller.GetLiveMigrateReceiveStatusRequest
-	122, // 253: kcore.controller.Controller.ResetLiveMigrateReceive:input_type -> kcore.controller.ResetLiveMigrateReceiveRequest
-	124, // 254: kcore.controller.Controller.ApproveNode:input_type -> kcore.controller.ApproveNodeRequest
-	126, // 255: kcore.controller.Controller.RejectNode:input_type -> kcore.controller.RejectNodeRequest
-	128, // 256: kcore.controller.Controller.CordonNode:input_type -> kcore.controller.CordonNodeRequest
-	130, // 257: kcore.controller.Controller.UncordonNode:input_type -> kcore.controller.UncordonNodeRequest
-	132, // 258: kcore.controller.Controller.DeleteNode:input_type -> kcore.controller.DeleteNodeRequest
-	134, // 259: kcore.controller.Controller.GetClusterHealth:input_type -> kcore.controller.GetClusterHealthRequest
-	136, // 260: kcore.controller.Controller.BackupCluster:input_type -> kcore.controller.BackupClusterRequest
-	138, // 261: kcore.controller.Controller.RestoreCluster:input_type -> kcore.controller.RestoreClusterRequest
-	140, // 262: kcore.controller.Controller.RenewNodeCert:input_type -> kcore.controller.RenewNodeCertRequest
-	142, // 263: kcore.controller.Controller.IssueNodeBootstrapCert:input_type -> kcore.controller.IssueNodeBootstrapCertRequest
-	144, // 264: kcore.controller.Controller.RotateSubCa:input_type -> kcore.controller.RotateSubCaRequest
-	146, // 265: kcore.controller.Controller.ReloadTls:input_type -> kcore.controller.ReloadTlsRequest
-	305, // 266: kcore.controller.Controller.SignNodeCsr:input_type -> kcore.controller.SignNodeCsrRequest
-	307, // 267: kcore.controller.Controller.RotateNodeCerts:input_type -> kcore.controller.RotateNodeCertsRequest
-	310, // 268: kcore.controller.Controller.ListCertificates:input_type -> kcore.controller.ListCertificatesRequest
-	312, // 269: kcore.controller.Controller.RevokeCertificate:input_type -> kcore.controller.RevokeCertificateRequest
-	314, // 270: kcore.controller.Controller.GetCrl:input_type -> kcore.controller.GetCrlRequest
-	316, // 271: kcore.controller.Controller.GetPkiStatus:input_type -> kcore.controller.GetPkiStatusRequest
-	148, // 272: kcore.controller.Controller.GetComplianceReport:input_type -> kcore.controller.GetComplianceReportRequest
-	152, // 273: kcore.controller.Controller.GetCryptoConfig:input_type -> kcore.controller.GetCryptoConfigRequest
-	154, // 274: kcore.controller.Controller.ExportSbom:input_type -> kcore.controller.ExportSbomRequest
-	149, // 275: kcore.controller.Controller.ListAuditEvents:input_type -> kcore.controller.ListAuditEventsRequest
-	173, // 276: kcore.controller.Controller.GetNetworkOverview:input_type -> kcore.controller.GetNetworkOverviewRequest
-	177, // 277: kcore.controller.Controller.GetStorageOverview:input_type -> kcore.controller.GetStorageOverviewRequest
-	184, // 278: kcore.controller.Controller.ListVolumes:input_type -> kcore.controller.ListVolumesRequest
-	187, // 279: kcore.controller.Controller.CreateVolume:input_type -> kcore.controller.CreateVolumeRequest
-	189, // 280: kcore.controller.Controller.GetVolume:input_type -> kcore.controller.GetVolumeRequest
-	191, // 281: kcore.controller.Controller.AttachVolume:input_type -> kcore.controller.AttachVolumeRequest
-	193, // 282: kcore.controller.Controller.DetachVolume:input_type -> kcore.controller.DetachVolumeRequest
-	195, // 283: kcore.controller.Controller.DeleteVolume:input_type -> kcore.controller.DeleteVolumeRequest
-	198, // 284: kcore.controller.Controller.ListVmOperations:input_type -> kcore.controller.ListVmOperationsRequest
-	200, // 285: kcore.controller.Controller.GetVmOperation:input_type -> kcore.controller.GetVmOperationRequest
-	202, // 286: kcore.controller.Controller.CancelVmOperation:input_type -> kcore.controller.CancelVmOperationRequest
-	205, // 287: kcore.controller.Controller.CreateVolumeSnapshot:input_type -> kcore.controller.CreateVolumeSnapshotRequest
-	207, // 288: kcore.controller.Controller.ListVolumeSnapshots:input_type -> kcore.controller.ListVolumeSnapshotsRequest
-	209, // 289: kcore.controller.Controller.DeleteVolumeSnapshot:input_type -> kcore.controller.DeleteVolumeSnapshotRequest
-	211, // 290: kcore.controller.Controller.RestoreVolume:input_type -> kcore.controller.RestoreVolumeRequest
-	213, // 291: kcore.controller.Controller.FlattenVolume:input_type -> kcore.controller.FlattenVolumeRequest
-	224, // 292: kcore.controller.Controller.ResizeVolume:input_type -> kcore.controller.ResizeVolumeRequest
-	226, // 293: kcore.controller.Controller.EncryptVolume:input_type -> kcore.controller.EncryptVolumeRequest
-	216, // 294: kcore.controller.Controller.CreateSnapshotPolicy:input_type -> kcore.controller.CreateSnapshotPolicyRequest
-	218, // 295: kcore.controller.Controller.GetSnapshotPolicy:input_type -> kcore.controller.GetSnapshotPolicyRequest
-	220, // 296: kcore.controller.Controller.ListSnapshotPolicies:input_type -> kcore.controller.ListSnapshotPoliciesRequest
-	222, // 297: kcore.controller.Controller.DeleteSnapshotPolicy:input_type -> kcore.controller.DeleteSnapshotPolicyRequest
-	230, // 298: kcore.controller.Controller.CreateDiskLayout:input_type -> kcore.controller.CreateDiskLayoutRequest
-	232, // 299: kcore.controller.Controller.GetDiskLayout:input_type -> kcore.controller.GetDiskLayoutRequest
-	234, // 300: kcore.controller.Controller.ListDiskLayouts:input_type -> kcore.controller.ListDiskLayoutsRequest
-	237, // 301: kcore.controller.Controller.DeleteDiskLayout:input_type -> kcore.controller.DeleteDiskLayoutRequest
-	239, // 302: kcore.controller.Controller.ClassifyDiskLayout:input_type -> kcore.controller.ClassifyDiskLayoutRequest
-	248, // 303: kcore.controller.Controller.CreateClusterUpdate:input_type -> kcore.controller.CreateClusterUpdateRequest
-	250, // 304: kcore.controller.Controller.GetClusterUpdate:input_type -> kcore.controller.GetClusterUpdateRequest
-	252, // 305: kcore.controller.Controller.ListClusterUpdates:input_type -> kcore.controller.ListClusterUpdatesRequest
-	254, // 306: kcore.controller.Controller.PlanClusterUpdate:input_type -> kcore.controller.PlanClusterUpdateRequest
-	257, // 307: kcore.controller.Controller.ApproveClusterUpdate:input_type -> kcore.controller.ApproveClusterUpdateRequest
-	259, // 308: kcore.controller.Controller.CancelClusterUpdate:input_type -> kcore.controller.CancelClusterUpdateRequest
-	261, // 309: kcore.controller.Controller.RollbackClusterUpdate:input_type -> kcore.controller.RollbackClusterUpdateRequest
-	267, // 310: kcore.controller.Controller.CreateCephCluster:input_type -> kcore.controller.CreateCephClusterRequest
-	269, // 311: kcore.controller.Controller.GetCephCluster:input_type -> kcore.controller.GetCephClusterRequest
-	271, // 312: kcore.controller.Controller.ListCephClusters:input_type -> kcore.controller.ListCephClustersRequest
-	273, // 313: kcore.controller.Controller.DeleteCephCluster:input_type -> kcore.controller.DeleteCephClusterRequest
-	279, // 314: kcore.controller.Controller.CreateSharedFilesystem:input_type -> kcore.controller.CreateSharedFilesystemRequest
-	281, // 315: kcore.controller.Controller.GetSharedFilesystem:input_type -> kcore.controller.GetSharedFilesystemRequest
-	283, // 316: kcore.controller.Controller.ListSharedFilesystems:input_type -> kcore.controller.ListSharedFilesystemsRequest
-	285, // 317: kcore.controller.Controller.DeleteSharedFilesystem:input_type -> kcore.controller.DeleteSharedFilesystemRequest
-	290, // 318: kcore.controller.Controller.CreateObjectStore:input_type -> kcore.controller.CreateObjectStoreRequest
-	292, // 319: kcore.controller.Controller.GetObjectStore:input_type -> kcore.controller.GetObjectStoreRequest
-	294, // 320: kcore.controller.Controller.ListObjectStores:input_type -> kcore.controller.ListObjectStoresRequest
-	296, // 321: kcore.controller.Controller.DeleteObjectStore:input_type -> kcore.controller.DeleteObjectStoreRequest
-	300, // 322: kcore.controller.Controller.CreateObjectUser:input_type -> kcore.controller.CreateObjectUserRequest
-	302, // 323: kcore.controller.Controller.DeleteObjectUser:input_type -> kcore.controller.DeleteObjectUserRequest
-	158, // 324: kcore.controller.Controller.CreateOperator:input_type -> kcore.controller.CreateOperatorRequest
-	160, // 325: kcore.controller.Controller.DeleteOperator:input_type -> kcore.controller.DeleteOperatorRequest
-	162, // 326: kcore.controller.Controller.ListOperators:input_type -> kcore.controller.ListOperatorsRequest
-	164, // 327: kcore.controller.Controller.GetOperator:input_type -> kcore.controller.GetOperatorRequest
-	166, // 328: kcore.controller.Controller.GrantOperatorRole:input_type -> kcore.controller.GrantOperatorRoleRequest
-	168, // 329: kcore.controller.Controller.RevokeOperatorRole:input_type -> kcore.controller.RevokeOperatorRoleRequest
-	170, // 330: kcore.controller.Controller.IssueOperatorCert:input_type -> kcore.controller.IssueOperatorCertRequest
-	89,  // 331: kcore.controller.ControllerAdmin.ApplyNixConfig:input_type -> kcore.controller.ApplyNixConfigRequest
-	91,  // 332: kcore.controller.ControllerAdmin.GetReplicationEvents:input_type -> kcore.controller.GetReplicationEventsRequest
-	94,  // 333: kcore.controller.ControllerAdmin.AckReplicationEvents:input_type -> kcore.controller.AckReplicationEventsRequest
-	96,  // 334: kcore.controller.ControllerAdmin.GetReplicationStatus:input_type -> kcore.controller.GetReplicationStatusRequest
-	100, // 335: kcore.controller.ControllerAdmin.ListReplicationConflicts:input_type -> kcore.controller.ListReplicationConflictsRequest
-	103, // 336: kcore.controller.ControllerAdmin.ResolveReplicationConflict:input_type -> kcore.controller.ResolveReplicationConflictRequest
-	22,  // 337: kcore.controller.Controller.RegisterNode:output_type -> kcore.controller.RegisterNodeResponse
-	24,  // 338: kcore.controller.Controller.Heartbeat:output_type -> kcore.controller.HeartbeatResponse
-	26,  // 339: kcore.controller.Controller.SyncVmState:output_type -> kcore.controller.SyncVmStateResponse
-	28,  // 340: kcore.controller.Controller.SyncWorkloadState:output_type -> kcore.controller.SyncWorkloadStateResponse
-	35,  // 341: kcore.controller.Controller.CreateVm:output_type -> kcore.controller.CreateVmResponse
-	37,  // 342: kcore.controller.Controller.UpdateVm:output_type -> kcore.controller.UpdateVmResponse
-	39,  // 343: kcore.controller.Controller.DeleteVm:output_type -> kcore.controller.DeleteVmResponse
-	41,  // 344: kcore.controller.Controller.SetVmDesiredState:output_type -> kcore.controller.SetVmDesiredStateResponse
-	43,  // 345: kcore.controller.Controller.GetVm:output_type -> kcore.controller.GetVmResponse
-	45,  // 346: kcore.controller.Controller.ListVms:output_type -> kcore.controller.ListVmsResponse
-	46,  // 347: kcore.controller.Controller.AttachVmConsole:output_type -> kcore.controller.ConsoleMessage
-	48,  // 348: kcore.controller.Controller.CreateWorkload:output_type -> kcore.controller.CreateWorkloadResponse
-	50,  // 349: kcore.controller.Controller.DeleteWorkload:output_type -> kcore.controller.DeleteWorkloadResponse
-	52,  // 350: kcore.controller.Controller.SetWorkloadDesiredState:output_type -> kcore.controller.SetWorkloadDesiredStateResponse
-	54,  // 351: kcore.controller.Controller.GetWorkload:output_type -> kcore.controller.GetWorkloadResponse
-	56,  // 352: kcore.controller.Controller.ListWorkloads:output_type -> kcore.controller.ListWorkloadsResponse
-	58,  // 353: kcore.controller.Controller.CreateNetwork:output_type -> kcore.controller.CreateNetworkResponse
-	60,  // 354: kcore.controller.Controller.DeleteNetwork:output_type -> kcore.controller.DeleteNetworkResponse
-	62,  // 355: kcore.controller.Controller.ListNetworks:output_type -> kcore.controller.ListNetworksResponse
-	68,  // 356: kcore.controller.Controller.CreateSecurityGroup:output_type -> kcore.controller.CreateSecurityGroupResponse
-	70,  // 357: kcore.controller.Controller.GetSecurityGroup:output_type -> kcore.controller.GetSecurityGroupResponse
-	72,  // 358: kcore.controller.Controller.ListSecurityGroups:output_type -> kcore.controller.ListSecurityGroupsResponse
-	74,  // 359: kcore.controller.Controller.DeleteSecurityGroup:output_type -> kcore.controller.DeleteSecurityGroupResponse
-	76,  // 360: kcore.controller.Controller.AttachSecurityGroup:output_type -> kcore.controller.AttachSecurityGroupResponse
-	78,  // 361: kcore.controller.Controller.DetachSecurityGroup:output_type -> kcore.controller.DetachSecurityGroupResponse
-	81,  // 362: kcore.controller.Controller.ListNodes:output_type -> kcore.controller.ListNodesResponse
-	84,  // 363: kcore.controller.Controller.GetNode:output_type -> kcore.controller.GetNodeResponse
-	106, // 364: kcore.controller.Controller.CreateSshKey:output_type -> kcore.controller.CreateSshKeyResponse
-	108, // 365: kcore.controller.Controller.DeleteSshKey:output_type -> kcore.controller.DeleteSshKeyResponse
-	110, // 366: kcore.controller.Controller.ListSshKeys:output_type -> kcore.controller.ListSshKeysResponse
-	112, // 367: kcore.controller.Controller.GetSshKey:output_type -> kcore.controller.GetSshKeyResponse
-	115, // 368: kcore.controller.Controller.DrainNode:output_type -> kcore.controller.DrainNodeResponse
-	117, // 369: kcore.controller.Controller.MigrateVm:output_type -> kcore.controller.MigrateVmResponse
-	121, // 370: kcore.controller.Controller.GetLiveMigrateReceiveStatus:output_type -> kcore.controller.GetLiveMigrateReceiveStatusResponse
-	123, // 371: kcore.controller.Controller.ResetLiveMigrateReceive:output_type -> kcore.controller.ResetLiveMigrateReceiveResponse
-	125, // 372: kcore.controller.Controller.ApproveNode:output_type -> kcore.controller.ApproveNodeResponse
-	127, // 373: kcore.controller.Controller.RejectNode:output_type -> kcore.controller.RejectNodeResponse
-	129, // 374: kcore.controller.Controller.CordonNode:output_type -> kcore.controller.CordonNodeResponse
-	131, // 375: kcore.controller.Controller.UncordonNode:output_type -> kcore.controller.UncordonNodeResponse
-	133, // 376: kcore.controller.Controller.DeleteNode:output_type -> kcore.controller.DeleteNodeResponse
-	135, // 377: kcore.controller.Controller.GetClusterHealth:output_type -> kcore.controller.GetClusterHealthResponse
-	137, // 378: kcore.controller.Controller.BackupCluster:output_type -> kcore.controller.BackupClusterResponse
-	139, // 379: kcore.controller.Controller.RestoreCluster:output_type -> kcore.controller.RestoreClusterResponse
-	141, // 380: kcore.controller.Controller.RenewNodeCert:output_type -> kcore.controller.RenewNodeCertResponse
-	143, // 381: kcore.controller.Controller.IssueNodeBootstrapCert:output_type -> kcore.controller.IssueNodeBootstrapCertResponse
-	145, // 382: kcore.controller.Controller.RotateSubCa:output_type -> kcore.controller.RotateSubCaResponse
-	147, // 383: kcore.controller.Controller.ReloadTls:output_type -> kcore.controller.ReloadTlsResponse
-	306, // 384: kcore.controller.Controller.SignNodeCsr:output_type -> kcore.controller.SignNodeCsrResponse
-	309, // 385: kcore.controller.Controller.RotateNodeCerts:output_type -> kcore.controller.RotateNodeCertsResponse
-	311, // 386: kcore.controller.Controller.ListCertificates:output_type -> kcore.controller.ListCertificatesResponse
-	313, // 387: kcore.controller.Controller.RevokeCertificate:output_type -> kcore.controller.RevokeCertificateResponse
-	315, // 388: kcore.controller.Controller.GetCrl:output_type -> kcore.controller.GetCrlResponse
-	317, // 389: kcore.controller.Controller.GetPkiStatus:output_type -> kcore.controller.GetPkiStatusResponse
-	172, // 390: kcore.controller.Controller.GetComplianceReport:output_type -> kcore.controller.GetComplianceReportResponse
-	153, // 391: kcore.controller.Controller.GetCryptoConfig:output_type -> kcore.controller.GetCryptoConfigResponse
-	155, // 392: kcore.controller.Controller.ExportSbom:output_type -> kcore.controller.ExportSbomResponse
-	151, // 393: kcore.controller.Controller.ListAuditEvents:output_type -> kcore.controller.ListAuditEventsResponse
-	176, // 394: kcore.controller.Controller.GetNetworkOverview:output_type -> kcore.controller.GetNetworkOverviewResponse
-	183, // 395: kcore.controller.Controller.GetStorageOverview:output_type -> kcore.controller.GetStorageOverviewResponse
-	185, // 396: kcore.controller.Controller.ListVolumes:output_type -> kcore.controller.ListVolumesResponse
-	188, // 397: kcore.controller.Controller.CreateVolume:output_type -> kcore.controller.CreateVolumeResponse
-	190, // 398: kcore.controller.Controller.GetVolume:output_type -> kcore.controller.GetVolumeResponse
-	192, // 399: kcore.controller.Controller.AttachVolume:output_type -> kcore.controller.AttachVolumeResponse
-	194, // 400: kcore.controller.Controller.DetachVolume:output_type -> kcore.controller.DetachVolumeResponse
-	196, // 401: kcore.controller.Controller.DeleteVolume:output_type -> kcore.controller.DeleteVolumeResponse
-	199, // 402: kcore.controller.Controller.ListVmOperations:output_type -> kcore.controller.ListVmOperationsResponse
-	201, // 403: kcore.controller.Controller.GetVmOperation:output_type -> kcore.controller.GetVmOperationResponse
-	203, // 404: kcore.controller.Controller.CancelVmOperation:output_type -> kcore.controller.CancelVmOperationResponse
-	206, // 405: kcore.controller.Controller.CreateVolumeSnapshot:output_type -> kcore.controller.CreateVolumeSnapshotResponse
-	208, // 406: kcore.controller.Controller.ListVolumeSnapshots:output_type -> kcore.controller.ListVolumeSnapshotsResponse
-	210, // 407: kcore.controller.Controller.DeleteVolumeSnapshot:output_type -> kcore.controller.DeleteVolumeSnapshotResponse
-	212, // 408: kcore.controller.Controller.RestoreVolume:output_type -> kcore.controller.RestoreVolumeResponse
-	214, // 409: kcore.controller.Controller.FlattenVolume:output_type -> kcore.controller.FlattenVolumeResponse
-	225, // 410: kcore.controller.Controller.ResizeVolume:output_type -> kcore.controller.ResizeVolumeResponse
-	227, // 411: kcore.controller.Controller.EncryptVolume:output_type -> kcore.controller.EncryptVolumeResponse
-	217, // 412: kcore.controller.Controller.CreateSnapshotPolicy:output_type -> kcore.controller.CreateSnapshotPolicyResponse
-	219, // 413: kcore.controller.Controller.GetSnapshotPolicy:output_type -> kcore.controller.GetSnapshotPolicyResponse
-	221, // 414: kcore.controller.Controller.ListSnapshotPolicies:output_type -> kcore.controller.ListSnapshotPoliciesResponse
-	223, // 415: kcore.controller.Controller.DeleteSnapshotPolicy:output_type -> kcore.controller.DeleteSnapshotPolicyResponse
-	231, // 416: kcore.controller.Controller.CreateDiskLayout:output_type -> kcore.controller.CreateDiskLayoutResponse
-	233, // 417: kcore.controller.Controller.GetDiskLayout:output_type -> kcore.controller.GetDiskLayoutResponse
-	236, // 418: kcore.controller.Controller.ListDiskLayouts:output_type -> kcore.controller.ListDiskLayoutsResponse
-	238, // 419: kcore.controller.Controller.DeleteDiskLayout:output_type -> kcore.controller.DeleteDiskLayoutResponse
-	240, // 420: kcore.controller.Controller.ClassifyDiskLayout:output_type -> kcore.controller.ClassifyDiskLayoutResponse
-	249, // 421: kcore.controller.Controller.CreateClusterUpdate:output_type -> kcore.controller.CreateClusterUpdateResponse
-	251, // 422: kcore.controller.Controller.GetClusterUpdate:output_type -> kcore.controller.GetClusterUpdateResponse
-	253, // 423: kcore.controller.Controller.ListClusterUpdates:output_type -> kcore.controller.ListClusterUpdatesResponse
-	256, // 424: kcore.controller.Controller.PlanClusterUpdate:output_type -> kcore.controller.PlanClusterUpdateResponse
-	258, // 425: kcore.controller.Controller.ApproveClusterUpdate:output_type -> kcore.controller.ApproveClusterUpdateResponse
-	260, // 426: kcore.controller.Controller.CancelClusterUpdate:output_type -> kcore.controller.CancelClusterUpdateResponse
-	262, // 427: kcore.controller.Controller.RollbackClusterUpdate:output_type -> kcore.controller.RollbackClusterUpdateResponse
-	268, // 428: kcore.controller.Controller.CreateCephCluster:output_type -> kcore.controller.CreateCephClusterResponse
-	270, // 429: kcore.controller.Controller.GetCephCluster:output_type -> kcore.controller.GetCephClusterResponse
-	272, // 430: kcore.controller.Controller.ListCephClusters:output_type -> kcore.controller.ListCephClustersResponse
-	274, // 431: kcore.controller.Controller.DeleteCephCluster:output_type -> kcore.controller.DeleteCephClusterResponse
-	280, // 432: kcore.controller.Controller.CreateSharedFilesystem:output_type -> kcore.controller.CreateSharedFilesystemResponse
-	282, // 433: kcore.controller.Controller.GetSharedFilesystem:output_type -> kcore.controller.GetSharedFilesystemResponse
-	284, // 434: kcore.controller.Controller.ListSharedFilesystems:output_type -> kcore.controller.ListSharedFilesystemsResponse
-	286, // 435: kcore.controller.Controller.DeleteSharedFilesystem:output_type -> kcore.controller.DeleteSharedFilesystemResponse
-	291, // 436: kcore.controller.Controller.CreateObjectStore:output_type -> kcore.controller.CreateObjectStoreResponse
-	293, // 437: kcore.controller.Controller.GetObjectStore:output_type -> kcore.controller.GetObjectStoreResponse
-	295, // 438: kcore.controller.Controller.ListObjectStores:output_type -> kcore.controller.ListObjectStoresResponse
-	297, // 439: kcore.controller.Controller.DeleteObjectStore:output_type -> kcore.controller.DeleteObjectStoreResponse
-	301, // 440: kcore.controller.Controller.CreateObjectUser:output_type -> kcore.controller.CreateObjectUserResponse
-	303, // 441: kcore.controller.Controller.DeleteObjectUser:output_type -> kcore.controller.DeleteObjectUserResponse
-	159, // 442: kcore.controller.Controller.CreateOperator:output_type -> kcore.controller.CreateOperatorResponse
-	161, // 443: kcore.controller.Controller.DeleteOperator:output_type -> kcore.controller.DeleteOperatorResponse
-	163, // 444: kcore.controller.Controller.ListOperators:output_type -> kcore.controller.ListOperatorsResponse
-	165, // 445: kcore.controller.Controller.GetOperator:output_type -> kcore.controller.GetOperatorResponse
-	167, // 446: kcore.controller.Controller.GrantOperatorRole:output_type -> kcore.controller.GrantOperatorRoleResponse
-	169, // 447: kcore.controller.Controller.RevokeOperatorRole:output_type -> kcore.controller.RevokeOperatorRoleResponse
-	171, // 448: kcore.controller.Controller.IssueOperatorCert:output_type -> kcore.controller.IssueOperatorCertResponse
-	90,  // 449: kcore.controller.ControllerAdmin.ApplyNixConfig:output_type -> kcore.controller.ApplyNixConfigResponse
-	93,  // 450: kcore.controller.ControllerAdmin.GetReplicationEvents:output_type -> kcore.controller.GetReplicationEventsResponse
-	95,  // 451: kcore.controller.ControllerAdmin.AckReplicationEvents:output_type -> kcore.controller.AckReplicationEventsResponse
-	99,  // 452: kcore.controller.ControllerAdmin.GetReplicationStatus:output_type -> kcore.controller.GetReplicationStatusResponse
-	102, // 453: kcore.controller.ControllerAdmin.ListReplicationConflicts:output_type -> kcore.controller.ListReplicationConflictsResponse
-	104, // 454: kcore.controller.ControllerAdmin.ResolveReplicationConflict:output_type -> kcore.controller.ResolveReplicationConflictResponse
-	337, // [337:455] is the sub-list for method output_type
-	219, // [219:337] is the sub-list for method input_type
-	219, // [219:219] is the sub-list for extension type_name
-	219, // [219:219] is the sub-list for extension extendee
-	0,   // [0:219] is the sub-list for field type_name
+	321, // 219: kcore.controller.KubernetesLocalProvisioner.volumes:type_name -> kcore.controller.KubernetesHostVolume
+	318, // 220: kcore.controller.KubernetesClusterSpec.cilium_config:type_name -> kcore.controller.CiliumConfig
+	319, // 221: kcore.controller.KubernetesClusterSpec.control_plane_nodes:type_name -> kcore.controller.KubernetesNodeSpec
+	319, // 222: kcore.controller.KubernetesClusterSpec.worker_nodes:type_name -> kcore.controller.KubernetesNodeSpec
+	320, // 223: kcore.controller.KubernetesClusterSpec.high_availability:type_name -> kcore.controller.HighAvailabilityConfig
+	322, // 224: kcore.controller.KubernetesClusterSpec.local_provisioner:type_name -> kcore.controller.KubernetesLocalProvisioner
+	345, // 225: kcore.controller.KubernetesClusterStatus.last_updated:type_name -> google.protobuf.Timestamp
+	323, // 226: kcore.controller.KubernetesCluster.spec:type_name -> kcore.controller.KubernetesClusterSpec
+	324, // 227: kcore.controller.KubernetesCluster.status:type_name -> kcore.controller.KubernetesClusterStatus
+	323, // 228: kcore.controller.PlanKubernetesClusterRequest.spec:type_name -> kcore.controller.KubernetesClusterSpec
+	327, // 229: kcore.controller.PlanKubernetesClusterResponse.node_plans:type_name -> kcore.controller.NodePlanResult
+	323, // 230: kcore.controller.CreateKubernetesClusterRequest.spec:type_name -> kcore.controller.KubernetesClusterSpec
+	325, // 231: kcore.controller.CreateKubernetesClusterResponse.cluster:type_name -> kcore.controller.KubernetesCluster
+	323, // 232: kcore.controller.UpdateKubernetesClusterRequest.spec:type_name -> kcore.controller.KubernetesClusterSpec
+	325, // 233: kcore.controller.UpdateKubernetesClusterResponse.cluster:type_name -> kcore.controller.KubernetesCluster
+	325, // 234: kcore.controller.GetKubernetesClusterResponse.cluster:type_name -> kcore.controller.KubernetesCluster
+	325, // 235: kcore.controller.ListKubernetesClustersResponse.clusters:type_name -> kcore.controller.KubernetesCluster
+	319, // 236: kcore.controller.ScaleKubernetesClusterRequest.add_nodes:type_name -> kcore.controller.KubernetesNodeSpec
+	325, // 237: kcore.controller.ScaleKubernetesClusterResponse.cluster:type_name -> kcore.controller.KubernetesCluster
+	342, // 238: kcore.controller.GetKubernetesClusterHealthResponse.node_health:type_name -> kcore.controller.NodeHealth
+	21,  // 239: kcore.controller.Controller.RegisterNode:input_type -> kcore.controller.RegisterNodeRequest
+	23,  // 240: kcore.controller.Controller.Heartbeat:input_type -> kcore.controller.HeartbeatRequest
+	25,  // 241: kcore.controller.Controller.SyncVmState:input_type -> kcore.controller.SyncVmStateRequest
+	27,  // 242: kcore.controller.Controller.SyncWorkloadState:input_type -> kcore.controller.SyncWorkloadStateRequest
+	34,  // 243: kcore.controller.Controller.CreateVm:input_type -> kcore.controller.CreateVmRequest
+	36,  // 244: kcore.controller.Controller.UpdateVm:input_type -> kcore.controller.UpdateVmRequest
+	38,  // 245: kcore.controller.Controller.DeleteVm:input_type -> kcore.controller.DeleteVmRequest
+	40,  // 246: kcore.controller.Controller.SetVmDesiredState:input_type -> kcore.controller.SetVmDesiredStateRequest
+	42,  // 247: kcore.controller.Controller.GetVm:input_type -> kcore.controller.GetVmRequest
+	44,  // 248: kcore.controller.Controller.ListVms:input_type -> kcore.controller.ListVmsRequest
+	46,  // 249: kcore.controller.Controller.AttachVmConsole:input_type -> kcore.controller.ConsoleMessage
+	47,  // 250: kcore.controller.Controller.CreateWorkload:input_type -> kcore.controller.CreateWorkloadRequest
+	49,  // 251: kcore.controller.Controller.DeleteWorkload:input_type -> kcore.controller.DeleteWorkloadRequest
+	51,  // 252: kcore.controller.Controller.SetWorkloadDesiredState:input_type -> kcore.controller.SetWorkloadDesiredStateRequest
+	53,  // 253: kcore.controller.Controller.GetWorkload:input_type -> kcore.controller.GetWorkloadRequest
+	55,  // 254: kcore.controller.Controller.ListWorkloads:input_type -> kcore.controller.ListWorkloadsRequest
+	57,  // 255: kcore.controller.Controller.CreateNetwork:input_type -> kcore.controller.CreateNetworkRequest
+	59,  // 256: kcore.controller.Controller.DeleteNetwork:input_type -> kcore.controller.DeleteNetworkRequest
+	61,  // 257: kcore.controller.Controller.ListNetworks:input_type -> kcore.controller.ListNetworksRequest
+	67,  // 258: kcore.controller.Controller.CreateSecurityGroup:input_type -> kcore.controller.CreateSecurityGroupRequest
+	69,  // 259: kcore.controller.Controller.GetSecurityGroup:input_type -> kcore.controller.GetSecurityGroupRequest
+	71,  // 260: kcore.controller.Controller.ListSecurityGroups:input_type -> kcore.controller.ListSecurityGroupsRequest
+	73,  // 261: kcore.controller.Controller.DeleteSecurityGroup:input_type -> kcore.controller.DeleteSecurityGroupRequest
+	75,  // 262: kcore.controller.Controller.AttachSecurityGroup:input_type -> kcore.controller.AttachSecurityGroupRequest
+	77,  // 263: kcore.controller.Controller.DetachSecurityGroup:input_type -> kcore.controller.DetachSecurityGroupRequest
+	80,  // 264: kcore.controller.Controller.ListNodes:input_type -> kcore.controller.ListNodesRequest
+	83,  // 265: kcore.controller.Controller.GetNode:input_type -> kcore.controller.GetNodeRequest
+	105, // 266: kcore.controller.Controller.CreateSshKey:input_type -> kcore.controller.CreateSshKeyRequest
+	107, // 267: kcore.controller.Controller.DeleteSshKey:input_type -> kcore.controller.DeleteSshKeyRequest
+	109, // 268: kcore.controller.Controller.ListSshKeys:input_type -> kcore.controller.ListSshKeysRequest
+	111, // 269: kcore.controller.Controller.GetSshKey:input_type -> kcore.controller.GetSshKeyRequest
+	114, // 270: kcore.controller.Controller.DrainNode:input_type -> kcore.controller.DrainNodeRequest
+	116, // 271: kcore.controller.Controller.MigrateVm:input_type -> kcore.controller.MigrateVmRequest
+	118, // 272: kcore.controller.Controller.GetLiveMigrateReceiveStatus:input_type -> kcore.controller.GetLiveMigrateReceiveStatusRequest
+	122, // 273: kcore.controller.Controller.ResetLiveMigrateReceive:input_type -> kcore.controller.ResetLiveMigrateReceiveRequest
+	124, // 274: kcore.controller.Controller.ApproveNode:input_type -> kcore.controller.ApproveNodeRequest
+	126, // 275: kcore.controller.Controller.RejectNode:input_type -> kcore.controller.RejectNodeRequest
+	128, // 276: kcore.controller.Controller.CordonNode:input_type -> kcore.controller.CordonNodeRequest
+	130, // 277: kcore.controller.Controller.UncordonNode:input_type -> kcore.controller.UncordonNodeRequest
+	132, // 278: kcore.controller.Controller.DeleteNode:input_type -> kcore.controller.DeleteNodeRequest
+	134, // 279: kcore.controller.Controller.GetClusterHealth:input_type -> kcore.controller.GetClusterHealthRequest
+	136, // 280: kcore.controller.Controller.BackupCluster:input_type -> kcore.controller.BackupClusterRequest
+	138, // 281: kcore.controller.Controller.RestoreCluster:input_type -> kcore.controller.RestoreClusterRequest
+	140, // 282: kcore.controller.Controller.RenewNodeCert:input_type -> kcore.controller.RenewNodeCertRequest
+	142, // 283: kcore.controller.Controller.IssueNodeBootstrapCert:input_type -> kcore.controller.IssueNodeBootstrapCertRequest
+	144, // 284: kcore.controller.Controller.RotateSubCa:input_type -> kcore.controller.RotateSubCaRequest
+	146, // 285: kcore.controller.Controller.ReloadTls:input_type -> kcore.controller.ReloadTlsRequest
+	305, // 286: kcore.controller.Controller.SignNodeCsr:input_type -> kcore.controller.SignNodeCsrRequest
+	307, // 287: kcore.controller.Controller.RotateNodeCerts:input_type -> kcore.controller.RotateNodeCertsRequest
+	310, // 288: kcore.controller.Controller.ListCertificates:input_type -> kcore.controller.ListCertificatesRequest
+	312, // 289: kcore.controller.Controller.RevokeCertificate:input_type -> kcore.controller.RevokeCertificateRequest
+	314, // 290: kcore.controller.Controller.GetCrl:input_type -> kcore.controller.GetCrlRequest
+	316, // 291: kcore.controller.Controller.GetPkiStatus:input_type -> kcore.controller.GetPkiStatusRequest
+	148, // 292: kcore.controller.Controller.GetComplianceReport:input_type -> kcore.controller.GetComplianceReportRequest
+	152, // 293: kcore.controller.Controller.GetCryptoConfig:input_type -> kcore.controller.GetCryptoConfigRequest
+	154, // 294: kcore.controller.Controller.ExportSbom:input_type -> kcore.controller.ExportSbomRequest
+	149, // 295: kcore.controller.Controller.ListAuditEvents:input_type -> kcore.controller.ListAuditEventsRequest
+	173, // 296: kcore.controller.Controller.GetNetworkOverview:input_type -> kcore.controller.GetNetworkOverviewRequest
+	177, // 297: kcore.controller.Controller.GetStorageOverview:input_type -> kcore.controller.GetStorageOverviewRequest
+	184, // 298: kcore.controller.Controller.ListVolumes:input_type -> kcore.controller.ListVolumesRequest
+	187, // 299: kcore.controller.Controller.CreateVolume:input_type -> kcore.controller.CreateVolumeRequest
+	189, // 300: kcore.controller.Controller.GetVolume:input_type -> kcore.controller.GetVolumeRequest
+	191, // 301: kcore.controller.Controller.AttachVolume:input_type -> kcore.controller.AttachVolumeRequest
+	193, // 302: kcore.controller.Controller.DetachVolume:input_type -> kcore.controller.DetachVolumeRequest
+	195, // 303: kcore.controller.Controller.DeleteVolume:input_type -> kcore.controller.DeleteVolumeRequest
+	198, // 304: kcore.controller.Controller.ListVmOperations:input_type -> kcore.controller.ListVmOperationsRequest
+	200, // 305: kcore.controller.Controller.GetVmOperation:input_type -> kcore.controller.GetVmOperationRequest
+	202, // 306: kcore.controller.Controller.CancelVmOperation:input_type -> kcore.controller.CancelVmOperationRequest
+	205, // 307: kcore.controller.Controller.CreateVolumeSnapshot:input_type -> kcore.controller.CreateVolumeSnapshotRequest
+	207, // 308: kcore.controller.Controller.ListVolumeSnapshots:input_type -> kcore.controller.ListVolumeSnapshotsRequest
+	209, // 309: kcore.controller.Controller.DeleteVolumeSnapshot:input_type -> kcore.controller.DeleteVolumeSnapshotRequest
+	211, // 310: kcore.controller.Controller.RestoreVolume:input_type -> kcore.controller.RestoreVolumeRequest
+	213, // 311: kcore.controller.Controller.FlattenVolume:input_type -> kcore.controller.FlattenVolumeRequest
+	224, // 312: kcore.controller.Controller.ResizeVolume:input_type -> kcore.controller.ResizeVolumeRequest
+	226, // 313: kcore.controller.Controller.EncryptVolume:input_type -> kcore.controller.EncryptVolumeRequest
+	216, // 314: kcore.controller.Controller.CreateSnapshotPolicy:input_type -> kcore.controller.CreateSnapshotPolicyRequest
+	218, // 315: kcore.controller.Controller.GetSnapshotPolicy:input_type -> kcore.controller.GetSnapshotPolicyRequest
+	220, // 316: kcore.controller.Controller.ListSnapshotPolicies:input_type -> kcore.controller.ListSnapshotPoliciesRequest
+	222, // 317: kcore.controller.Controller.DeleteSnapshotPolicy:input_type -> kcore.controller.DeleteSnapshotPolicyRequest
+	230, // 318: kcore.controller.Controller.CreateDiskLayout:input_type -> kcore.controller.CreateDiskLayoutRequest
+	232, // 319: kcore.controller.Controller.GetDiskLayout:input_type -> kcore.controller.GetDiskLayoutRequest
+	234, // 320: kcore.controller.Controller.ListDiskLayouts:input_type -> kcore.controller.ListDiskLayoutsRequest
+	237, // 321: kcore.controller.Controller.DeleteDiskLayout:input_type -> kcore.controller.DeleteDiskLayoutRequest
+	239, // 322: kcore.controller.Controller.ClassifyDiskLayout:input_type -> kcore.controller.ClassifyDiskLayoutRequest
+	248, // 323: kcore.controller.Controller.CreateClusterUpdate:input_type -> kcore.controller.CreateClusterUpdateRequest
+	250, // 324: kcore.controller.Controller.GetClusterUpdate:input_type -> kcore.controller.GetClusterUpdateRequest
+	252, // 325: kcore.controller.Controller.ListClusterUpdates:input_type -> kcore.controller.ListClusterUpdatesRequest
+	254, // 326: kcore.controller.Controller.PlanClusterUpdate:input_type -> kcore.controller.PlanClusterUpdateRequest
+	257, // 327: kcore.controller.Controller.ApproveClusterUpdate:input_type -> kcore.controller.ApproveClusterUpdateRequest
+	259, // 328: kcore.controller.Controller.CancelClusterUpdate:input_type -> kcore.controller.CancelClusterUpdateRequest
+	261, // 329: kcore.controller.Controller.RollbackClusterUpdate:input_type -> kcore.controller.RollbackClusterUpdateRequest
+	267, // 330: kcore.controller.Controller.CreateCephCluster:input_type -> kcore.controller.CreateCephClusterRequest
+	269, // 331: kcore.controller.Controller.GetCephCluster:input_type -> kcore.controller.GetCephClusterRequest
+	271, // 332: kcore.controller.Controller.ListCephClusters:input_type -> kcore.controller.ListCephClustersRequest
+	273, // 333: kcore.controller.Controller.DeleteCephCluster:input_type -> kcore.controller.DeleteCephClusterRequest
+	279, // 334: kcore.controller.Controller.CreateSharedFilesystem:input_type -> kcore.controller.CreateSharedFilesystemRequest
+	281, // 335: kcore.controller.Controller.GetSharedFilesystem:input_type -> kcore.controller.GetSharedFilesystemRequest
+	283, // 336: kcore.controller.Controller.ListSharedFilesystems:input_type -> kcore.controller.ListSharedFilesystemsRequest
+	285, // 337: kcore.controller.Controller.DeleteSharedFilesystem:input_type -> kcore.controller.DeleteSharedFilesystemRequest
+	290, // 338: kcore.controller.Controller.CreateObjectStore:input_type -> kcore.controller.CreateObjectStoreRequest
+	292, // 339: kcore.controller.Controller.GetObjectStore:input_type -> kcore.controller.GetObjectStoreRequest
+	294, // 340: kcore.controller.Controller.ListObjectStores:input_type -> kcore.controller.ListObjectStoresRequest
+	296, // 341: kcore.controller.Controller.DeleteObjectStore:input_type -> kcore.controller.DeleteObjectStoreRequest
+	300, // 342: kcore.controller.Controller.CreateObjectUser:input_type -> kcore.controller.CreateObjectUserRequest
+	302, // 343: kcore.controller.Controller.DeleteObjectUser:input_type -> kcore.controller.DeleteObjectUserRequest
+	158, // 344: kcore.controller.Controller.CreateOperator:input_type -> kcore.controller.CreateOperatorRequest
+	160, // 345: kcore.controller.Controller.DeleteOperator:input_type -> kcore.controller.DeleteOperatorRequest
+	162, // 346: kcore.controller.Controller.ListOperators:input_type -> kcore.controller.ListOperatorsRequest
+	164, // 347: kcore.controller.Controller.GetOperator:input_type -> kcore.controller.GetOperatorRequest
+	166, // 348: kcore.controller.Controller.GrantOperatorRole:input_type -> kcore.controller.GrantOperatorRoleRequest
+	168, // 349: kcore.controller.Controller.RevokeOperatorRole:input_type -> kcore.controller.RevokeOperatorRoleRequest
+	170, // 350: kcore.controller.Controller.IssueOperatorCert:input_type -> kcore.controller.IssueOperatorCertRequest
+	326, // 351: kcore.controller.Controller.PlanKubernetesCluster:input_type -> kcore.controller.PlanKubernetesClusterRequest
+	329, // 352: kcore.controller.Controller.CreateKubernetesCluster:input_type -> kcore.controller.CreateKubernetesClusterRequest
+	331, // 353: kcore.controller.Controller.UpdateKubernetesCluster:input_type -> kcore.controller.UpdateKubernetesClusterRequest
+	333, // 354: kcore.controller.Controller.GetKubernetesCluster:input_type -> kcore.controller.GetKubernetesClusterRequest
+	335, // 355: kcore.controller.Controller.ListKubernetesClusters:input_type -> kcore.controller.ListKubernetesClustersRequest
+	337, // 356: kcore.controller.Controller.DeleteKubernetesCluster:input_type -> kcore.controller.DeleteKubernetesClusterRequest
+	339, // 357: kcore.controller.Controller.ScaleKubernetesCluster:input_type -> kcore.controller.ScaleKubernetesClusterRequest
+	341, // 358: kcore.controller.Controller.GetKubernetesClusterHealth:input_type -> kcore.controller.GetKubernetesClusterHealthRequest
+	89,  // 359: kcore.controller.ControllerAdmin.ApplyNixConfig:input_type -> kcore.controller.ApplyNixConfigRequest
+	91,  // 360: kcore.controller.ControllerAdmin.GetReplicationEvents:input_type -> kcore.controller.GetReplicationEventsRequest
+	94,  // 361: kcore.controller.ControllerAdmin.AckReplicationEvents:input_type -> kcore.controller.AckReplicationEventsRequest
+	96,  // 362: kcore.controller.ControllerAdmin.GetReplicationStatus:input_type -> kcore.controller.GetReplicationStatusRequest
+	100, // 363: kcore.controller.ControllerAdmin.ListReplicationConflicts:input_type -> kcore.controller.ListReplicationConflictsRequest
+	103, // 364: kcore.controller.ControllerAdmin.ResolveReplicationConflict:input_type -> kcore.controller.ResolveReplicationConflictRequest
+	22,  // 365: kcore.controller.Controller.RegisterNode:output_type -> kcore.controller.RegisterNodeResponse
+	24,  // 366: kcore.controller.Controller.Heartbeat:output_type -> kcore.controller.HeartbeatResponse
+	26,  // 367: kcore.controller.Controller.SyncVmState:output_type -> kcore.controller.SyncVmStateResponse
+	28,  // 368: kcore.controller.Controller.SyncWorkloadState:output_type -> kcore.controller.SyncWorkloadStateResponse
+	35,  // 369: kcore.controller.Controller.CreateVm:output_type -> kcore.controller.CreateVmResponse
+	37,  // 370: kcore.controller.Controller.UpdateVm:output_type -> kcore.controller.UpdateVmResponse
+	39,  // 371: kcore.controller.Controller.DeleteVm:output_type -> kcore.controller.DeleteVmResponse
+	41,  // 372: kcore.controller.Controller.SetVmDesiredState:output_type -> kcore.controller.SetVmDesiredStateResponse
+	43,  // 373: kcore.controller.Controller.GetVm:output_type -> kcore.controller.GetVmResponse
+	45,  // 374: kcore.controller.Controller.ListVms:output_type -> kcore.controller.ListVmsResponse
+	46,  // 375: kcore.controller.Controller.AttachVmConsole:output_type -> kcore.controller.ConsoleMessage
+	48,  // 376: kcore.controller.Controller.CreateWorkload:output_type -> kcore.controller.CreateWorkloadResponse
+	50,  // 377: kcore.controller.Controller.DeleteWorkload:output_type -> kcore.controller.DeleteWorkloadResponse
+	52,  // 378: kcore.controller.Controller.SetWorkloadDesiredState:output_type -> kcore.controller.SetWorkloadDesiredStateResponse
+	54,  // 379: kcore.controller.Controller.GetWorkload:output_type -> kcore.controller.GetWorkloadResponse
+	56,  // 380: kcore.controller.Controller.ListWorkloads:output_type -> kcore.controller.ListWorkloadsResponse
+	58,  // 381: kcore.controller.Controller.CreateNetwork:output_type -> kcore.controller.CreateNetworkResponse
+	60,  // 382: kcore.controller.Controller.DeleteNetwork:output_type -> kcore.controller.DeleteNetworkResponse
+	62,  // 383: kcore.controller.Controller.ListNetworks:output_type -> kcore.controller.ListNetworksResponse
+	68,  // 384: kcore.controller.Controller.CreateSecurityGroup:output_type -> kcore.controller.CreateSecurityGroupResponse
+	70,  // 385: kcore.controller.Controller.GetSecurityGroup:output_type -> kcore.controller.GetSecurityGroupResponse
+	72,  // 386: kcore.controller.Controller.ListSecurityGroups:output_type -> kcore.controller.ListSecurityGroupsResponse
+	74,  // 387: kcore.controller.Controller.DeleteSecurityGroup:output_type -> kcore.controller.DeleteSecurityGroupResponse
+	76,  // 388: kcore.controller.Controller.AttachSecurityGroup:output_type -> kcore.controller.AttachSecurityGroupResponse
+	78,  // 389: kcore.controller.Controller.DetachSecurityGroup:output_type -> kcore.controller.DetachSecurityGroupResponse
+	81,  // 390: kcore.controller.Controller.ListNodes:output_type -> kcore.controller.ListNodesResponse
+	84,  // 391: kcore.controller.Controller.GetNode:output_type -> kcore.controller.GetNodeResponse
+	106, // 392: kcore.controller.Controller.CreateSshKey:output_type -> kcore.controller.CreateSshKeyResponse
+	108, // 393: kcore.controller.Controller.DeleteSshKey:output_type -> kcore.controller.DeleteSshKeyResponse
+	110, // 394: kcore.controller.Controller.ListSshKeys:output_type -> kcore.controller.ListSshKeysResponse
+	112, // 395: kcore.controller.Controller.GetSshKey:output_type -> kcore.controller.GetSshKeyResponse
+	115, // 396: kcore.controller.Controller.DrainNode:output_type -> kcore.controller.DrainNodeResponse
+	117, // 397: kcore.controller.Controller.MigrateVm:output_type -> kcore.controller.MigrateVmResponse
+	121, // 398: kcore.controller.Controller.GetLiveMigrateReceiveStatus:output_type -> kcore.controller.GetLiveMigrateReceiveStatusResponse
+	123, // 399: kcore.controller.Controller.ResetLiveMigrateReceive:output_type -> kcore.controller.ResetLiveMigrateReceiveResponse
+	125, // 400: kcore.controller.Controller.ApproveNode:output_type -> kcore.controller.ApproveNodeResponse
+	127, // 401: kcore.controller.Controller.RejectNode:output_type -> kcore.controller.RejectNodeResponse
+	129, // 402: kcore.controller.Controller.CordonNode:output_type -> kcore.controller.CordonNodeResponse
+	131, // 403: kcore.controller.Controller.UncordonNode:output_type -> kcore.controller.UncordonNodeResponse
+	133, // 404: kcore.controller.Controller.DeleteNode:output_type -> kcore.controller.DeleteNodeResponse
+	135, // 405: kcore.controller.Controller.GetClusterHealth:output_type -> kcore.controller.GetClusterHealthResponse
+	137, // 406: kcore.controller.Controller.BackupCluster:output_type -> kcore.controller.BackupClusterResponse
+	139, // 407: kcore.controller.Controller.RestoreCluster:output_type -> kcore.controller.RestoreClusterResponse
+	141, // 408: kcore.controller.Controller.RenewNodeCert:output_type -> kcore.controller.RenewNodeCertResponse
+	143, // 409: kcore.controller.Controller.IssueNodeBootstrapCert:output_type -> kcore.controller.IssueNodeBootstrapCertResponse
+	145, // 410: kcore.controller.Controller.RotateSubCa:output_type -> kcore.controller.RotateSubCaResponse
+	147, // 411: kcore.controller.Controller.ReloadTls:output_type -> kcore.controller.ReloadTlsResponse
+	306, // 412: kcore.controller.Controller.SignNodeCsr:output_type -> kcore.controller.SignNodeCsrResponse
+	309, // 413: kcore.controller.Controller.RotateNodeCerts:output_type -> kcore.controller.RotateNodeCertsResponse
+	311, // 414: kcore.controller.Controller.ListCertificates:output_type -> kcore.controller.ListCertificatesResponse
+	313, // 415: kcore.controller.Controller.RevokeCertificate:output_type -> kcore.controller.RevokeCertificateResponse
+	315, // 416: kcore.controller.Controller.GetCrl:output_type -> kcore.controller.GetCrlResponse
+	317, // 417: kcore.controller.Controller.GetPkiStatus:output_type -> kcore.controller.GetPkiStatusResponse
+	172, // 418: kcore.controller.Controller.GetComplianceReport:output_type -> kcore.controller.GetComplianceReportResponse
+	153, // 419: kcore.controller.Controller.GetCryptoConfig:output_type -> kcore.controller.GetCryptoConfigResponse
+	155, // 420: kcore.controller.Controller.ExportSbom:output_type -> kcore.controller.ExportSbomResponse
+	151, // 421: kcore.controller.Controller.ListAuditEvents:output_type -> kcore.controller.ListAuditEventsResponse
+	176, // 422: kcore.controller.Controller.GetNetworkOverview:output_type -> kcore.controller.GetNetworkOverviewResponse
+	183, // 423: kcore.controller.Controller.GetStorageOverview:output_type -> kcore.controller.GetStorageOverviewResponse
+	185, // 424: kcore.controller.Controller.ListVolumes:output_type -> kcore.controller.ListVolumesResponse
+	188, // 425: kcore.controller.Controller.CreateVolume:output_type -> kcore.controller.CreateVolumeResponse
+	190, // 426: kcore.controller.Controller.GetVolume:output_type -> kcore.controller.GetVolumeResponse
+	192, // 427: kcore.controller.Controller.AttachVolume:output_type -> kcore.controller.AttachVolumeResponse
+	194, // 428: kcore.controller.Controller.DetachVolume:output_type -> kcore.controller.DetachVolumeResponse
+	196, // 429: kcore.controller.Controller.DeleteVolume:output_type -> kcore.controller.DeleteVolumeResponse
+	199, // 430: kcore.controller.Controller.ListVmOperations:output_type -> kcore.controller.ListVmOperationsResponse
+	201, // 431: kcore.controller.Controller.GetVmOperation:output_type -> kcore.controller.GetVmOperationResponse
+	203, // 432: kcore.controller.Controller.CancelVmOperation:output_type -> kcore.controller.CancelVmOperationResponse
+	206, // 433: kcore.controller.Controller.CreateVolumeSnapshot:output_type -> kcore.controller.CreateVolumeSnapshotResponse
+	208, // 434: kcore.controller.Controller.ListVolumeSnapshots:output_type -> kcore.controller.ListVolumeSnapshotsResponse
+	210, // 435: kcore.controller.Controller.DeleteVolumeSnapshot:output_type -> kcore.controller.DeleteVolumeSnapshotResponse
+	212, // 436: kcore.controller.Controller.RestoreVolume:output_type -> kcore.controller.RestoreVolumeResponse
+	214, // 437: kcore.controller.Controller.FlattenVolume:output_type -> kcore.controller.FlattenVolumeResponse
+	225, // 438: kcore.controller.Controller.ResizeVolume:output_type -> kcore.controller.ResizeVolumeResponse
+	227, // 439: kcore.controller.Controller.EncryptVolume:output_type -> kcore.controller.EncryptVolumeResponse
+	217, // 440: kcore.controller.Controller.CreateSnapshotPolicy:output_type -> kcore.controller.CreateSnapshotPolicyResponse
+	219, // 441: kcore.controller.Controller.GetSnapshotPolicy:output_type -> kcore.controller.GetSnapshotPolicyResponse
+	221, // 442: kcore.controller.Controller.ListSnapshotPolicies:output_type -> kcore.controller.ListSnapshotPoliciesResponse
+	223, // 443: kcore.controller.Controller.DeleteSnapshotPolicy:output_type -> kcore.controller.DeleteSnapshotPolicyResponse
+	231, // 444: kcore.controller.Controller.CreateDiskLayout:output_type -> kcore.controller.CreateDiskLayoutResponse
+	233, // 445: kcore.controller.Controller.GetDiskLayout:output_type -> kcore.controller.GetDiskLayoutResponse
+	236, // 446: kcore.controller.Controller.ListDiskLayouts:output_type -> kcore.controller.ListDiskLayoutsResponse
+	238, // 447: kcore.controller.Controller.DeleteDiskLayout:output_type -> kcore.controller.DeleteDiskLayoutResponse
+	240, // 448: kcore.controller.Controller.ClassifyDiskLayout:output_type -> kcore.controller.ClassifyDiskLayoutResponse
+	249, // 449: kcore.controller.Controller.CreateClusterUpdate:output_type -> kcore.controller.CreateClusterUpdateResponse
+	251, // 450: kcore.controller.Controller.GetClusterUpdate:output_type -> kcore.controller.GetClusterUpdateResponse
+	253, // 451: kcore.controller.Controller.ListClusterUpdates:output_type -> kcore.controller.ListClusterUpdatesResponse
+	256, // 452: kcore.controller.Controller.PlanClusterUpdate:output_type -> kcore.controller.PlanClusterUpdateResponse
+	258, // 453: kcore.controller.Controller.ApproveClusterUpdate:output_type -> kcore.controller.ApproveClusterUpdateResponse
+	260, // 454: kcore.controller.Controller.CancelClusterUpdate:output_type -> kcore.controller.CancelClusterUpdateResponse
+	262, // 455: kcore.controller.Controller.RollbackClusterUpdate:output_type -> kcore.controller.RollbackClusterUpdateResponse
+	268, // 456: kcore.controller.Controller.CreateCephCluster:output_type -> kcore.controller.CreateCephClusterResponse
+	270, // 457: kcore.controller.Controller.GetCephCluster:output_type -> kcore.controller.GetCephClusterResponse
+	272, // 458: kcore.controller.Controller.ListCephClusters:output_type -> kcore.controller.ListCephClustersResponse
+	274, // 459: kcore.controller.Controller.DeleteCephCluster:output_type -> kcore.controller.DeleteCephClusterResponse
+	280, // 460: kcore.controller.Controller.CreateSharedFilesystem:output_type -> kcore.controller.CreateSharedFilesystemResponse
+	282, // 461: kcore.controller.Controller.GetSharedFilesystem:output_type -> kcore.controller.GetSharedFilesystemResponse
+	284, // 462: kcore.controller.Controller.ListSharedFilesystems:output_type -> kcore.controller.ListSharedFilesystemsResponse
+	286, // 463: kcore.controller.Controller.DeleteSharedFilesystem:output_type -> kcore.controller.DeleteSharedFilesystemResponse
+	291, // 464: kcore.controller.Controller.CreateObjectStore:output_type -> kcore.controller.CreateObjectStoreResponse
+	293, // 465: kcore.controller.Controller.GetObjectStore:output_type -> kcore.controller.GetObjectStoreResponse
+	295, // 466: kcore.controller.Controller.ListObjectStores:output_type -> kcore.controller.ListObjectStoresResponse
+	297, // 467: kcore.controller.Controller.DeleteObjectStore:output_type -> kcore.controller.DeleteObjectStoreResponse
+	301, // 468: kcore.controller.Controller.CreateObjectUser:output_type -> kcore.controller.CreateObjectUserResponse
+	303, // 469: kcore.controller.Controller.DeleteObjectUser:output_type -> kcore.controller.DeleteObjectUserResponse
+	159, // 470: kcore.controller.Controller.CreateOperator:output_type -> kcore.controller.CreateOperatorResponse
+	161, // 471: kcore.controller.Controller.DeleteOperator:output_type -> kcore.controller.DeleteOperatorResponse
+	163, // 472: kcore.controller.Controller.ListOperators:output_type -> kcore.controller.ListOperatorsResponse
+	165, // 473: kcore.controller.Controller.GetOperator:output_type -> kcore.controller.GetOperatorResponse
+	167, // 474: kcore.controller.Controller.GrantOperatorRole:output_type -> kcore.controller.GrantOperatorRoleResponse
+	169, // 475: kcore.controller.Controller.RevokeOperatorRole:output_type -> kcore.controller.RevokeOperatorRoleResponse
+	171, // 476: kcore.controller.Controller.IssueOperatorCert:output_type -> kcore.controller.IssueOperatorCertResponse
+	328, // 477: kcore.controller.Controller.PlanKubernetesCluster:output_type -> kcore.controller.PlanKubernetesClusterResponse
+	330, // 478: kcore.controller.Controller.CreateKubernetesCluster:output_type -> kcore.controller.CreateKubernetesClusterResponse
+	332, // 479: kcore.controller.Controller.UpdateKubernetesCluster:output_type -> kcore.controller.UpdateKubernetesClusterResponse
+	334, // 480: kcore.controller.Controller.GetKubernetesCluster:output_type -> kcore.controller.GetKubernetesClusterResponse
+	336, // 481: kcore.controller.Controller.ListKubernetesClusters:output_type -> kcore.controller.ListKubernetesClustersResponse
+	338, // 482: kcore.controller.Controller.DeleteKubernetesCluster:output_type -> kcore.controller.DeleteKubernetesClusterResponse
+	340, // 483: kcore.controller.Controller.ScaleKubernetesCluster:output_type -> kcore.controller.ScaleKubernetesClusterResponse
+	343, // 484: kcore.controller.Controller.GetKubernetesClusterHealth:output_type -> kcore.controller.GetKubernetesClusterHealthResponse
+	90,  // 485: kcore.controller.ControllerAdmin.ApplyNixConfig:output_type -> kcore.controller.ApplyNixConfigResponse
+	93,  // 486: kcore.controller.ControllerAdmin.GetReplicationEvents:output_type -> kcore.controller.GetReplicationEventsResponse
+	95,  // 487: kcore.controller.ControllerAdmin.AckReplicationEvents:output_type -> kcore.controller.AckReplicationEventsResponse
+	99,  // 488: kcore.controller.ControllerAdmin.GetReplicationStatus:output_type -> kcore.controller.GetReplicationStatusResponse
+	102, // 489: kcore.controller.ControllerAdmin.ListReplicationConflicts:output_type -> kcore.controller.ListReplicationConflictsResponse
+	104, // 490: kcore.controller.ControllerAdmin.ResolveReplicationConflict:output_type -> kcore.controller.ResolveReplicationConflictResponse
+	365, // [365:491] is the sub-list for method output_type
+	239, // [239:365] is the sub-list for method input_type
+	239, // [239:239] is the sub-list for extension type_name
+	239, // [239:239] is the sub-list for extension extendee
+	0,   // [0:239] is the sub-list for field type_name
 }
 
 func init() { file_controller_proto_init() }
@@ -22190,7 +24093,7 @@ func file_controller_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_controller_proto_rawDesc), len(file_controller_proto_rawDesc)),
 			NumEnums:      21,
-			NumMessages:   298,
+			NumMessages:   324,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

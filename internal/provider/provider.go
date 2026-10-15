@@ -69,11 +69,14 @@ func New() *schema.Provider {
 			"kcore_operator":                  resourceOperator(),
 			"kcore_cluster_update":            resourceClusterUpdate(),
 			"kcore_workload":                  resourceWorkload(),
+			"kcore_kubernetes_cluster":        resourceKubernetesCluster(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"kcore_vm":    dataSourceVM(),
-			"kcore_node":  dataSourceNode(),
-			"kcore_nodes": dataSourceNodes(),
+			"kcore_vm":                  dataSourceVM(),
+			"kcore_node":                dataSourceNode(),
+			"kcore_nodes":               dataSourceNodes(),
+			"kcore_kubernetes_cluster":  dataSourceKubernetesCluster(),
+			"kcore_kubernetes_clusters": dataSourceKubernetesClusters(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

@@ -131,6 +131,14 @@ const (
 	Controller_GrantOperatorRole_FullMethodName           = "/kcore.controller.Controller/GrantOperatorRole"
 	Controller_RevokeOperatorRole_FullMethodName          = "/kcore.controller.Controller/RevokeOperatorRole"
 	Controller_IssueOperatorCert_FullMethodName           = "/kcore.controller.Controller/IssueOperatorCert"
+	Controller_PlanKubernetesCluster_FullMethodName       = "/kcore.controller.Controller/PlanKubernetesCluster"
+	Controller_CreateKubernetesCluster_FullMethodName     = "/kcore.controller.Controller/CreateKubernetesCluster"
+	Controller_UpdateKubernetesCluster_FullMethodName     = "/kcore.controller.Controller/UpdateKubernetesCluster"
+	Controller_GetKubernetesCluster_FullMethodName        = "/kcore.controller.Controller/GetKubernetesCluster"
+	Controller_ListKubernetesClusters_FullMethodName      = "/kcore.controller.Controller/ListKubernetesClusters"
+	Controller_DeleteKubernetesCluster_FullMethodName     = "/kcore.controller.Controller/DeleteKubernetesCluster"
+	Controller_ScaleKubernetesCluster_FullMethodName      = "/kcore.controller.Controller/ScaleKubernetesCluster"
+	Controller_GetKubernetesClusterHealth_FullMethodName  = "/kcore.controller.Controller/GetKubernetesClusterHealth"
 )
 
 // ControllerClient is the client API for Controller service.
@@ -307,6 +315,15 @@ type ControllerClient interface {
 	GrantOperatorRole(ctx context.Context, in *GrantOperatorRoleRequest, opts ...grpc.CallOption) (*GrantOperatorRoleResponse, error)
 	RevokeOperatorRole(ctx context.Context, in *RevokeOperatorRoleRequest, opts ...grpc.CallOption) (*RevokeOperatorRoleResponse, error)
 	IssueOperatorCert(ctx context.Context, in *IssueOperatorCertRequest, opts ...grpc.CallOption) (*IssueOperatorCertResponse, error)
+	// Kubernetes cluster lifecycle, including the local volume provisioner.
+	PlanKubernetesCluster(ctx context.Context, in *PlanKubernetesClusterRequest, opts ...grpc.CallOption) (*PlanKubernetesClusterResponse, error)
+	CreateKubernetesCluster(ctx context.Context, in *CreateKubernetesClusterRequest, opts ...grpc.CallOption) (*CreateKubernetesClusterResponse, error)
+	UpdateKubernetesCluster(ctx context.Context, in *UpdateKubernetesClusterRequest, opts ...grpc.CallOption) (*UpdateKubernetesClusterResponse, error)
+	GetKubernetesCluster(ctx context.Context, in *GetKubernetesClusterRequest, opts ...grpc.CallOption) (*GetKubernetesClusterResponse, error)
+	ListKubernetesClusters(ctx context.Context, in *ListKubernetesClustersRequest, opts ...grpc.CallOption) (*ListKubernetesClustersResponse, error)
+	DeleteKubernetesCluster(ctx context.Context, in *DeleteKubernetesClusterRequest, opts ...grpc.CallOption) (*DeleteKubernetesClusterResponse, error)
+	ScaleKubernetesCluster(ctx context.Context, in *ScaleKubernetesClusterRequest, opts ...grpc.CallOption) (*ScaleKubernetesClusterResponse, error)
+	GetKubernetesClusterHealth(ctx context.Context, in *GetKubernetesClusterHealthRequest, opts ...grpc.CallOption) (*GetKubernetesClusterHealthResponse, error)
 }
 
 type controllerClient struct {
@@ -1440,6 +1457,86 @@ func (c *controllerClient) IssueOperatorCert(ctx context.Context, in *IssueOpera
 	return out, nil
 }
 
+func (c *controllerClient) PlanKubernetesCluster(ctx context.Context, in *PlanKubernetesClusterRequest, opts ...grpc.CallOption) (*PlanKubernetesClusterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PlanKubernetesClusterResponse)
+	err := c.cc.Invoke(ctx, Controller_PlanKubernetesCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) CreateKubernetesCluster(ctx context.Context, in *CreateKubernetesClusterRequest, opts ...grpc.CallOption) (*CreateKubernetesClusterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateKubernetesClusterResponse)
+	err := c.cc.Invoke(ctx, Controller_CreateKubernetesCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) UpdateKubernetesCluster(ctx context.Context, in *UpdateKubernetesClusterRequest, opts ...grpc.CallOption) (*UpdateKubernetesClusterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateKubernetesClusterResponse)
+	err := c.cc.Invoke(ctx, Controller_UpdateKubernetesCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetKubernetesCluster(ctx context.Context, in *GetKubernetesClusterRequest, opts ...grpc.CallOption) (*GetKubernetesClusterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetKubernetesClusterResponse)
+	err := c.cc.Invoke(ctx, Controller_GetKubernetesCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListKubernetesClusters(ctx context.Context, in *ListKubernetesClustersRequest, opts ...grpc.CallOption) (*ListKubernetesClustersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListKubernetesClustersResponse)
+	err := c.cc.Invoke(ctx, Controller_ListKubernetesClusters_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) DeleteKubernetesCluster(ctx context.Context, in *DeleteKubernetesClusterRequest, opts ...grpc.CallOption) (*DeleteKubernetesClusterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteKubernetesClusterResponse)
+	err := c.cc.Invoke(ctx, Controller_DeleteKubernetesCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ScaleKubernetesCluster(ctx context.Context, in *ScaleKubernetesClusterRequest, opts ...grpc.CallOption) (*ScaleKubernetesClusterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ScaleKubernetesClusterResponse)
+	err := c.cc.Invoke(ctx, Controller_ScaleKubernetesCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetKubernetesClusterHealth(ctx context.Context, in *GetKubernetesClusterHealthRequest, opts ...grpc.CallOption) (*GetKubernetesClusterHealthResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetKubernetesClusterHealthResponse)
+	err := c.cc.Invoke(ctx, Controller_GetKubernetesClusterHealth_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ControllerServer is the server API for Controller service.
 // All implementations must embed UnimplementedControllerServer
 // for forward compatibility.
@@ -1614,6 +1711,15 @@ type ControllerServer interface {
 	GrantOperatorRole(context.Context, *GrantOperatorRoleRequest) (*GrantOperatorRoleResponse, error)
 	RevokeOperatorRole(context.Context, *RevokeOperatorRoleRequest) (*RevokeOperatorRoleResponse, error)
 	IssueOperatorCert(context.Context, *IssueOperatorCertRequest) (*IssueOperatorCertResponse, error)
+	// Kubernetes cluster lifecycle, including the local volume provisioner.
+	PlanKubernetesCluster(context.Context, *PlanKubernetesClusterRequest) (*PlanKubernetesClusterResponse, error)
+	CreateKubernetesCluster(context.Context, *CreateKubernetesClusterRequest) (*CreateKubernetesClusterResponse, error)
+	UpdateKubernetesCluster(context.Context, *UpdateKubernetesClusterRequest) (*UpdateKubernetesClusterResponse, error)
+	GetKubernetesCluster(context.Context, *GetKubernetesClusterRequest) (*GetKubernetesClusterResponse, error)
+	ListKubernetesClusters(context.Context, *ListKubernetesClustersRequest) (*ListKubernetesClustersResponse, error)
+	DeleteKubernetesCluster(context.Context, *DeleteKubernetesClusterRequest) (*DeleteKubernetesClusterResponse, error)
+	ScaleKubernetesCluster(context.Context, *ScaleKubernetesClusterRequest) (*ScaleKubernetesClusterResponse, error)
+	GetKubernetesClusterHealth(context.Context, *GetKubernetesClusterHealthRequest) (*GetKubernetesClusterHealthResponse, error)
 	mustEmbedUnimplementedControllerServer()
 }
 
@@ -1959,6 +2065,30 @@ func (UnimplementedControllerServer) RevokeOperatorRole(context.Context, *Revoke
 }
 func (UnimplementedControllerServer) IssueOperatorCert(context.Context, *IssueOperatorCertRequest) (*IssueOperatorCertResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method IssueOperatorCert not implemented")
+}
+func (UnimplementedControllerServer) PlanKubernetesCluster(context.Context, *PlanKubernetesClusterRequest) (*PlanKubernetesClusterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PlanKubernetesCluster not implemented")
+}
+func (UnimplementedControllerServer) CreateKubernetesCluster(context.Context, *CreateKubernetesClusterRequest) (*CreateKubernetesClusterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateKubernetesCluster not implemented")
+}
+func (UnimplementedControllerServer) UpdateKubernetesCluster(context.Context, *UpdateKubernetesClusterRequest) (*UpdateKubernetesClusterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateKubernetesCluster not implemented")
+}
+func (UnimplementedControllerServer) GetKubernetesCluster(context.Context, *GetKubernetesClusterRequest) (*GetKubernetesClusterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetKubernetesCluster not implemented")
+}
+func (UnimplementedControllerServer) ListKubernetesClusters(context.Context, *ListKubernetesClustersRequest) (*ListKubernetesClustersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListKubernetesClusters not implemented")
+}
+func (UnimplementedControllerServer) DeleteKubernetesCluster(context.Context, *DeleteKubernetesClusterRequest) (*DeleteKubernetesClusterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteKubernetesCluster not implemented")
+}
+func (UnimplementedControllerServer) ScaleKubernetesCluster(context.Context, *ScaleKubernetesClusterRequest) (*ScaleKubernetesClusterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ScaleKubernetesCluster not implemented")
+}
+func (UnimplementedControllerServer) GetKubernetesClusterHealth(context.Context, *GetKubernetesClusterHealthRequest) (*GetKubernetesClusterHealthResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetKubernetesClusterHealth not implemented")
 }
 func (UnimplementedControllerServer) mustEmbedUnimplementedControllerServer() {}
 func (UnimplementedControllerServer) testEmbeddedByValue()                    {}
@@ -3986,6 +4116,150 @@ func _Controller_IssueOperatorCert_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_PlanKubernetesCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlanKubernetesClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).PlanKubernetesCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_PlanKubernetesCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).PlanKubernetesCluster(ctx, req.(*PlanKubernetesClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_CreateKubernetesCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateKubernetesClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).CreateKubernetesCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_CreateKubernetesCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).CreateKubernetesCluster(ctx, req.(*CreateKubernetesClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_UpdateKubernetesCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateKubernetesClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).UpdateKubernetesCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_UpdateKubernetesCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).UpdateKubernetesCluster(ctx, req.(*UpdateKubernetesClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetKubernetesCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetKubernetesClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetKubernetesCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_GetKubernetesCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetKubernetesCluster(ctx, req.(*GetKubernetesClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ListKubernetesClusters_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListKubernetesClustersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ListKubernetesClusters(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ListKubernetesClusters_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ListKubernetesClusters(ctx, req.(*ListKubernetesClustersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_DeleteKubernetesCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteKubernetesClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).DeleteKubernetesCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_DeleteKubernetesCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).DeleteKubernetesCluster(ctx, req.(*DeleteKubernetesClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ScaleKubernetesCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ScaleKubernetesClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ScaleKubernetesCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ScaleKubernetesCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ScaleKubernetesCluster(ctx, req.(*ScaleKubernetesClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetKubernetesClusterHealth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetKubernetesClusterHealthRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetKubernetesClusterHealth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_GetKubernetesClusterHealth_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetKubernetesClusterHealth(ctx, req.(*GetKubernetesClusterHealthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Controller_ServiceDesc is the grpc.ServiceDesc for Controller service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -4436,6 +4710,38 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "IssueOperatorCert",
 			Handler:    _Controller_IssueOperatorCert_Handler,
+		},
+		{
+			MethodName: "PlanKubernetesCluster",
+			Handler:    _Controller_PlanKubernetesCluster_Handler,
+		},
+		{
+			MethodName: "CreateKubernetesCluster",
+			Handler:    _Controller_CreateKubernetesCluster_Handler,
+		},
+		{
+			MethodName: "UpdateKubernetesCluster",
+			Handler:    _Controller_UpdateKubernetesCluster_Handler,
+		},
+		{
+			MethodName: "GetKubernetesCluster",
+			Handler:    _Controller_GetKubernetesCluster_Handler,
+		},
+		{
+			MethodName: "ListKubernetesClusters",
+			Handler:    _Controller_ListKubernetesClusters_Handler,
+		},
+		{
+			MethodName: "DeleteKubernetesCluster",
+			Handler:    _Controller_DeleteKubernetesCluster_Handler,
+		},
+		{
+			MethodName: "ScaleKubernetesCluster",
+			Handler:    _Controller_ScaleKubernetesCluster_Handler,
+		},
+		{
+			MethodName: "GetKubernetesClusterHealth",
+			Handler:    _Controller_GetKubernetesClusterHealth_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

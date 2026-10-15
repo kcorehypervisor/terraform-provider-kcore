@@ -2,7 +2,7 @@
 
 Manage a kcore cluster through the same create path as `kctl`: cluster TLS, node install and approval, VMs, networks, security groups, volumes, Ceph, object storage, operators, SSH keys, host updates, and container workloads.
 
-The controller API matches kcore **0.5.0**. Provider **0.5.0** publishes the resources below. [`kcore_cluster`](docs/resources/cluster.md) writes CA, sub-CA, controller, and kctl certificates on the machine running Terraform. Apply it before any node is installed.
+The controller API matches kcore **0.5.0**. Provider **0.5.1** publishes the resources below. [`kcore_cluster`](docs/resources/cluster.md) writes CA, sub-CA, controller, and kctl certificates on the machine running Terraform. Apply it before any node is installed.
 
 Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terraform.io/providers/kcorehypervisor/kcore/latest).
 
@@ -28,6 +28,7 @@ Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terra
 | `kcore_ssh_key` | `kctl ssh-key add` |
 | `kcore_operator` | `kctl operator add` |
 | `kcore_cluster_update` | `kctl update cluster` (destroy cancels; reboot stays `kctl`) |
+| `kcore_kubernetes_cluster` | `kctl kubernetes apply`. `local_provisioner` mode `shared` installs local-path; mode `lvm` creates one thin pool per node |
 
 Console, drain, migrate, backup, restore, cert rotation, certificate revoke, and node approval stay as `kctl` commands. Destroying `kcore_node` drops it from state and leaves the installed disk in place.
 
@@ -46,7 +47,7 @@ terraform {
   required_providers {
     kcore = {
       source  = "kcorehypervisor/kcore"
-      version = "0.5.0"
+      version = "0.5.1"
     }
   }
 }
@@ -80,6 +81,7 @@ Runnable snippets live under [`examples/`](examples/):
 | [`examples/data-sources/kcore_vm/`](examples/data-sources/kcore_vm/) | Read an existing VM |
 | [`examples/data-sources/kcore_node/`](examples/data-sources/kcore_node/) | Read a hypervisor node |
 | [`examples/data-sources/kcore_nodes/`](examples/data-sources/kcore_nodes/) | List all nodes |
+| [`examples/resources/kcore_kubernetes_cluster/`](examples/resources/kcore_kubernetes_cluster/) | Kubernetes cluster with a shared local-path provisioner or an LVM thin pool |
 
 ### Minimal VM
 
@@ -122,6 +124,12 @@ data "kcore_node" "worker" {
 data "kcore_vm" "inspect" {
   id = kcore_vm.web.id
 }
+
+data "kcore_kubernetes_cluster" "lab" {
+  name = kcore_kubernetes_cluster.lab.name
+}
+
+data "kcore_kubernetes_clusters" "all" {}
 ```
 
 ## Generated documentation
