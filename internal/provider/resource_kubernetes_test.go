@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -141,6 +143,49 @@ func TestKubernetesSchemaRejectsUnknownProvisionerMode(t *testing.T) {
 	}
 	if _, errs := provisioner.Schema["mode"].ValidateFunc("lvm", "mode"); len(errs) != 0 {
 		t.Fatal(errs)
+	}
+}
+
+func TestWaitKubernetesPhaseDoesNotReturnWhileBootstrapping(t *testing.T) {
+	calls := 0
+	err := waitKubernetesPhase(context.Background(), func(context.Context) (string, string, error) {
+		calls++
+		if calls == 1 {
+			return "bootstrapping", "cluster creation started", nil
+		}
+		return "ready", "etcd quorum and API server ready", nil
+	}, time.Second, time.Millisecond)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if calls < 2 {
+		t.Fatalf("create wait returned while phase was bootstrapping (%d reads)", calls)
+	}
+}
+
+func TestWaitKubernetesPhaseDoesNotReturnWhileScaling(t *testing.T) {
+	calls := 0
+	err := waitKubernetesPhase(context.Background(), func(context.Context) (string, string, error) {
+		calls++
+		if calls == 1 {
+			return "scaling", "cluster scaling in progress", nil
+		}
+		return "ready", "etcd quorum and API server ready", nil
+	}, time.Second, time.Millisecond)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if calls < 2 {
+		t.Fatalf("update wait returned while phase was scaling (%d reads)", calls)
+	}
+}
+
+func TestWaitKubernetesPhaseFailsWhenTheControllerReportsFailed(t *testing.T) {
+	err := waitKubernetesPhase(context.Background(), func(context.Context) (string, string, error) {
+		return "failed", "removing this member would drop etcd below quorum", nil
+	}, time.Second, time.Millisecond)
+	if err == nil {
+		t.Fatal("expected a failed phase to fail the apply")
 	}
 }
 

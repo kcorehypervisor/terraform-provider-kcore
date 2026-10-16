@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -16,9 +17,14 @@ import (
 	pb "github.com/kcorehypervisor/terraform-provider-kcore/api/controller"
 )
 
+const (
+	kubernetesPhaseTimeout  = 20 * time.Minute
+	kubernetesPhaseInterval = 2 * time.Second
+)
+
 func resourceKubernetesCluster() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Kubernetes cluster (`kctl kubernetes apply`). The local provisioner is `shared` (directories on one formatted volume) or `lvm` (one thin pool per node, no volume provisioner). Destroy deletes the cluster record.",
+		Description:   "Kubernetes cluster (`kctl kubernetes apply`). The local provisioner is `shared` (directories on one formatted volume) or `lvm` (one thin pool per node, no volume provisioner). Create and a membership change wait until the controller reports phase ready. Destroy deletes the cluster record. It does not uninstall Kubernetes from the nodes.",
 		CreateContext: resourceKubernetesCreate,
 		ReadContext:   resourceKubernetesRead,
 		UpdateContext: resourceKubernetesUpdate,
@@ -424,6 +430,11 @@ func resourceKubernetesCreate(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.Errorf("controller did not return kubernetes cluster %s", name)
 	}
 	d.SetId(name)
+	if err := waitKubernetesPhase(ctx, func(ctx context.Context) (string, string, error) {
+		return readKubernetesPhase(ctx, client, name)
+	}, kubernetesPhaseTimeout, kubernetesPhaseInterval); err != nil {
+		return diag.FromErr(err)
+	}
 	return append(diags, resourceKubernetesRead(ctx, d, meta)...)
 }
 
@@ -457,7 +468,55 @@ func resourceKubernetesUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.FromErr(err)
 		}
 	}
+	if err := waitKubernetesPhase(ctx, func(ctx context.Context) (string, string, error) {
+		return readKubernetesPhase(ctx, client, name)
+	}, kubernetesPhaseTimeout, kubernetesPhaseInterval); err != nil {
+		return diag.FromErr(err)
+	}
 	return append(diags, resourceKubernetesRead(ctx, d, meta)...)
+}
+
+func readKubernetesPhase(ctx context.Context, client pb.ControllerClient, name string) (string, string, error) {
+	resp, err := client.GetKubernetesCluster(ctx, &pb.GetKubernetesClusterRequest{Name: name})
+	if err != nil {
+		return "", "", err
+	}
+	cluster := resp.GetCluster()
+	if cluster == nil || cluster.GetStatus() == nil {
+		return "", "", fmt.Errorf("controller did not return kubernetes cluster %s", name)
+	}
+	return cluster.GetStatus().GetPhase(), cluster.GetStatus().GetMessage(), nil
+}
+
+func waitKubernetesPhase(ctx context.Context, read func(context.Context) (string, string, error), timeout, interval time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	var phase, message string
+	for {
+		var err error
+		phase, message, err = read(ctx)
+		if err != nil {
+			return err
+		}
+		switch phase {
+		case "ready":
+			return nil
+		case "failed":
+			if message == "" {
+				message = "kubernetes cluster phase is failed"
+			}
+			return fmt.Errorf("%s", message)
+		}
+		if !time.Now().Before(deadline) {
+			return fmt.Errorf("timed out waiting for kubernetes cluster phase ready (last phase %s)", phase)
+		}
+		timer := time.NewTimer(interval)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return ctx.Err()
+		case <-timer.C:
+		}
+	}
 }
 
 func changeOld(d *schema.ResourceData, key string) interface{} {

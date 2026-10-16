@@ -3,12 +3,12 @@
 page_title: "kcore_kubernetes_cluster Resource - kcore"
 subcategory: ""
 description: |-
-  Kubernetes cluster (kctl kubernetes apply). The local provisioner is shared (directories on one formatted volume) or lvm (one thin pool per node, no volume provisioner). Destroy deletes the cluster record.
+  Kubernetes cluster (kctl kubernetes apply). The local provisioner is shared (directories on one formatted volume) or lvm (one thin pool per node, no volume provisioner). Create and a membership change wait until the controller reports phase ready. Destroy deletes the cluster record. It does not uninstall Kubernetes from the nodes.
 ---
 
 # kcore_kubernetes_cluster (Resource)
 
-Kubernetes cluster (`kctl kubernetes apply`). The local provisioner is `shared` (directories on one formatted volume) or `lvm` (one thin pool per node, no volume provisioner). Destroy deletes the cluster record.
+Kubernetes cluster (`kctl kubernetes apply`). The local provisioner is `shared` (directories on one formatted volume) or `lvm` (one thin pool per node, no volume provisioner). Create and a membership change wait until the controller reports phase ready. Destroy deletes the cluster record. It does not uninstall Kubernetes from the nodes.
 
 ## Example Usage
 
