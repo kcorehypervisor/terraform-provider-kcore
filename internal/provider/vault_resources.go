@@ -116,6 +116,9 @@ func resourceVaultPolicy() *schema.Resource {
 			"keep_weekly":  {Type: schema.TypeInt, Optional: true},
 			"keep_monthly": {Type: schema.TypeInt, Optional: true},
 			"keep_yearly":  {Type: schema.TypeInt, Optional: true},
+			"keep_recent":  {Type: schema.TypeInt, Optional: true},
+			"pre_hook":     {Type: schema.TypeString, Optional: true},
+			"post_hook":    {Type: schema.TypeString, Optional: true},
 			"enabled":      {Type: schema.TypeBool, Optional: true, Default: true},
 		},
 	}
@@ -132,6 +135,7 @@ func vaultPolicyApply(ctx context.Context, d *schema.ResourceData, meta interfac
 		Weekly:  int32(d.Get("keep_weekly").(int)),
 		Monthly: int32(d.Get("keep_monthly").(int)),
 		Yearly:  int32(d.Get("keep_yearly").(int)),
+		Recent:  int32(d.Get("keep_recent").(int)),
 	}
 	var vms []string
 	for _, raw := range d.Get("vms").([]interface{}) {
@@ -150,6 +154,8 @@ func vaultPolicyApply(ctx context.Context, d *schema.ResourceData, meta interfac
 			Schedule:        d.Get("schedule").(string),
 			Consistency:     vaultpb.ConsistencyLevel_CONSISTENCY_LEVEL_FS,
 			SelectorVmNames: vms,
+			PreHook:         d.Get("pre_hook").(string),
+			PostHook:        d.Get("post_hook").(string),
 			Targets:         targets,
 			Enabled:         d.Get("enabled").(bool),
 		},
@@ -182,6 +188,8 @@ func vaultPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface
 	_ = d.Set("schedule", p.GetSchedule())
 	_ = d.Set("enabled", p.GetEnabled())
 	_ = d.Set("vms", p.GetSelectorVmNames())
+	_ = d.Set("pre_hook", p.GetPreHook())
+	_ = d.Set("post_hook", p.GetPostHook())
 	if len(p.GetTargets()) > 0 {
 		_ = d.Set("target", p.GetTargets()[0].GetTargetName())
 		if keep := p.GetTargets()[0].GetKeep(); keep != nil {
@@ -190,6 +198,7 @@ func vaultPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface
 			_ = d.Set("keep_weekly", keep.GetWeekly())
 			_ = d.Set("keep_monthly", keep.GetMonthly())
 			_ = d.Set("keep_yearly", keep.GetYearly())
+			_ = d.Set("keep_recent", keep.GetRecent())
 		}
 	}
 	if len(p.GetTargets()) > 1 {
@@ -268,7 +277,18 @@ func vaultReplicationRead(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func vaultReplicationDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func vaultReplicationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	c, err := meta.(*apiClient).requireVault()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	resp, err := c.DeleteReplicationJob(ctx, &vaultpb.DeleteReplicationJobRequest{Id: d.Id()})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if !resp.GetSuccess() {
+		return diag.FromErr(fmt.Errorf("delete replication: %s", resp.GetMessage()))
+	}
 	d.SetId("")
 	return nil
 }
