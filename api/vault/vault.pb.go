@@ -1061,12 +1061,14 @@ func (x *DeleteTargetResponse) GetMessage() string {
 }
 
 type RetentionKeep struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Hourly        int32                  `protobuf:"varint,1,opt,name=hourly,proto3" json:"hourly,omitempty"`
-	Daily         int32                  `protobuf:"varint,2,opt,name=daily,proto3" json:"daily,omitempty"`
-	Weekly        int32                  `protobuf:"varint,3,opt,name=weekly,proto3" json:"weekly,omitempty"`
-	Monthly       int32                  `protobuf:"varint,4,opt,name=monthly,proto3" json:"monthly,omitempty"`
-	Yearly        int32                  `protobuf:"varint,5,opt,name=yearly,proto3" json:"yearly,omitempty"`
+	state   protoimpl.MessageState `protogen:"open.v1"`
+	Hourly  int32                  `protobuf:"varint,1,opt,name=hourly,proto3" json:"hourly,omitempty"`
+	Daily   int32                  `protobuf:"varint,2,opt,name=daily,proto3" json:"daily,omitempty"`
+	Weekly  int32                  `protobuf:"varint,3,opt,name=weekly,proto3" json:"weekly,omitempty"`
+	Monthly int32                  `protobuf:"varint,4,opt,name=monthly,proto3" json:"monthly,omitempty"`
+	Yearly  int32                  `protobuf:"varint,5,opt,name=yearly,proto3" json:"yearly,omitempty"`
+	// Newest N backups in the last 48 hours, with no clock-hour bucket.
+	Recent        int32 `protobuf:"varint,6,opt,name=recent,proto3" json:"recent,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1132,6 +1134,13 @@ func (x *RetentionKeep) GetMonthly() int32 {
 func (x *RetentionKeep) GetYearly() int32 {
 	if x != nil {
 		return x.Yearly
+	}
+	return 0
+}
+
+func (x *RetentionKeep) GetRecent() int32 {
+	if x != nil {
+		return x.Recent
 	}
 	return 0
 }
@@ -1203,7 +1212,7 @@ type BackupPolicy struct {
 	// Label selector: key=value pairs the VM must match.
 	SelectorLabels     map[string]string      `protobuf:"bytes,2,rep,name=selector_labels,json=selectorLabels,proto3" json:"selector_labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	SelectorVmNames    []string               `protobuf:"bytes,3,rep,name=selector_vm_names,json=selectorVmNames,proto3" json:"selector_vm_names,omitempty"`
-	Schedule           string                 `protobuf:"bytes,4,opt,name=schedule,proto3" json:"schedule,omitempty"` // cron or @daily / @hourly
+	Schedule           string                 `protobuf:"bytes,4,opt,name=schedule,proto3" json:"schedule,omitempty"` // @daily, @hourly, or every:N seconds (N >= 300)
 	Consistency        ConsistencyLevel       `protobuf:"varint,5,opt,name=consistency,proto3,enum=kcore.vault.ConsistencyLevel" json:"consistency,omitempty"`
 	Tier0Keep          int32                  `protobuf:"varint,6,opt,name=tier0_keep,json=tier0Keep,proto3" json:"tier0_keep,omitempty"`
 	Targets            []*TargetRetention     `protobuf:"bytes,7,rep,name=targets,proto3" json:"targets,omitempty"`
@@ -1722,6 +1731,10 @@ type BackupJob struct {
 	TargetName       string                 `protobuf:"bytes,12,opt,name=target_name,json=targetName,proto3" json:"target_name,omitempty"`
 	VolumeNames      []string               `protobuf:"bytes,13,rep,name=volume_names,json=volumeNames,proto3" json:"volume_names,omitempty"`
 	ParentBackupId   string                 `protobuf:"bytes,14,opt,name=parent_backup_id,json=parentBackupId,proto3" json:"parent_backup_id,omitempty"`
+	ForceFull        bool                   `protobuf:"varint,15,opt,name=force_full,json=forceFull,proto3" json:"force_full,omitempty"`
+	SourcePath       string                 `protobuf:"bytes,16,opt,name=source_path,json=sourcePath,proto3" json:"source_path,omitempty"`
+	MoverEndpoint    string                 `protobuf:"bytes,17,opt,name=mover_endpoint,json=moverEndpoint,proto3" json:"mover_endpoint,omitempty"`
+	Retain           string                 `protobuf:"bytes,18,opt,name=retain,proto3" json:"retain,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -1850,6 +1863,34 @@ func (x *BackupJob) GetVolumeNames() []string {
 func (x *BackupJob) GetParentBackupId() string {
 	if x != nil {
 		return x.ParentBackupId
+	}
+	return ""
+}
+
+func (x *BackupJob) GetForceFull() bool {
+	if x != nil {
+		return x.ForceFull
+	}
+	return false
+}
+
+func (x *BackupJob) GetSourcePath() string {
+	if x != nil {
+		return x.SourcePath
+	}
+	return ""
+}
+
+func (x *BackupJob) GetMoverEndpoint() string {
+	if x != nil {
+		return x.MoverEndpoint
+	}
+	return ""
+}
+
+func (x *BackupJob) GetRetain() string {
+	if x != nil {
+		return x.Retain
 	}
 	return ""
 }
@@ -2322,6 +2363,13 @@ type RestoreJob struct {
 	FinishedAt    *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=finished_at,json=finishedAt,proto3" json:"finished_at,omitempty"`
 	VolumeName    string                 `protobuf:"bytes,9,opt,name=volume_name,json=volumeName,proto3" json:"volume_name,omitempty"`
 	BytesWritten  int64                  `protobuf:"varint,10,opt,name=bytes_written,json=bytesWritten,proto3" json:"bytes_written,omitempty"`
+	DestPath      string                 `protobuf:"bytes,11,opt,name=dest_path,json=destPath,proto3" json:"dest_path,omitempty"`
+	StorageClass  string                 `protobuf:"bytes,12,opt,name=storage_class,json=storageClass,proto3" json:"storage_class,omitempty"`
+	Node          string                 `protobuf:"bytes,13,opt,name=node,proto3" json:"node,omitempty"`
+	SourceVolume  string                 `protobuf:"bytes,14,opt,name=source_volume,json=sourceVolume,proto3" json:"source_volume,omitempty"`
+	Instant       bool                   `protobuf:"varint,15,opt,name=instant,proto3" json:"instant,omitempty"`
+	NetworkMap    map[string]string      `protobuf:"bytes,16,rep,name=network_map,json=networkMap,proto3" json:"network_map,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	PowerOn       bool                   `protobuf:"varint,17,opt,name=power_on,json=powerOn,proto3" json:"power_on,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2424,6 +2472,55 @@ func (x *RestoreJob) GetBytesWritten() int64 {
 		return x.BytesWritten
 	}
 	return 0
+}
+
+func (x *RestoreJob) GetDestPath() string {
+	if x != nil {
+		return x.DestPath
+	}
+	return ""
+}
+
+func (x *RestoreJob) GetStorageClass() string {
+	if x != nil {
+		return x.StorageClass
+	}
+	return ""
+}
+
+func (x *RestoreJob) GetNode() string {
+	if x != nil {
+		return x.Node
+	}
+	return ""
+}
+
+func (x *RestoreJob) GetSourceVolume() string {
+	if x != nil {
+		return x.SourceVolume
+	}
+	return ""
+}
+
+func (x *RestoreJob) GetInstant() bool {
+	if x != nil {
+		return x.Instant
+	}
+	return false
+}
+
+func (x *RestoreJob) GetNetworkMap() map[string]string {
+	if x != nil {
+		return x.NetworkMap
+	}
+	return nil
+}
+
+func (x *RestoreJob) GetPowerOn() bool {
+	if x != nil {
+		return x.PowerOn
+	}
+	return false
 }
 
 type CreateRestoreJobRequest struct {
@@ -3039,7 +3136,11 @@ type CreateVerifyJobRequest struct {
 	Full     bool `protobuf:"varint,1,opt,name=full,proto3" json:"full,omitempty"`
 	BootTest bool `protobuf:"varint,2,opt,name=boot_test,json=bootTest,proto3" json:"boot_test,omitempty"`
 	// Empty = every target.
-	TargetName    string `protobuf:"bytes,3,opt,name=target_name,json=targetName,proto3" json:"target_name,omitempty"`
+	TargetName string `protobuf:"bytes,3,opt,name=target_name,json=targetName,proto3" json:"target_name,omitempty"`
+	// Optional SSH proof after the serial probe. Both must be set.
+	SshUser string `protobuf:"bytes,4,opt,name=ssh_user,json=sshUser,proto3" json:"ssh_user,omitempty"`
+	// Path to a private key on the coordinator host.
+	SshKey        string `protobuf:"bytes,5,opt,name=ssh_key,json=sshKey,proto3" json:"ssh_key,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3091,6 +3192,20 @@ func (x *CreateVerifyJobRequest) GetBootTest() bool {
 func (x *CreateVerifyJobRequest) GetTargetName() string {
 	if x != nil {
 		return x.TargetName
+	}
+	return ""
+}
+
+func (x *CreateVerifyJobRequest) GetSshUser() string {
+	if x != nil {
+		return x.SshUser
+	}
+	return ""
+}
+
+func (x *CreateVerifyJobRequest) GetSshKey() string {
+	if x != nil {
+		return x.SshKey
 	}
 	return ""
 }
@@ -3337,9 +3452,15 @@ type BackupInfo struct {
 	ParentBackupId string                 `protobuf:"bytes,10,opt,name=parent_backup_id,json=parentBackupId,proto3" json:"parent_backup_id,omitempty"`
 	// Soft-expired by retention pruning; objects are deleted by GC once their
 	// repository lock lapses.
-	Expired       bool     `protobuf:"varint,11,opt,name=expired,proto3" json:"expired,omitempty"`
-	PolicyName    string   `protobuf:"bytes,12,opt,name=policy_name,json=policyName,proto3" json:"policy_name,omitempty"`
-	VolumeNames   []string `protobuf:"bytes,13,rep,name=volume_names,json=volumeNames,proto3" json:"volume_names,omitempty"`
+	Expired     bool     `protobuf:"varint,11,opt,name=expired,proto3" json:"expired,omitempty"`
+	PolicyName  string   `protobuf:"bytes,12,opt,name=policy_name,json=policyName,proto3" json:"policy_name,omitempty"`
+	VolumeNames []string `protobuf:"bytes,13,rep,name=volume_names,json=volumeNames,proto3" json:"volume_names,omitempty"`
+	// Thousandths of newly written chunks that scored as high entropy.
+	// Meaningful only when entropy_known is set.
+	EntropyMilli uint32 `protobuf:"varint,14,opt,name=entropy_milli,json=entropyMilli,proto3" json:"entropy_milli,omitempty"`
+	EntropyKnown bool   `protobuf:"varint,15,opt,name=entropy_known,json=entropyKnown,proto3" json:"entropy_known,omitempty"`
+	// Empty unless this backup's high-entropy fraction jumped versus its parent.
+	Anomaly       string `protobuf:"bytes,16,opt,name=anomaly,proto3" json:"anomaly,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3463,6 +3584,27 @@ func (x *BackupInfo) GetVolumeNames() []string {
 		return x.VolumeNames
 	}
 	return nil
+}
+
+func (x *BackupInfo) GetEntropyMilli() uint32 {
+	if x != nil {
+		return x.EntropyMilli
+	}
+	return 0
+}
+
+func (x *BackupInfo) GetEntropyKnown() bool {
+	if x != nil {
+		return x.EntropyKnown
+	}
+	return false
+}
+
+func (x *BackupInfo) GetAnomaly() string {
+	if x != nil {
+		return x.Anomaly
+	}
+	return ""
 }
 
 type ListBackupsRequest struct {
@@ -4157,6 +4299,102 @@ func (x *ListReplicationJobsResponse) GetJobs() []*ReplicationJob {
 	return nil
 }
 
+type DeleteReplicationJobRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteReplicationJobRequest) Reset() {
+	*x = DeleteReplicationJobRequest{}
+	mi := &file_vault_proto_msgTypes[66]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteReplicationJobRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteReplicationJobRequest) ProtoMessage() {}
+
+func (x *DeleteReplicationJobRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_vault_proto_msgTypes[66]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteReplicationJobRequest.ProtoReflect.Descriptor instead.
+func (*DeleteReplicationJobRequest) Descriptor() ([]byte, []int) {
+	return file_vault_proto_rawDescGZIP(), []int{66}
+}
+
+func (x *DeleteReplicationJobRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type DeleteReplicationJobResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteReplicationJobResponse) Reset() {
+	*x = DeleteReplicationJobResponse{}
+	mi := &file_vault_proto_msgTypes[67]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteReplicationJobResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteReplicationJobResponse) ProtoMessage() {}
+
+func (x *DeleteReplicationJobResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_vault_proto_msgTypes[67]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteReplicationJobResponse.ProtoReflect.Descriptor instead.
+func (*DeleteReplicationJobResponse) Descriptor() ([]byte, []int) {
+	return file_vault_proto_rawDescGZIP(), []int{67}
+}
+
+func (x *DeleteReplicationJobResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *DeleteReplicationJobResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 type RunGarbageCollectionRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Empty = every target.
@@ -4168,7 +4406,7 @@ type RunGarbageCollectionRequest struct {
 
 func (x *RunGarbageCollectionRequest) Reset() {
 	*x = RunGarbageCollectionRequest{}
-	mi := &file_vault_proto_msgTypes[66]
+	mi := &file_vault_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4180,7 +4418,7 @@ func (x *RunGarbageCollectionRequest) String() string {
 func (*RunGarbageCollectionRequest) ProtoMessage() {}
 
 func (x *RunGarbageCollectionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[66]
+	mi := &file_vault_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4193,7 +4431,7 @@ func (x *RunGarbageCollectionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RunGarbageCollectionRequest.ProtoReflect.Descriptor instead.
 func (*RunGarbageCollectionRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{66}
+	return file_vault_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *RunGarbageCollectionRequest) GetTargetName() string {
@@ -4223,7 +4461,7 @@ type RunGarbageCollectionResponse struct {
 
 func (x *RunGarbageCollectionResponse) Reset() {
 	*x = RunGarbageCollectionResponse{}
-	mi := &file_vault_proto_msgTypes[67]
+	mi := &file_vault_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4235,7 +4473,7 @@ func (x *RunGarbageCollectionResponse) String() string {
 func (*RunGarbageCollectionResponse) ProtoMessage() {}
 
 func (x *RunGarbageCollectionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[67]
+	mi := &file_vault_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4248,7 +4486,7 @@ func (x *RunGarbageCollectionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RunGarbageCollectionResponse.ProtoReflect.Descriptor instead.
 func (*RunGarbageCollectionResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{67}
+	return file_vault_proto_rawDescGZIP(), []int{69}
 }
 
 func (x *RunGarbageCollectionResponse) GetSuccess() bool {
@@ -4305,7 +4543,7 @@ type VaultEvent struct {
 
 func (x *VaultEvent) Reset() {
 	*x = VaultEvent{}
-	mi := &file_vault_proto_msgTypes[68]
+	mi := &file_vault_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4317,7 +4555,7 @@ func (x *VaultEvent) String() string {
 func (*VaultEvent) ProtoMessage() {}
 
 func (x *VaultEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[68]
+	mi := &file_vault_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4330,7 +4568,7 @@ func (x *VaultEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VaultEvent.ProtoReflect.Descriptor instead.
 func (*VaultEvent) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{68}
+	return file_vault_proto_rawDescGZIP(), []int{70}
 }
 
 func (x *VaultEvent) GetSeq() int64 {
@@ -4406,7 +4644,7 @@ type WatchEventsRequest struct {
 
 func (x *WatchEventsRequest) Reset() {
 	*x = WatchEventsRequest{}
-	mi := &file_vault_proto_msgTypes[69]
+	mi := &file_vault_proto_msgTypes[71]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4418,7 +4656,7 @@ func (x *WatchEventsRequest) String() string {
 func (*WatchEventsRequest) ProtoMessage() {}
 
 func (x *WatchEventsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[69]
+	mi := &file_vault_proto_msgTypes[71]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4431,7 +4669,7 @@ func (x *WatchEventsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WatchEventsRequest.ProtoReflect.Descriptor instead.
 func (*WatchEventsRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{69}
+	return file_vault_proto_rawDescGZIP(), []int{71}
 }
 
 func (x *WatchEventsRequest) GetSinceSeq() int64 {
@@ -4458,7 +4696,7 @@ type ListEventsRequest struct {
 
 func (x *ListEventsRequest) Reset() {
 	*x = ListEventsRequest{}
-	mi := &file_vault_proto_msgTypes[70]
+	mi := &file_vault_proto_msgTypes[72]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4470,7 +4708,7 @@ func (x *ListEventsRequest) String() string {
 func (*ListEventsRequest) ProtoMessage() {}
 
 func (x *ListEventsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[70]
+	mi := &file_vault_proto_msgTypes[72]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4483,7 +4721,7 @@ func (x *ListEventsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListEventsRequest.ProtoReflect.Descriptor instead.
 func (*ListEventsRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{70}
+	return file_vault_proto_rawDescGZIP(), []int{72}
 }
 
 func (x *ListEventsRequest) GetSinceSeq() int64 {
@@ -4509,7 +4747,7 @@ type ListEventsResponse struct {
 
 func (x *ListEventsResponse) Reset() {
 	*x = ListEventsResponse{}
-	mi := &file_vault_proto_msgTypes[71]
+	mi := &file_vault_proto_msgTypes[73]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4521,7 +4759,7 @@ func (x *ListEventsResponse) String() string {
 func (*ListEventsResponse) ProtoMessage() {}
 
 func (x *ListEventsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[71]
+	mi := &file_vault_proto_msgTypes[73]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4534,7 +4772,7 @@ func (x *ListEventsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListEventsResponse.ProtoReflect.Descriptor instead.
 func (*ListEventsResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{71}
+	return file_vault_proto_rawDescGZIP(), []int{73}
 }
 
 func (x *ListEventsResponse) GetEvents() []*VaultEvent {
@@ -4553,7 +4791,7 @@ type CancelRestoreJobRequest struct {
 
 func (x *CancelRestoreJobRequest) Reset() {
 	*x = CancelRestoreJobRequest{}
-	mi := &file_vault_proto_msgTypes[72]
+	mi := &file_vault_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4565,7 +4803,7 @@ func (x *CancelRestoreJobRequest) String() string {
 func (*CancelRestoreJobRequest) ProtoMessage() {}
 
 func (x *CancelRestoreJobRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[72]
+	mi := &file_vault_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4578,7 +4816,7 @@ func (x *CancelRestoreJobRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelRestoreJobRequest.ProtoReflect.Descriptor instead.
 func (*CancelRestoreJobRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{72}
+	return file_vault_proto_rawDescGZIP(), []int{74}
 }
 
 func (x *CancelRestoreJobRequest) GetId() string {
@@ -4598,7 +4836,7 @@ type CancelRestoreJobResponse struct {
 
 func (x *CancelRestoreJobResponse) Reset() {
 	*x = CancelRestoreJobResponse{}
-	mi := &file_vault_proto_msgTypes[73]
+	mi := &file_vault_proto_msgTypes[75]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4610,7 +4848,7 @@ func (x *CancelRestoreJobResponse) String() string {
 func (*CancelRestoreJobResponse) ProtoMessage() {}
 
 func (x *CancelRestoreJobResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[73]
+	mi := &file_vault_proto_msgTypes[75]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4623,7 +4861,7 @@ func (x *CancelRestoreJobResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelRestoreJobResponse.ProtoReflect.Descriptor instead.
 func (*CancelRestoreJobResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{73}
+	return file_vault_proto_rawDescGZIP(), []int{75}
 }
 
 func (x *CancelRestoreJobResponse) GetSuccess() bool {
@@ -4649,7 +4887,7 @@ type CancelVerifyJobRequest struct {
 
 func (x *CancelVerifyJobRequest) Reset() {
 	*x = CancelVerifyJobRequest{}
-	mi := &file_vault_proto_msgTypes[74]
+	mi := &file_vault_proto_msgTypes[76]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4661,7 +4899,7 @@ func (x *CancelVerifyJobRequest) String() string {
 func (*CancelVerifyJobRequest) ProtoMessage() {}
 
 func (x *CancelVerifyJobRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[74]
+	mi := &file_vault_proto_msgTypes[76]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4674,7 +4912,7 @@ func (x *CancelVerifyJobRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelVerifyJobRequest.ProtoReflect.Descriptor instead.
 func (*CancelVerifyJobRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{74}
+	return file_vault_proto_rawDescGZIP(), []int{76}
 }
 
 func (x *CancelVerifyJobRequest) GetId() string {
@@ -4694,7 +4932,7 @@ type CancelVerifyJobResponse struct {
 
 func (x *CancelVerifyJobResponse) Reset() {
 	*x = CancelVerifyJobResponse{}
-	mi := &file_vault_proto_msgTypes[75]
+	mi := &file_vault_proto_msgTypes[77]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4706,7 +4944,7 @@ func (x *CancelVerifyJobResponse) String() string {
 func (*CancelVerifyJobResponse) ProtoMessage() {}
 
 func (x *CancelVerifyJobResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[75]
+	mi := &file_vault_proto_msgTypes[77]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4719,7 +4957,7 @@ func (x *CancelVerifyJobResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelVerifyJobResponse.ProtoReflect.Descriptor instead.
 func (*CancelVerifyJobResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{75}
+	return file_vault_proto_rawDescGZIP(), []int{77}
 }
 
 func (x *CancelVerifyJobResponse) GetSuccess() bool {
@@ -4737,30 +4975,32 @@ func (x *CancelVerifyJobResponse) GetMessage() string {
 }
 
 type InventoryVm struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Node          string                 `protobuf:"bytes,3,opt,name=node,proto3" json:"node,omitempty"`
-	State         string                 `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
-	Cpu           int32                  `protobuf:"varint,5,opt,name=cpu,proto3" json:"cpu,omitempty"`
-	MemoryBytes   int64                  `protobuf:"varint,6,opt,name=memory_bytes,json=memoryBytes,proto3" json:"memory_bytes,omitempty"`
-	Disks         []string               `protobuf:"bytes,7,rep,name=disks,proto3" json:"disks,omitempty"`
-	Nics          []string               `protobuf:"bytes,8,rep,name=nics,proto3" json:"nics,omitempty"`
-	Labels        map[string]string      `protobuf:"bytes,9,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Policy        string                 `protobuf:"bytes,10,opt,name=policy,proto3" json:"policy,omitempty"`
-	LastSuccess   string                 `protobuf:"bytes,11,opt,name=last_success,json=lastSuccess,proto3" json:"last_success,omitempty"`
-	LastFailure   string                 `protobuf:"bytes,12,opt,name=last_failure,json=lastFailure,proto3" json:"last_failure,omitempty"`
-	NextRun       string                 `protobuf:"bytes,13,opt,name=next_run,json=nextRun,proto3" json:"next_run,omitempty"`
-	Unprotected   bool                   `protobuf:"varint,14,opt,name=unprotected,proto3" json:"unprotected,omitempty"`
-	RpoBreach     bool                   `protobuf:"varint,15,opt,name=rpo_breach,json=rpoBreach,proto3" json:"rpo_breach,omitempty"`
-	VerifyStatus  string                 `protobuf:"bytes,16,opt,name=verify_status,json=verifyStatus,proto3" json:"verify_status,omitempty"`
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Id           string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name         string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Node         string                 `protobuf:"bytes,3,opt,name=node,proto3" json:"node,omitempty"`
+	State        string                 `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
+	Cpu          int32                  `protobuf:"varint,5,opt,name=cpu,proto3" json:"cpu,omitempty"`
+	MemoryBytes  int64                  `protobuf:"varint,6,opt,name=memory_bytes,json=memoryBytes,proto3" json:"memory_bytes,omitempty"`
+	Disks        []string               `protobuf:"bytes,7,rep,name=disks,proto3" json:"disks,omitempty"`
+	Nics         []string               `protobuf:"bytes,8,rep,name=nics,proto3" json:"nics,omitempty"`
+	Labels       map[string]string      `protobuf:"bytes,9,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Policy       string                 `protobuf:"bytes,10,opt,name=policy,proto3" json:"policy,omitempty"`
+	LastSuccess  string                 `protobuf:"bytes,11,opt,name=last_success,json=lastSuccess,proto3" json:"last_success,omitempty"`
+	LastFailure  string                 `protobuf:"bytes,12,opt,name=last_failure,json=lastFailure,proto3" json:"last_failure,omitempty"`
+	NextRun      string                 `protobuf:"bytes,13,opt,name=next_run,json=nextRun,proto3" json:"next_run,omitempty"`
+	Unprotected  bool                   `protobuf:"varint,14,opt,name=unprotected,proto3" json:"unprotected,omitempty"`
+	RpoBreach    bool                   `protobuf:"varint,15,opt,name=rpo_breach,json=rpoBreach,proto3" json:"rpo_breach,omitempty"`
+	VerifyStatus string                 `protobuf:"bytes,16,opt,name=verify_status,json=verifyStatus,proto3" json:"verify_status,omitempty"`
+	// Warning from the newest live backup, or empty.
+	Anomaly       string `protobuf:"bytes,17,opt,name=anomaly,proto3" json:"anomaly,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *InventoryVm) Reset() {
 	*x = InventoryVm{}
-	mi := &file_vault_proto_msgTypes[76]
+	mi := &file_vault_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4772,7 +5012,7 @@ func (x *InventoryVm) String() string {
 func (*InventoryVm) ProtoMessage() {}
 
 func (x *InventoryVm) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[76]
+	mi := &file_vault_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4785,7 +5025,7 @@ func (x *InventoryVm) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InventoryVm.ProtoReflect.Descriptor instead.
 func (*InventoryVm) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{76}
+	return file_vault_proto_rawDescGZIP(), []int{78}
 }
 
 func (x *InventoryVm) GetId() string {
@@ -4900,6 +5140,13 @@ func (x *InventoryVm) GetVerifyStatus() string {
 	return ""
 }
 
+func (x *InventoryVm) GetAnomaly() string {
+	if x != nil {
+		return x.Anomaly
+	}
+	return ""
+}
+
 type ListInventoryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -4908,7 +5155,7 @@ type ListInventoryRequest struct {
 
 func (x *ListInventoryRequest) Reset() {
 	*x = ListInventoryRequest{}
-	mi := &file_vault_proto_msgTypes[77]
+	mi := &file_vault_proto_msgTypes[79]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4920,7 +5167,7 @@ func (x *ListInventoryRequest) String() string {
 func (*ListInventoryRequest) ProtoMessage() {}
 
 func (x *ListInventoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[77]
+	mi := &file_vault_proto_msgTypes[79]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4933,7 +5180,7 @@ func (x *ListInventoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListInventoryRequest.ProtoReflect.Descriptor instead.
 func (*ListInventoryRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{77}
+	return file_vault_proto_rawDescGZIP(), []int{79}
 }
 
 type ListInventoryResponse struct {
@@ -4945,7 +5192,7 @@ type ListInventoryResponse struct {
 
 func (x *ListInventoryResponse) Reset() {
 	*x = ListInventoryResponse{}
-	mi := &file_vault_proto_msgTypes[78]
+	mi := &file_vault_proto_msgTypes[80]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4957,7 +5204,7 @@ func (x *ListInventoryResponse) String() string {
 func (*ListInventoryResponse) ProtoMessage() {}
 
 func (x *ListInventoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[78]
+	mi := &file_vault_proto_msgTypes[80]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4970,7 +5217,7 @@ func (x *ListInventoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListInventoryResponse.ProtoReflect.Descriptor instead.
 func (*ListInventoryResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{78}
+	return file_vault_proto_rawDescGZIP(), []int{80}
 }
 
 func (x *ListInventoryResponse) GetVms() []*InventoryVm {
@@ -4988,7 +5235,7 @@ type GetDashboardSummaryRequest struct {
 
 func (x *GetDashboardSummaryRequest) Reset() {
 	*x = GetDashboardSummaryRequest{}
-	mi := &file_vault_proto_msgTypes[79]
+	mi := &file_vault_proto_msgTypes[81]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5000,7 +5247,7 @@ func (x *GetDashboardSummaryRequest) String() string {
 func (*GetDashboardSummaryRequest) ProtoMessage() {}
 
 func (x *GetDashboardSummaryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[79]
+	mi := &file_vault_proto_msgTypes[81]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5013,7 +5260,7 @@ func (x *GetDashboardSummaryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDashboardSummaryRequest.ProtoReflect.Descriptor instead.
 func (*GetDashboardSummaryRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{79}
+	return file_vault_proto_rawDescGZIP(), []int{81}
 }
 
 type GetDashboardSummaryResponse struct {
@@ -5030,7 +5277,7 @@ type GetDashboardSummaryResponse struct {
 
 func (x *GetDashboardSummaryResponse) Reset() {
 	*x = GetDashboardSummaryResponse{}
-	mi := &file_vault_proto_msgTypes[80]
+	mi := &file_vault_proto_msgTypes[82]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5042,7 +5289,7 @@ func (x *GetDashboardSummaryResponse) String() string {
 func (*GetDashboardSummaryResponse) ProtoMessage() {}
 
 func (x *GetDashboardSummaryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[80]
+	mi := &file_vault_proto_msgTypes[82]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5055,7 +5302,7 @@ func (x *GetDashboardSummaryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDashboardSummaryResponse.ProtoReflect.Descriptor instead.
 func (*GetDashboardSummaryResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{80}
+	return file_vault_proto_rawDescGZIP(), []int{82}
 }
 
 func (x *GetDashboardSummaryResponse) GetProtected() int32 {
@@ -5116,7 +5363,7 @@ type Notification struct {
 
 func (x *Notification) Reset() {
 	*x = Notification{}
-	mi := &file_vault_proto_msgTypes[81]
+	mi := &file_vault_proto_msgTypes[83]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5128,7 +5375,7 @@ func (x *Notification) String() string {
 func (*Notification) ProtoMessage() {}
 
 func (x *Notification) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[81]
+	mi := &file_vault_proto_msgTypes[83]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5141,7 +5388,7 @@ func (x *Notification) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Notification.ProtoReflect.Descriptor instead.
 func (*Notification) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{81}
+	return file_vault_proto_rawDescGZIP(), []int{83}
 }
 
 func (x *Notification) GetId() string {
@@ -5209,7 +5456,7 @@ type ListNotificationsRequest struct {
 
 func (x *ListNotificationsRequest) Reset() {
 	*x = ListNotificationsRequest{}
-	mi := &file_vault_proto_msgTypes[82]
+	mi := &file_vault_proto_msgTypes[84]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5221,7 +5468,7 @@ func (x *ListNotificationsRequest) String() string {
 func (*ListNotificationsRequest) ProtoMessage() {}
 
 func (x *ListNotificationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[82]
+	mi := &file_vault_proto_msgTypes[84]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5234,7 +5481,7 @@ func (x *ListNotificationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListNotificationsRequest.ProtoReflect.Descriptor instead.
 func (*ListNotificationsRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{82}
+	return file_vault_proto_rawDescGZIP(), []int{84}
 }
 
 func (x *ListNotificationsRequest) GetIncludeAcked() bool {
@@ -5253,7 +5500,7 @@ type ListNotificationsResponse struct {
 
 func (x *ListNotificationsResponse) Reset() {
 	*x = ListNotificationsResponse{}
-	mi := &file_vault_proto_msgTypes[83]
+	mi := &file_vault_proto_msgTypes[85]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5265,7 +5512,7 @@ func (x *ListNotificationsResponse) String() string {
 func (*ListNotificationsResponse) ProtoMessage() {}
 
 func (x *ListNotificationsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[83]
+	mi := &file_vault_proto_msgTypes[85]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5278,7 +5525,7 @@ func (x *ListNotificationsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListNotificationsResponse.ProtoReflect.Descriptor instead.
 func (*ListNotificationsResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{83}
+	return file_vault_proto_rawDescGZIP(), []int{85}
 }
 
 func (x *ListNotificationsResponse) GetNotifications() []*Notification {
@@ -5297,7 +5544,7 @@ type AckNotificationRequest struct {
 
 func (x *AckNotificationRequest) Reset() {
 	*x = AckNotificationRequest{}
-	mi := &file_vault_proto_msgTypes[84]
+	mi := &file_vault_proto_msgTypes[86]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5309,7 +5556,7 @@ func (x *AckNotificationRequest) String() string {
 func (*AckNotificationRequest) ProtoMessage() {}
 
 func (x *AckNotificationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[84]
+	mi := &file_vault_proto_msgTypes[86]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5322,7 +5569,7 @@ func (x *AckNotificationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AckNotificationRequest.ProtoReflect.Descriptor instead.
 func (*AckNotificationRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{84}
+	return file_vault_proto_rawDescGZIP(), []int{86}
 }
 
 func (x *AckNotificationRequest) GetId() string {
@@ -5342,7 +5589,7 @@ type AckNotificationResponse struct {
 
 func (x *AckNotificationResponse) Reset() {
 	*x = AckNotificationResponse{}
-	mi := &file_vault_proto_msgTypes[85]
+	mi := &file_vault_proto_msgTypes[87]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5354,7 +5601,7 @@ func (x *AckNotificationResponse) String() string {
 func (*AckNotificationResponse) ProtoMessage() {}
 
 func (x *AckNotificationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[85]
+	mi := &file_vault_proto_msgTypes[87]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5367,7 +5614,7 @@ func (x *AckNotificationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AckNotificationResponse.ProtoReflect.Descriptor instead.
 func (*AckNotificationResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{85}
+	return file_vault_proto_rawDescGZIP(), []int{87}
 }
 
 func (x *AckNotificationResponse) GetSuccess() bool {
@@ -5394,7 +5641,7 @@ type OpenFileRestoreRequest struct {
 
 func (x *OpenFileRestoreRequest) Reset() {
 	*x = OpenFileRestoreRequest{}
-	mi := &file_vault_proto_msgTypes[86]
+	mi := &file_vault_proto_msgTypes[88]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5406,7 +5653,7 @@ func (x *OpenFileRestoreRequest) String() string {
 func (*OpenFileRestoreRequest) ProtoMessage() {}
 
 func (x *OpenFileRestoreRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[86]
+	mi := &file_vault_proto_msgTypes[88]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5419,7 +5666,7 @@ func (x *OpenFileRestoreRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenFileRestoreRequest.ProtoReflect.Descriptor instead.
 func (*OpenFileRestoreRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{86}
+	return file_vault_proto_rawDescGZIP(), []int{88}
 }
 
 func (x *OpenFileRestoreRequest) GetBackupId() string {
@@ -5447,7 +5694,7 @@ type OpenFileRestoreResponse struct {
 
 func (x *OpenFileRestoreResponse) Reset() {
 	*x = OpenFileRestoreResponse{}
-	mi := &file_vault_proto_msgTypes[87]
+	mi := &file_vault_proto_msgTypes[89]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5459,7 +5706,7 @@ func (x *OpenFileRestoreResponse) String() string {
 func (*OpenFileRestoreResponse) ProtoMessage() {}
 
 func (x *OpenFileRestoreResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[87]
+	mi := &file_vault_proto_msgTypes[89]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5472,7 +5719,7 @@ func (x *OpenFileRestoreResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenFileRestoreResponse.ProtoReflect.Descriptor instead.
 func (*OpenFileRestoreResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{87}
+	return file_vault_proto_rawDescGZIP(), []int{89}
 }
 
 func (x *OpenFileRestoreResponse) GetSuccess() bool {
@@ -5507,7 +5754,7 @@ type DirEntry struct {
 
 func (x *DirEntry) Reset() {
 	*x = DirEntry{}
-	mi := &file_vault_proto_msgTypes[88]
+	mi := &file_vault_proto_msgTypes[90]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5519,7 +5766,7 @@ func (x *DirEntry) String() string {
 func (*DirEntry) ProtoMessage() {}
 
 func (x *DirEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[88]
+	mi := &file_vault_proto_msgTypes[90]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5532,7 +5779,7 @@ func (x *DirEntry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DirEntry.ProtoReflect.Descriptor instead.
 func (*DirEntry) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{88}
+	return file_vault_proto_rawDescGZIP(), []int{90}
 }
 
 func (x *DirEntry) GetName() string {
@@ -5566,7 +5813,7 @@ type ListDirRequest struct {
 
 func (x *ListDirRequest) Reset() {
 	*x = ListDirRequest{}
-	mi := &file_vault_proto_msgTypes[89]
+	mi := &file_vault_proto_msgTypes[91]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5578,7 +5825,7 @@ func (x *ListDirRequest) String() string {
 func (*ListDirRequest) ProtoMessage() {}
 
 func (x *ListDirRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[89]
+	mi := &file_vault_proto_msgTypes[91]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5591,7 +5838,7 @@ func (x *ListDirRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDirRequest.ProtoReflect.Descriptor instead.
 func (*ListDirRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{89}
+	return file_vault_proto_rawDescGZIP(), []int{91}
 }
 
 func (x *ListDirRequest) GetMountId() string {
@@ -5618,7 +5865,7 @@ type ListDirResponse struct {
 
 func (x *ListDirResponse) Reset() {
 	*x = ListDirResponse{}
-	mi := &file_vault_proto_msgTypes[90]
+	mi := &file_vault_proto_msgTypes[92]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5630,7 +5877,7 @@ func (x *ListDirResponse) String() string {
 func (*ListDirResponse) ProtoMessage() {}
 
 func (x *ListDirResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[90]
+	mi := &file_vault_proto_msgTypes[92]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5643,7 +5890,7 @@ func (x *ListDirResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDirResponse.ProtoReflect.Descriptor instead.
 func (*ListDirResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{90}
+	return file_vault_proto_rawDescGZIP(), []int{92}
 }
 
 func (x *ListDirResponse) GetEntries() []*DirEntry {
@@ -5674,7 +5921,7 @@ type GetFileRequest struct {
 
 func (x *GetFileRequest) Reset() {
 	*x = GetFileRequest{}
-	mi := &file_vault_proto_msgTypes[91]
+	mi := &file_vault_proto_msgTypes[93]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5686,7 +5933,7 @@ func (x *GetFileRequest) String() string {
 func (*GetFileRequest) ProtoMessage() {}
 
 func (x *GetFileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[91]
+	mi := &file_vault_proto_msgTypes[93]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5699,7 +5946,7 @@ func (x *GetFileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFileRequest.ProtoReflect.Descriptor instead.
 func (*GetFileRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{91}
+	return file_vault_proto_rawDescGZIP(), []int{93}
 }
 
 func (x *GetFileRequest) GetMountId() string {
@@ -5740,7 +5987,7 @@ type DownloadArchiveRequest struct {
 
 func (x *DownloadArchiveRequest) Reset() {
 	*x = DownloadArchiveRequest{}
-	mi := &file_vault_proto_msgTypes[92]
+	mi := &file_vault_proto_msgTypes[94]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5752,7 +5999,7 @@ func (x *DownloadArchiveRequest) String() string {
 func (*DownloadArchiveRequest) ProtoMessage() {}
 
 func (x *DownloadArchiveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[92]
+	mi := &file_vault_proto_msgTypes[94]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5765,7 +6012,7 @@ func (x *DownloadArchiveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadArchiveRequest.ProtoReflect.Descriptor instead.
 func (*DownloadArchiveRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{92}
+	return file_vault_proto_rawDescGZIP(), []int{94}
 }
 
 func (x *DownloadArchiveRequest) GetMountId() string {
@@ -5795,7 +6042,7 @@ type GetFileResponse struct {
 
 func (x *GetFileResponse) Reset() {
 	*x = GetFileResponse{}
-	mi := &file_vault_proto_msgTypes[93]
+	mi := &file_vault_proto_msgTypes[95]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5807,7 +6054,7 @@ func (x *GetFileResponse) String() string {
 func (*GetFileResponse) ProtoMessage() {}
 
 func (x *GetFileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[93]
+	mi := &file_vault_proto_msgTypes[95]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5820,7 +6067,7 @@ func (x *GetFileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFileResponse.ProtoReflect.Descriptor instead.
 func (*GetFileResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{93}
+	return file_vault_proto_rawDescGZIP(), []int{95}
 }
 
 func (x *GetFileResponse) GetData() []byte {
@@ -5860,7 +6107,7 @@ type CloseFileRestoreRequest struct {
 
 func (x *CloseFileRestoreRequest) Reset() {
 	*x = CloseFileRestoreRequest{}
-	mi := &file_vault_proto_msgTypes[94]
+	mi := &file_vault_proto_msgTypes[96]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5872,7 +6119,7 @@ func (x *CloseFileRestoreRequest) String() string {
 func (*CloseFileRestoreRequest) ProtoMessage() {}
 
 func (x *CloseFileRestoreRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[94]
+	mi := &file_vault_proto_msgTypes[96]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5885,7 +6132,7 @@ func (x *CloseFileRestoreRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseFileRestoreRequest.ProtoReflect.Descriptor instead.
 func (*CloseFileRestoreRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{94}
+	return file_vault_proto_rawDescGZIP(), []int{96}
 }
 
 func (x *CloseFileRestoreRequest) GetMountId() string {
@@ -5905,7 +6152,7 @@ type CloseFileRestoreResponse struct {
 
 func (x *CloseFileRestoreResponse) Reset() {
 	*x = CloseFileRestoreResponse{}
-	mi := &file_vault_proto_msgTypes[95]
+	mi := &file_vault_proto_msgTypes[97]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5917,7 +6164,7 @@ func (x *CloseFileRestoreResponse) String() string {
 func (*CloseFileRestoreResponse) ProtoMessage() {}
 
 func (x *CloseFileRestoreResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[95]
+	mi := &file_vault_proto_msgTypes[97]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5930,7 +6177,7 @@ func (x *CloseFileRestoreResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseFileRestoreResponse.ProtoReflect.Descriptor instead.
 func (*CloseFileRestoreResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{95}
+	return file_vault_proto_rawDescGZIP(), []int{97}
 }
 
 func (x *CloseFileRestoreResponse) GetSuccess() bool {
@@ -5955,7 +6202,7 @@ type GetSettingsRequest struct {
 
 func (x *GetSettingsRequest) Reset() {
 	*x = GetSettingsRequest{}
-	mi := &file_vault_proto_msgTypes[96]
+	mi := &file_vault_proto_msgTypes[98]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5967,7 +6214,7 @@ func (x *GetSettingsRequest) String() string {
 func (*GetSettingsRequest) ProtoMessage() {}
 
 func (x *GetSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[96]
+	mi := &file_vault_proto_msgTypes[98]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5980,7 +6227,7 @@ func (x *GetSettingsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSettingsRequest.ProtoReflect.Descriptor instead.
 func (*GetSettingsRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{96}
+	return file_vault_proto_rawDescGZIP(), []int{98}
 }
 
 type GetSettingsResponse struct {
@@ -5992,7 +6239,7 @@ type GetSettingsResponse struct {
 
 func (x *GetSettingsResponse) Reset() {
 	*x = GetSettingsResponse{}
-	mi := &file_vault_proto_msgTypes[97]
+	mi := &file_vault_proto_msgTypes[99]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6004,7 +6251,7 @@ func (x *GetSettingsResponse) String() string {
 func (*GetSettingsResponse) ProtoMessage() {}
 
 func (x *GetSettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[97]
+	mi := &file_vault_proto_msgTypes[99]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6017,7 +6264,7 @@ func (x *GetSettingsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSettingsResponse.ProtoReflect.Descriptor instead.
 func (*GetSettingsResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{97}
+	return file_vault_proto_rawDescGZIP(), []int{99}
 }
 
 func (x *GetSettingsResponse) GetJson() string {
@@ -6036,7 +6283,7 @@ type ApplySettingsRequest struct {
 
 func (x *ApplySettingsRequest) Reset() {
 	*x = ApplySettingsRequest{}
-	mi := &file_vault_proto_msgTypes[98]
+	mi := &file_vault_proto_msgTypes[100]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6048,7 +6295,7 @@ func (x *ApplySettingsRequest) String() string {
 func (*ApplySettingsRequest) ProtoMessage() {}
 
 func (x *ApplySettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[98]
+	mi := &file_vault_proto_msgTypes[100]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6061,7 +6308,7 @@ func (x *ApplySettingsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplySettingsRequest.ProtoReflect.Descriptor instead.
 func (*ApplySettingsRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{98}
+	return file_vault_proto_rawDescGZIP(), []int{100}
 }
 
 func (x *ApplySettingsRequest) GetJson() string {
@@ -6081,7 +6328,7 @@ type ApplySettingsResponse struct {
 
 func (x *ApplySettingsResponse) Reset() {
 	*x = ApplySettingsResponse{}
-	mi := &file_vault_proto_msgTypes[99]
+	mi := &file_vault_proto_msgTypes[101]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6093,7 +6340,7 @@ func (x *ApplySettingsResponse) String() string {
 func (*ApplySettingsResponse) ProtoMessage() {}
 
 func (x *ApplySettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[99]
+	mi := &file_vault_proto_msgTypes[101]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6106,7 +6353,7 @@ func (x *ApplySettingsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplySettingsResponse.ProtoReflect.Descriptor instead.
 func (*ApplySettingsResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{99}
+	return file_vault_proto_rawDescGZIP(), []int{101}
 }
 
 func (x *ApplySettingsResponse) GetSuccess() bool {
@@ -6133,7 +6380,7 @@ type OpenLeaseRequest struct {
 
 func (x *OpenLeaseRequest) Reset() {
 	*x = OpenLeaseRequest{}
-	mi := &file_vault_proto_msgTypes[100]
+	mi := &file_vault_proto_msgTypes[102]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6145,7 +6392,7 @@ func (x *OpenLeaseRequest) String() string {
 func (*OpenLeaseRequest) ProtoMessage() {}
 
 func (x *OpenLeaseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[100]
+	mi := &file_vault_proto_msgTypes[102]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6158,7 +6405,7 @@ func (x *OpenLeaseRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenLeaseRequest.ProtoReflect.Descriptor instead.
 func (*OpenLeaseRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{100}
+	return file_vault_proto_rawDescGZIP(), []int{102}
 }
 
 func (x *OpenLeaseRequest) GetPath() string {
@@ -6185,7 +6432,7 @@ type OpenLeaseResponse struct {
 
 func (x *OpenLeaseResponse) Reset() {
 	*x = OpenLeaseResponse{}
-	mi := &file_vault_proto_msgTypes[101]
+	mi := &file_vault_proto_msgTypes[103]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6197,7 +6444,7 @@ func (x *OpenLeaseResponse) String() string {
 func (*OpenLeaseResponse) ProtoMessage() {}
 
 func (x *OpenLeaseResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[101]
+	mi := &file_vault_proto_msgTypes[103]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6210,7 +6457,7 @@ func (x *OpenLeaseResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenLeaseResponse.ProtoReflect.Descriptor instead.
 func (*OpenLeaseResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{101}
+	return file_vault_proto_rawDescGZIP(), []int{103}
 }
 
 func (x *OpenLeaseResponse) GetLeaseId() string {
@@ -6236,7 +6483,7 @@ type CloseLeaseRequest struct {
 
 func (x *CloseLeaseRequest) Reset() {
 	*x = CloseLeaseRequest{}
-	mi := &file_vault_proto_msgTypes[102]
+	mi := &file_vault_proto_msgTypes[104]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6248,7 +6495,7 @@ func (x *CloseLeaseRequest) String() string {
 func (*CloseLeaseRequest) ProtoMessage() {}
 
 func (x *CloseLeaseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[102]
+	mi := &file_vault_proto_msgTypes[104]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6261,7 +6508,7 @@ func (x *CloseLeaseRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseLeaseRequest.ProtoReflect.Descriptor instead.
 func (*CloseLeaseRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{102}
+	return file_vault_proto_rawDescGZIP(), []int{104}
 }
 
 func (x *CloseLeaseRequest) GetLeaseId() string {
@@ -6281,7 +6528,7 @@ type CloseLeaseResponse struct {
 
 func (x *CloseLeaseResponse) Reset() {
 	*x = CloseLeaseResponse{}
-	mi := &file_vault_proto_msgTypes[103]
+	mi := &file_vault_proto_msgTypes[105]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6293,7 +6540,7 @@ func (x *CloseLeaseResponse) String() string {
 func (*CloseLeaseResponse) ProtoMessage() {}
 
 func (x *CloseLeaseResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[103]
+	mi := &file_vault_proto_msgTypes[105]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6306,7 +6553,7 @@ func (x *CloseLeaseResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseLeaseResponse.ProtoReflect.Descriptor instead.
 func (*CloseLeaseResponse) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{103}
+	return file_vault_proto_rawDescGZIP(), []int{105}
 }
 
 func (x *CloseLeaseResponse) GetSuccess() bool {
@@ -6336,7 +6583,7 @@ type ReadChunksRequest struct {
 
 func (x *ReadChunksRequest) Reset() {
 	*x = ReadChunksRequest{}
-	mi := &file_vault_proto_msgTypes[104]
+	mi := &file_vault_proto_msgTypes[106]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6348,7 +6595,7 @@ func (x *ReadChunksRequest) String() string {
 func (*ReadChunksRequest) ProtoMessage() {}
 
 func (x *ReadChunksRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[104]
+	mi := &file_vault_proto_msgTypes[106]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6361,7 +6608,7 @@ func (x *ReadChunksRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadChunksRequest.ProtoReflect.Descriptor instead.
 func (*ReadChunksRequest) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{104}
+	return file_vault_proto_rawDescGZIP(), []int{106}
 }
 
 func (x *ReadChunksRequest) GetLeaseId() string {
@@ -6406,7 +6653,7 @@ type ChunkPayload struct {
 
 func (x *ChunkPayload) Reset() {
 	*x = ChunkPayload{}
-	mi := &file_vault_proto_msgTypes[105]
+	mi := &file_vault_proto_msgTypes[107]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6418,7 +6665,7 @@ func (x *ChunkPayload) String() string {
 func (*ChunkPayload) ProtoMessage() {}
 
 func (x *ChunkPayload) ProtoReflect() protoreflect.Message {
-	mi := &file_vault_proto_msgTypes[105]
+	mi := &file_vault_proto_msgTypes[107]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6431,7 +6678,7 @@ func (x *ChunkPayload) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChunkPayload.ProtoReflect.Descriptor instead.
 func (*ChunkPayload) Descriptor() ([]byte, []int) {
-	return file_vault_proto_rawDescGZIP(), []int{105}
+	return file_vault_proto_rawDescGZIP(), []int{107}
 }
 
 func (x *ChunkPayload) GetOffset() uint64 {
@@ -6517,13 +6764,14 @@ const file_vault_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"J\n" +
 	"\x14DeleteTargetResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\x87\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x9f\x01\n" +
 	"\rRetentionKeep\x12\x16\n" +
 	"\x06hourly\x18\x01 \x01(\x05R\x06hourly\x12\x14\n" +
 	"\x05daily\x18\x02 \x01(\x05R\x05daily\x12\x16\n" +
 	"\x06weekly\x18\x03 \x01(\x05R\x06weekly\x12\x18\n" +
 	"\amonthly\x18\x04 \x01(\x05R\amonthly\x12\x16\n" +
-	"\x06yearly\x18\x05 \x01(\x05R\x06yearly\"|\n" +
+	"\x06yearly\x18\x05 \x01(\x05R\x06yearly\x12\x16\n" +
+	"\x06recent\x18\x06 \x01(\x05R\x06recent\"|\n" +
 	"\x0fTargetRetention\x12\x1f\n" +
 	"\vtarget_name\x18\x01 \x01(\tR\n" +
 	"targetName\x12.\n" +
@@ -6565,7 +6813,7 @@ const file_vault_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"P\n" +
 	"\x1aDeleteBackupPolicyResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\xa2\x04\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xa1\x05\n" +
 	"\tBackupJob\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1f\n" +
 	"\vpolicy_name\x18\x02 \x01(\tR\n" +
@@ -6585,7 +6833,13 @@ const file_vault_proto_rawDesc = "" +
 	"\vtarget_name\x18\f \x01(\tR\n" +
 	"targetName\x12!\n" +
 	"\fvolume_names\x18\r \x03(\tR\vvolumeNames\x12(\n" +
-	"\x10parent_backup_id\x18\x0e \x01(\tR\x0eparentBackupId\"\xd6\x02\n" +
+	"\x10parent_backup_id\x18\x0e \x01(\tR\x0eparentBackupId\x12\x1d\n" +
+	"\n" +
+	"force_full\x18\x0f \x01(\bR\tforceFull\x12\x1f\n" +
+	"\vsource_path\x18\x10 \x01(\tR\n" +
+	"sourcePath\x12%\n" +
+	"\x0emover_endpoint\x18\x11 \x01(\tR\rmoverEndpoint\x12\x16\n" +
+	"\x06retain\x18\x12 \x01(\tR\x06retain\"\xd6\x02\n" +
 	"\x16CreateBackupJobRequest\x12\x17\n" +
 	"\avm_name\x18\x01 \x01(\tR\x06vmName\x12?\n" +
 	"\vconsistency\x18\x02 \x01(\x0e2\x1d.kcore.vault.ConsistencyLevelR\vconsistency\x12\x1f\n" +
@@ -6618,7 +6872,7 @@ const file_vault_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"M\n" +
 	"\x17CancelBackupJobResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\xf7\x02\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xb0\x05\n" +
 	"\n" +
 	"RestoreJob\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
@@ -6635,7 +6889,18 @@ const file_vault_proto_rawDesc = "" +
 	"\vvolume_name\x18\t \x01(\tR\n" +
 	"volumeName\x12#\n" +
 	"\rbytes_written\x18\n" +
-	" \x01(\x03R\fbytesWritten\"\xbb\x03\n" +
+	" \x01(\x03R\fbytesWritten\x12\x1b\n" +
+	"\tdest_path\x18\v \x01(\tR\bdestPath\x12#\n" +
+	"\rstorage_class\x18\f \x01(\tR\fstorageClass\x12\x12\n" +
+	"\x04node\x18\r \x01(\tR\x04node\x12#\n" +
+	"\rsource_volume\x18\x0e \x01(\tR\fsourceVolume\x12\x18\n" +
+	"\ainstant\x18\x0f \x01(\bR\ainstant\x12H\n" +
+	"\vnetwork_map\x18\x10 \x03(\v2'.kcore.vault.RestoreJob.NetworkMapEntryR\n" +
+	"networkMap\x12\x19\n" +
+	"\bpower_on\x18\x11 \x01(\bR\apowerOn\x1a=\n" +
+	"\x0fNetworkMapEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xbb\x03\n" +
 	"\x17CreateRestoreJobRequest\x12\x1b\n" +
 	"\tbackup_id\x18\x01 \x01(\tR\bbackupId\x12\x1c\n" +
 	"\n" +
@@ -6692,12 +6957,14 @@ const file_vault_proto_rawDesc = "" +
 	"\x06errors\x18\f \x01(\x05R\x06errors\x12\x1e\n" +
 	"\n" +
 	"transcript\x18\r \x01(\tR\n" +
-	"transcript\"j\n" +
+	"transcript\"\x9e\x01\n" +
 	"\x16CreateVerifyJobRequest\x12\x12\n" +
 	"\x04full\x18\x01 \x01(\bR\x04full\x12\x1b\n" +
 	"\tboot_test\x18\x02 \x01(\bR\bbootTest\x12\x1f\n" +
 	"\vtarget_name\x18\x03 \x01(\tR\n" +
-	"targetName\"w\n" +
+	"targetName\x12\x19\n" +
+	"\bssh_user\x18\x04 \x01(\tR\asshUser\x12\x17\n" +
+	"\assh_key\x18\x05 \x01(\tR\x06sshKey\"w\n" +
 	"\x17CreateVerifyJobResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12(\n" +
@@ -6708,7 +6975,7 @@ const file_vault_proto_rawDesc = "" +
 	"\x03job\x18\x01 \x01(\v2\x16.kcore.vault.VerifyJobR\x03job\"\x17\n" +
 	"\x15ListVerifyJobsRequest\"D\n" +
 	"\x16ListVerifyJobsResponse\x12*\n" +
-	"\x04jobs\x18\x01 \x03(\v2\x16.kcore.vault.VerifyJobR\x04jobs\"\x83\x04\n" +
+	"\x04jobs\x18\x01 \x03(\v2\x16.kcore.vault.VerifyJobR\x04jobs\"\xe7\x04\n" +
 	"\n" +
 	"BackupInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x13\n" +
@@ -6728,7 +6995,10 @@ const file_vault_proto_rawDesc = "" +
 	"\aexpired\x18\v \x01(\bR\aexpired\x12\x1f\n" +
 	"\vpolicy_name\x18\f \x01(\tR\n" +
 	"policyName\x12!\n" +
-	"\fvolume_names\x18\r \x03(\tR\vvolumeNames\"N\n" +
+	"\fvolume_names\x18\r \x03(\tR\vvolumeNames\x12#\n" +
+	"\rentropy_milli\x18\x0e \x01(\rR\fentropyMilli\x12#\n" +
+	"\rentropy_known\x18\x0f \x01(\bR\fentropyKnown\x12\x18\n" +
+	"\aanomaly\x18\x10 \x01(\tR\aanomaly\"N\n" +
 	"\x12ListBackupsRequest\x12\x17\n" +
 	"\avm_name\x18\x01 \x01(\tR\x06vmName\x12\x1f\n" +
 	"\vtarget_name\x18\x02 \x01(\tR\n" +
@@ -6776,7 +7046,12 @@ const file_vault_proto_rawDesc = "" +
 	"\x03job\x18\x01 \x01(\v2\x1b.kcore.vault.ReplicationJobR\x03job\"\x1c\n" +
 	"\x1aListReplicationJobsRequest\"N\n" +
 	"\x1bListReplicationJobsResponse\x12/\n" +
-	"\x04jobs\x18\x01 \x03(\v2\x1b.kcore.vault.ReplicationJobR\x04jobs\"W\n" +
+	"\x04jobs\x18\x01 \x03(\v2\x1b.kcore.vault.ReplicationJobR\x04jobs\"-\n" +
+	"\x1bDeleteReplicationJobRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"R\n" +
+	"\x1cDeleteReplicationJobResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"W\n" +
 	"\x1bRunGarbageCollectionRequest\x12\x1f\n" +
 	"\vtarget_name\x18\x01 \x01(\tR\n" +
 	"targetName\x12\x17\n" +
@@ -6816,7 +7091,7 @@ const file_vault_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"M\n" +
 	"\x17CancelVerifyJobResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\x92\x04\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xac\x04\n" +
 	"\vInventoryVm\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
@@ -6835,7 +7110,8 @@ const file_vault_proto_rawDesc = "" +
 	"\vunprotected\x18\x0e \x01(\bR\vunprotected\x12\x1d\n" +
 	"\n" +
 	"rpo_breach\x18\x0f \x01(\bR\trpoBreach\x12#\n" +
-	"\rverify_status\x18\x10 \x01(\tR\fverifyStatus\x1a9\n" +
+	"\rverify_status\x18\x10 \x01(\tR\fverifyStatus\x12\x18\n" +
+	"\aanomaly\x18\x11 \x01(\tR\aanomaly\x1a9\n" +
 	"\vLabelsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x16\n" +
@@ -6958,7 +7234,7 @@ const file_vault_proto_rawDesc = "" +
 	"\x0eJOB_PHASE_DONE\x10\b\x12\x14\n" +
 	"\x10JOB_PHASE_FAILED\x10\t\x12\x17\n" +
 	"\x13JOB_PHASE_CANCELLED\x10\n" +
-	"2\xae\x1f\n" +
+	"2\x9d \n" +
 	"\x05Vault\x12Y\n" +
 	"\x0eGetVaultStatus\x12\".kcore.vault.GetVaultStatusRequest\x1a#.kcore.vault.GetVaultStatusResponse\x12P\n" +
 	"\vApplyTarget\x12\x1f.kcore.vault.ApplyTargetRequest\x1a .kcore.vault.ApplyTargetResponse\x12J\n" +
@@ -6986,6 +7262,7 @@ const file_vault_proto_rawDesc = "" +
 	"\x14CreateReplicationJob\x12(.kcore.vault.CreateReplicationJobRequest\x1a).kcore.vault.CreateReplicationJobResponse\x12b\n" +
 	"\x11GetReplicationJob\x12%.kcore.vault.GetReplicationJobRequest\x1a&.kcore.vault.GetReplicationJobResponse\x12h\n" +
 	"\x13ListReplicationJobs\x12'.kcore.vault.ListReplicationJobsRequest\x1a(.kcore.vault.ListReplicationJobsResponse\x12k\n" +
+	"\x14DeleteReplicationJob\x12(.kcore.vault.DeleteReplicationJobRequest\x1a).kcore.vault.DeleteReplicationJobResponse\x12k\n" +
 	"\x14RunGarbageCollection\x12(.kcore.vault.RunGarbageCollectionRequest\x1a).kcore.vault.RunGarbageCollectionResponse\x12Y\n" +
 	"\x0eInstallLicence\x12\".kcore.vault.InstallLicenceRequest\x1a#.kcore.vault.InstallLicenceResponse\x12M\n" +
 	"\n" +
@@ -7001,8 +7278,8 @@ const file_vault_proto_rawDesc = "" +
 	"\x0fAckNotification\x12#.kcore.vault.AckNotificationRequest\x1a$.kcore.vault.AckNotificationResponse\x12\\\n" +
 	"\x0fOpenFileRestore\x12#.kcore.vault.OpenFileRestoreRequest\x1a$.kcore.vault.OpenFileRestoreResponse\x12D\n" +
 	"\aListDir\x12\x1b.kcore.vault.ListDirRequest\x1a\x1c.kcore.vault.ListDirResponse\x12D\n" +
-	"\aGetFile\x12\x1b.kcore.vault.GetFileRequest\x1a\x1c.kcore.vault.GetFileResponse\x12T\n" +
-	"\x0fDownloadArchive\x12#.kcore.vault.DownloadArchiveRequest\x1a\x1c.kcore.vault.GetFileResponse\x12_\n" +
+	"\aGetFile\x12\x1b.kcore.vault.GetFileRequest\x1a\x1c.kcore.vault.GetFileResponse\x12V\n" +
+	"\x0fDownloadArchive\x12#.kcore.vault.DownloadArchiveRequest\x1a\x1c.kcore.vault.GetFileResponse0\x01\x12_\n" +
 	"\x10CloseFileRestore\x12$.kcore.vault.CloseFileRestoreRequest\x1a%.kcore.vault.CloseFileRestoreResponse\x12P\n" +
 	"\vGetSettings\x12\x1f.kcore.vault.GetSettingsRequest\x1a .kcore.vault.GetSettingsResponse\x12V\n" +
 	"\rApplySettings\x12!.kcore.vault.ApplySettingsRequest\x1a\".kcore.vault.ApplySettingsResponse2\xf2\x01\n" +
@@ -7027,7 +7304,7 @@ func file_vault_proto_rawDescGZIP() []byte {
 }
 
 var file_vault_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_vault_proto_msgTypes = make([]protoimpl.MessageInfo, 109)
+var file_vault_proto_msgTypes = make([]protoimpl.MessageInfo, 112)
 var file_vault_proto_goTypes = []any{
 	(ImmutabilityGrade)(0),                  // 0: kcore.vault.ImmutabilityGrade
 	(ConsistencyLevel)(0),                   // 1: kcore.vault.ConsistencyLevel
@@ -7098,208 +7375,214 @@ var file_vault_proto_goTypes = []any{
 	(*GetReplicationJobResponse)(nil),       // 66: kcore.vault.GetReplicationJobResponse
 	(*ListReplicationJobsRequest)(nil),      // 67: kcore.vault.ListReplicationJobsRequest
 	(*ListReplicationJobsResponse)(nil),     // 68: kcore.vault.ListReplicationJobsResponse
-	(*RunGarbageCollectionRequest)(nil),     // 69: kcore.vault.RunGarbageCollectionRequest
-	(*RunGarbageCollectionResponse)(nil),    // 70: kcore.vault.RunGarbageCollectionResponse
-	(*VaultEvent)(nil),                      // 71: kcore.vault.VaultEvent
-	(*WatchEventsRequest)(nil),              // 72: kcore.vault.WatchEventsRequest
-	(*ListEventsRequest)(nil),               // 73: kcore.vault.ListEventsRequest
-	(*ListEventsResponse)(nil),              // 74: kcore.vault.ListEventsResponse
-	(*CancelRestoreJobRequest)(nil),         // 75: kcore.vault.CancelRestoreJobRequest
-	(*CancelRestoreJobResponse)(nil),        // 76: kcore.vault.CancelRestoreJobResponse
-	(*CancelVerifyJobRequest)(nil),          // 77: kcore.vault.CancelVerifyJobRequest
-	(*CancelVerifyJobResponse)(nil),         // 78: kcore.vault.CancelVerifyJobResponse
-	(*InventoryVm)(nil),                     // 79: kcore.vault.InventoryVm
-	(*ListInventoryRequest)(nil),            // 80: kcore.vault.ListInventoryRequest
-	(*ListInventoryResponse)(nil),           // 81: kcore.vault.ListInventoryResponse
-	(*GetDashboardSummaryRequest)(nil),      // 82: kcore.vault.GetDashboardSummaryRequest
-	(*GetDashboardSummaryResponse)(nil),     // 83: kcore.vault.GetDashboardSummaryResponse
-	(*Notification)(nil),                    // 84: kcore.vault.Notification
-	(*ListNotificationsRequest)(nil),        // 85: kcore.vault.ListNotificationsRequest
-	(*ListNotificationsResponse)(nil),       // 86: kcore.vault.ListNotificationsResponse
-	(*AckNotificationRequest)(nil),          // 87: kcore.vault.AckNotificationRequest
-	(*AckNotificationResponse)(nil),         // 88: kcore.vault.AckNotificationResponse
-	(*OpenFileRestoreRequest)(nil),          // 89: kcore.vault.OpenFileRestoreRequest
-	(*OpenFileRestoreResponse)(nil),         // 90: kcore.vault.OpenFileRestoreResponse
-	(*DirEntry)(nil),                        // 91: kcore.vault.DirEntry
-	(*ListDirRequest)(nil),                  // 92: kcore.vault.ListDirRequest
-	(*ListDirResponse)(nil),                 // 93: kcore.vault.ListDirResponse
-	(*GetFileRequest)(nil),                  // 94: kcore.vault.GetFileRequest
-	(*DownloadArchiveRequest)(nil),          // 95: kcore.vault.DownloadArchiveRequest
-	(*GetFileResponse)(nil),                 // 96: kcore.vault.GetFileResponse
-	(*CloseFileRestoreRequest)(nil),         // 97: kcore.vault.CloseFileRestoreRequest
-	(*CloseFileRestoreResponse)(nil),        // 98: kcore.vault.CloseFileRestoreResponse
-	(*GetSettingsRequest)(nil),              // 99: kcore.vault.GetSettingsRequest
-	(*GetSettingsResponse)(nil),             // 100: kcore.vault.GetSettingsResponse
-	(*ApplySettingsRequest)(nil),            // 101: kcore.vault.ApplySettingsRequest
-	(*ApplySettingsResponse)(nil),           // 102: kcore.vault.ApplySettingsResponse
-	(*OpenLeaseRequest)(nil),                // 103: kcore.vault.OpenLeaseRequest
-	(*OpenLeaseResponse)(nil),               // 104: kcore.vault.OpenLeaseResponse
-	(*CloseLeaseRequest)(nil),               // 105: kcore.vault.CloseLeaseRequest
-	(*CloseLeaseResponse)(nil),              // 106: kcore.vault.CloseLeaseResponse
-	(*ReadChunksRequest)(nil),               // 107: kcore.vault.ReadChunksRequest
-	(*ChunkPayload)(nil),                    // 108: kcore.vault.ChunkPayload
-	nil,                                     // 109: kcore.vault.BackupPolicy.SelectorLabelsEntry
-	nil,                                     // 110: kcore.vault.CreateRestoreJobRequest.NetworkMapEntry
-	nil,                                     // 111: kcore.vault.InventoryVm.LabelsEntry
-	(*timestamppb.Timestamp)(nil),           // 112: google.protobuf.Timestamp
+	(*DeleteReplicationJobRequest)(nil),     // 69: kcore.vault.DeleteReplicationJobRequest
+	(*DeleteReplicationJobResponse)(nil),    // 70: kcore.vault.DeleteReplicationJobResponse
+	(*RunGarbageCollectionRequest)(nil),     // 71: kcore.vault.RunGarbageCollectionRequest
+	(*RunGarbageCollectionResponse)(nil),    // 72: kcore.vault.RunGarbageCollectionResponse
+	(*VaultEvent)(nil),                      // 73: kcore.vault.VaultEvent
+	(*WatchEventsRequest)(nil),              // 74: kcore.vault.WatchEventsRequest
+	(*ListEventsRequest)(nil),               // 75: kcore.vault.ListEventsRequest
+	(*ListEventsResponse)(nil),              // 76: kcore.vault.ListEventsResponse
+	(*CancelRestoreJobRequest)(nil),         // 77: kcore.vault.CancelRestoreJobRequest
+	(*CancelRestoreJobResponse)(nil),        // 78: kcore.vault.CancelRestoreJobResponse
+	(*CancelVerifyJobRequest)(nil),          // 79: kcore.vault.CancelVerifyJobRequest
+	(*CancelVerifyJobResponse)(nil),         // 80: kcore.vault.CancelVerifyJobResponse
+	(*InventoryVm)(nil),                     // 81: kcore.vault.InventoryVm
+	(*ListInventoryRequest)(nil),            // 82: kcore.vault.ListInventoryRequest
+	(*ListInventoryResponse)(nil),           // 83: kcore.vault.ListInventoryResponse
+	(*GetDashboardSummaryRequest)(nil),      // 84: kcore.vault.GetDashboardSummaryRequest
+	(*GetDashboardSummaryResponse)(nil),     // 85: kcore.vault.GetDashboardSummaryResponse
+	(*Notification)(nil),                    // 86: kcore.vault.Notification
+	(*ListNotificationsRequest)(nil),        // 87: kcore.vault.ListNotificationsRequest
+	(*ListNotificationsResponse)(nil),       // 88: kcore.vault.ListNotificationsResponse
+	(*AckNotificationRequest)(nil),          // 89: kcore.vault.AckNotificationRequest
+	(*AckNotificationResponse)(nil),         // 90: kcore.vault.AckNotificationResponse
+	(*OpenFileRestoreRequest)(nil),          // 91: kcore.vault.OpenFileRestoreRequest
+	(*OpenFileRestoreResponse)(nil),         // 92: kcore.vault.OpenFileRestoreResponse
+	(*DirEntry)(nil),                        // 93: kcore.vault.DirEntry
+	(*ListDirRequest)(nil),                  // 94: kcore.vault.ListDirRequest
+	(*ListDirResponse)(nil),                 // 95: kcore.vault.ListDirResponse
+	(*GetFileRequest)(nil),                  // 96: kcore.vault.GetFileRequest
+	(*DownloadArchiveRequest)(nil),          // 97: kcore.vault.DownloadArchiveRequest
+	(*GetFileResponse)(nil),                 // 98: kcore.vault.GetFileResponse
+	(*CloseFileRestoreRequest)(nil),         // 99: kcore.vault.CloseFileRestoreRequest
+	(*CloseFileRestoreResponse)(nil),        // 100: kcore.vault.CloseFileRestoreResponse
+	(*GetSettingsRequest)(nil),              // 101: kcore.vault.GetSettingsRequest
+	(*GetSettingsResponse)(nil),             // 102: kcore.vault.GetSettingsResponse
+	(*ApplySettingsRequest)(nil),            // 103: kcore.vault.ApplySettingsRequest
+	(*ApplySettingsResponse)(nil),           // 104: kcore.vault.ApplySettingsResponse
+	(*OpenLeaseRequest)(nil),                // 105: kcore.vault.OpenLeaseRequest
+	(*OpenLeaseResponse)(nil),               // 106: kcore.vault.OpenLeaseResponse
+	(*CloseLeaseRequest)(nil),               // 107: kcore.vault.CloseLeaseRequest
+	(*CloseLeaseResponse)(nil),              // 108: kcore.vault.CloseLeaseResponse
+	(*ReadChunksRequest)(nil),               // 109: kcore.vault.ReadChunksRequest
+	(*ChunkPayload)(nil),                    // 110: kcore.vault.ChunkPayload
+	nil,                                     // 111: kcore.vault.BackupPolicy.SelectorLabelsEntry
+	nil,                                     // 112: kcore.vault.RestoreJob.NetworkMapEntry
+	nil,                                     // 113: kcore.vault.CreateRestoreJobRequest.NetworkMapEntry
+	nil,                                     // 114: kcore.vault.InventoryVm.LabelsEntry
+	(*timestamppb.Timestamp)(nil),           // 115: google.protobuf.Timestamp
 }
 var file_vault_proto_depIdxs = []int32{
 	5,   // 0: kcore.vault.GetVaultStatusResponse.licence:type_name -> kcore.vault.LicenceStatus
-	112, // 1: kcore.vault.LicenceStatus.expires:type_name -> google.protobuf.Timestamp
+	115, // 1: kcore.vault.LicenceStatus.expires:type_name -> google.protobuf.Timestamp
 	5,   // 2: kcore.vault.InstallLicenceResponse.licence:type_name -> kcore.vault.LicenceStatus
 	5,   // 3: kcore.vault.GetLicenceResponse.licence:type_name -> kcore.vault.LicenceStatus
 	0,   // 4: kcore.vault.Target.grade:type_name -> kcore.vault.ImmutabilityGrade
-	112, // 5: kcore.vault.Target.created_at:type_name -> google.protobuf.Timestamp
+	115, // 5: kcore.vault.Target.created_at:type_name -> google.protobuf.Timestamp
 	10,  // 6: kcore.vault.ApplyTargetRequest.target:type_name -> kcore.vault.Target
 	10,  // 7: kcore.vault.ApplyTargetResponse.target:type_name -> kcore.vault.Target
 	10,  // 8: kcore.vault.GetTargetResponse.target:type_name -> kcore.vault.Target
 	10,  // 9: kcore.vault.ListTargetsResponse.targets:type_name -> kcore.vault.Target
 	19,  // 10: kcore.vault.TargetRetention.keep:type_name -> kcore.vault.RetentionKeep
-	109, // 11: kcore.vault.BackupPolicy.selector_labels:type_name -> kcore.vault.BackupPolicy.SelectorLabelsEntry
+	111, // 11: kcore.vault.BackupPolicy.selector_labels:type_name -> kcore.vault.BackupPolicy.SelectorLabelsEntry
 	1,   // 12: kcore.vault.BackupPolicy.consistency:type_name -> kcore.vault.ConsistencyLevel
 	20,  // 13: kcore.vault.BackupPolicy.targets:type_name -> kcore.vault.TargetRetention
-	112, // 14: kcore.vault.BackupPolicy.last_run_at:type_name -> google.protobuf.Timestamp
+	115, // 14: kcore.vault.BackupPolicy.last_run_at:type_name -> google.protobuf.Timestamp
 	21,  // 15: kcore.vault.ApplyBackupPolicyRequest.policy:type_name -> kcore.vault.BackupPolicy
 	21,  // 16: kcore.vault.ApplyBackupPolicyResponse.policy:type_name -> kcore.vault.BackupPolicy
 	21,  // 17: kcore.vault.GetBackupPolicyResponse.policy:type_name -> kcore.vault.BackupPolicy
 	21,  // 18: kcore.vault.ListBackupPoliciesResponse.policies:type_name -> kcore.vault.BackupPolicy
 	2,   // 19: kcore.vault.BackupJob.phase:type_name -> kcore.vault.JobPhase
 	1,   // 20: kcore.vault.BackupJob.consistency:type_name -> kcore.vault.ConsistencyLevel
-	112, // 21: kcore.vault.BackupJob.started_at:type_name -> google.protobuf.Timestamp
-	112, // 22: kcore.vault.BackupJob.finished_at:type_name -> google.protobuf.Timestamp
+	115, // 21: kcore.vault.BackupJob.started_at:type_name -> google.protobuf.Timestamp
+	115, // 22: kcore.vault.BackupJob.finished_at:type_name -> google.protobuf.Timestamp
 	1,   // 23: kcore.vault.CreateBackupJobRequest.consistency:type_name -> kcore.vault.ConsistencyLevel
 	30,  // 24: kcore.vault.CreateBackupJobResponse.job:type_name -> kcore.vault.BackupJob
 	30,  // 25: kcore.vault.GetBackupJobResponse.job:type_name -> kcore.vault.BackupJob
 	30,  // 26: kcore.vault.ListBackupJobsResponse.jobs:type_name -> kcore.vault.BackupJob
 	2,   // 27: kcore.vault.RestoreJob.phase:type_name -> kcore.vault.JobPhase
-	112, // 28: kcore.vault.RestoreJob.started_at:type_name -> google.protobuf.Timestamp
-	112, // 29: kcore.vault.RestoreJob.finished_at:type_name -> google.protobuf.Timestamp
-	110, // 30: kcore.vault.CreateRestoreJobRequest.network_map:type_name -> kcore.vault.CreateRestoreJobRequest.NetworkMapEntry
-	39,  // 31: kcore.vault.CreateRestoreJobResponse.job:type_name -> kcore.vault.RestoreJob
-	39,  // 32: kcore.vault.GetRestoreJobResponse.job:type_name -> kcore.vault.RestoreJob
-	39,  // 33: kcore.vault.ListRestoreJobsResponse.jobs:type_name -> kcore.vault.RestoreJob
-	2,   // 34: kcore.vault.VerifyJob.phase:type_name -> kcore.vault.JobPhase
-	112, // 35: kcore.vault.VerifyJob.started_at:type_name -> google.protobuf.Timestamp
-	112, // 36: kcore.vault.VerifyJob.finished_at:type_name -> google.protobuf.Timestamp
-	48,  // 37: kcore.vault.CreateVerifyJobResponse.job:type_name -> kcore.vault.VerifyJob
-	48,  // 38: kcore.vault.GetVerifyJobResponse.job:type_name -> kcore.vault.VerifyJob
-	48,  // 39: kcore.vault.ListVerifyJobsResponse.jobs:type_name -> kcore.vault.VerifyJob
-	1,   // 40: kcore.vault.BackupInfo.consistency:type_name -> kcore.vault.ConsistencyLevel
-	0,   // 41: kcore.vault.BackupInfo.grade:type_name -> kcore.vault.ImmutabilityGrade
-	112, // 42: kcore.vault.BackupInfo.created_at:type_name -> google.protobuf.Timestamp
-	112, // 43: kcore.vault.BackupInfo.retain_until:type_name -> google.protobuf.Timestamp
-	55,  // 44: kcore.vault.ListBackupsResponse.backups:type_name -> kcore.vault.BackupInfo
-	55,  // 45: kcore.vault.GetBackupResponse.backup:type_name -> kcore.vault.BackupInfo
-	2,   // 46: kcore.vault.ReplicationJob.phase:type_name -> kcore.vault.JobPhase
-	112, // 47: kcore.vault.ReplicationJob.started_at:type_name -> google.protobuf.Timestamp
-	112, // 48: kcore.vault.ReplicationJob.finished_at:type_name -> google.protobuf.Timestamp
-	62,  // 49: kcore.vault.CreateReplicationJobResponse.job:type_name -> kcore.vault.ReplicationJob
-	62,  // 50: kcore.vault.GetReplicationJobResponse.job:type_name -> kcore.vault.ReplicationJob
-	62,  // 51: kcore.vault.ListReplicationJobsResponse.jobs:type_name -> kcore.vault.ReplicationJob
-	71,  // 52: kcore.vault.ListEventsResponse.events:type_name -> kcore.vault.VaultEvent
-	111, // 53: kcore.vault.InventoryVm.labels:type_name -> kcore.vault.InventoryVm.LabelsEntry
-	79,  // 54: kcore.vault.ListInventoryResponse.vms:type_name -> kcore.vault.InventoryVm
-	84,  // 55: kcore.vault.ListNotificationsResponse.notifications:type_name -> kcore.vault.Notification
-	91,  // 56: kcore.vault.ListDirResponse.entries:type_name -> kcore.vault.DirEntry
-	3,   // 57: kcore.vault.Vault.GetVaultStatus:input_type -> kcore.vault.GetVaultStatusRequest
-	11,  // 58: kcore.vault.Vault.ApplyTarget:input_type -> kcore.vault.ApplyTargetRequest
-	13,  // 59: kcore.vault.Vault.GetTarget:input_type -> kcore.vault.GetTargetRequest
-	15,  // 60: kcore.vault.Vault.ListTargets:input_type -> kcore.vault.ListTargetsRequest
-	17,  // 61: kcore.vault.Vault.DeleteTarget:input_type -> kcore.vault.DeleteTargetRequest
-	22,  // 62: kcore.vault.Vault.ApplyBackupPolicy:input_type -> kcore.vault.ApplyBackupPolicyRequest
-	24,  // 63: kcore.vault.Vault.GetBackupPolicy:input_type -> kcore.vault.GetBackupPolicyRequest
-	26,  // 64: kcore.vault.Vault.ListBackupPolicies:input_type -> kcore.vault.ListBackupPoliciesRequest
-	28,  // 65: kcore.vault.Vault.DeleteBackupPolicy:input_type -> kcore.vault.DeleteBackupPolicyRequest
-	31,  // 66: kcore.vault.Vault.CreateBackupJob:input_type -> kcore.vault.CreateBackupJobRequest
-	33,  // 67: kcore.vault.Vault.GetBackupJob:input_type -> kcore.vault.GetBackupJobRequest
-	35,  // 68: kcore.vault.Vault.ListBackupJobs:input_type -> kcore.vault.ListBackupJobsRequest
-	37,  // 69: kcore.vault.Vault.CancelBackupJob:input_type -> kcore.vault.CancelBackupJobRequest
-	40,  // 70: kcore.vault.Vault.CreateRestoreJob:input_type -> kcore.vault.CreateRestoreJobRequest
-	42,  // 71: kcore.vault.Vault.GetRestoreJob:input_type -> kcore.vault.GetRestoreJobRequest
-	44,  // 72: kcore.vault.Vault.ListRestoreJobs:input_type -> kcore.vault.ListRestoreJobsRequest
-	46,  // 73: kcore.vault.Vault.FinalizeInstantRecovery:input_type -> kcore.vault.FinalizeInstantRecoveryRequest
-	49,  // 74: kcore.vault.Vault.CreateVerifyJob:input_type -> kcore.vault.CreateVerifyJobRequest
-	51,  // 75: kcore.vault.Vault.GetVerifyJob:input_type -> kcore.vault.GetVerifyJobRequest
-	53,  // 76: kcore.vault.Vault.ListVerifyJobs:input_type -> kcore.vault.ListVerifyJobsRequest
-	56,  // 77: kcore.vault.Vault.ListBackups:input_type -> kcore.vault.ListBackupsRequest
-	58,  // 78: kcore.vault.Vault.GetBackup:input_type -> kcore.vault.GetBackupRequest
-	60,  // 79: kcore.vault.Vault.ImportCatalog:input_type -> kcore.vault.ImportCatalogRequest
-	63,  // 80: kcore.vault.Vault.CreateReplicationJob:input_type -> kcore.vault.CreateReplicationJobRequest
-	65,  // 81: kcore.vault.Vault.GetReplicationJob:input_type -> kcore.vault.GetReplicationJobRequest
-	67,  // 82: kcore.vault.Vault.ListReplicationJobs:input_type -> kcore.vault.ListReplicationJobsRequest
-	69,  // 83: kcore.vault.Vault.RunGarbageCollection:input_type -> kcore.vault.RunGarbageCollectionRequest
-	6,   // 84: kcore.vault.Vault.InstallLicence:input_type -> kcore.vault.InstallLicenceRequest
-	8,   // 85: kcore.vault.Vault.GetLicence:input_type -> kcore.vault.GetLicenceRequest
-	72,  // 86: kcore.vault.Vault.WatchEvents:input_type -> kcore.vault.WatchEventsRequest
-	73,  // 87: kcore.vault.Vault.ListEvents:input_type -> kcore.vault.ListEventsRequest
-	75,  // 88: kcore.vault.Vault.CancelRestoreJob:input_type -> kcore.vault.CancelRestoreJobRequest
-	77,  // 89: kcore.vault.Vault.CancelVerifyJob:input_type -> kcore.vault.CancelVerifyJobRequest
-	80,  // 90: kcore.vault.Vault.ListInventory:input_type -> kcore.vault.ListInventoryRequest
-	82,  // 91: kcore.vault.Vault.GetDashboardSummary:input_type -> kcore.vault.GetDashboardSummaryRequest
-	85,  // 92: kcore.vault.Vault.ListNotifications:input_type -> kcore.vault.ListNotificationsRequest
-	87,  // 93: kcore.vault.Vault.AckNotification:input_type -> kcore.vault.AckNotificationRequest
-	89,  // 94: kcore.vault.Vault.OpenFileRestore:input_type -> kcore.vault.OpenFileRestoreRequest
-	92,  // 95: kcore.vault.Vault.ListDir:input_type -> kcore.vault.ListDirRequest
-	94,  // 96: kcore.vault.Vault.GetFile:input_type -> kcore.vault.GetFileRequest
-	95,  // 97: kcore.vault.Vault.DownloadArchive:input_type -> kcore.vault.DownloadArchiveRequest
-	97,  // 98: kcore.vault.Vault.CloseFileRestore:input_type -> kcore.vault.CloseFileRestoreRequest
-	99,  // 99: kcore.vault.Vault.GetSettings:input_type -> kcore.vault.GetSettingsRequest
-	101, // 100: kcore.vault.Vault.ApplySettings:input_type -> kcore.vault.ApplySettingsRequest
-	103, // 101: kcore.vault.VaultMover.OpenLease:input_type -> kcore.vault.OpenLeaseRequest
-	105, // 102: kcore.vault.VaultMover.CloseLease:input_type -> kcore.vault.CloseLeaseRequest
-	107, // 103: kcore.vault.VaultMover.ReadChunks:input_type -> kcore.vault.ReadChunksRequest
-	4,   // 104: kcore.vault.Vault.GetVaultStatus:output_type -> kcore.vault.GetVaultStatusResponse
-	12,  // 105: kcore.vault.Vault.ApplyTarget:output_type -> kcore.vault.ApplyTargetResponse
-	14,  // 106: kcore.vault.Vault.GetTarget:output_type -> kcore.vault.GetTargetResponse
-	16,  // 107: kcore.vault.Vault.ListTargets:output_type -> kcore.vault.ListTargetsResponse
-	18,  // 108: kcore.vault.Vault.DeleteTarget:output_type -> kcore.vault.DeleteTargetResponse
-	23,  // 109: kcore.vault.Vault.ApplyBackupPolicy:output_type -> kcore.vault.ApplyBackupPolicyResponse
-	25,  // 110: kcore.vault.Vault.GetBackupPolicy:output_type -> kcore.vault.GetBackupPolicyResponse
-	27,  // 111: kcore.vault.Vault.ListBackupPolicies:output_type -> kcore.vault.ListBackupPoliciesResponse
-	29,  // 112: kcore.vault.Vault.DeleteBackupPolicy:output_type -> kcore.vault.DeleteBackupPolicyResponse
-	32,  // 113: kcore.vault.Vault.CreateBackupJob:output_type -> kcore.vault.CreateBackupJobResponse
-	34,  // 114: kcore.vault.Vault.GetBackupJob:output_type -> kcore.vault.GetBackupJobResponse
-	36,  // 115: kcore.vault.Vault.ListBackupJobs:output_type -> kcore.vault.ListBackupJobsResponse
-	38,  // 116: kcore.vault.Vault.CancelBackupJob:output_type -> kcore.vault.CancelBackupJobResponse
-	41,  // 117: kcore.vault.Vault.CreateRestoreJob:output_type -> kcore.vault.CreateRestoreJobResponse
-	43,  // 118: kcore.vault.Vault.GetRestoreJob:output_type -> kcore.vault.GetRestoreJobResponse
-	45,  // 119: kcore.vault.Vault.ListRestoreJobs:output_type -> kcore.vault.ListRestoreJobsResponse
-	47,  // 120: kcore.vault.Vault.FinalizeInstantRecovery:output_type -> kcore.vault.FinalizeInstantRecoveryResponse
-	50,  // 121: kcore.vault.Vault.CreateVerifyJob:output_type -> kcore.vault.CreateVerifyJobResponse
-	52,  // 122: kcore.vault.Vault.GetVerifyJob:output_type -> kcore.vault.GetVerifyJobResponse
-	54,  // 123: kcore.vault.Vault.ListVerifyJobs:output_type -> kcore.vault.ListVerifyJobsResponse
-	57,  // 124: kcore.vault.Vault.ListBackups:output_type -> kcore.vault.ListBackupsResponse
-	59,  // 125: kcore.vault.Vault.GetBackup:output_type -> kcore.vault.GetBackupResponse
-	61,  // 126: kcore.vault.Vault.ImportCatalog:output_type -> kcore.vault.ImportCatalogResponse
-	64,  // 127: kcore.vault.Vault.CreateReplicationJob:output_type -> kcore.vault.CreateReplicationJobResponse
-	66,  // 128: kcore.vault.Vault.GetReplicationJob:output_type -> kcore.vault.GetReplicationJobResponse
-	68,  // 129: kcore.vault.Vault.ListReplicationJobs:output_type -> kcore.vault.ListReplicationJobsResponse
-	70,  // 130: kcore.vault.Vault.RunGarbageCollection:output_type -> kcore.vault.RunGarbageCollectionResponse
-	7,   // 131: kcore.vault.Vault.InstallLicence:output_type -> kcore.vault.InstallLicenceResponse
-	9,   // 132: kcore.vault.Vault.GetLicence:output_type -> kcore.vault.GetLicenceResponse
-	71,  // 133: kcore.vault.Vault.WatchEvents:output_type -> kcore.vault.VaultEvent
-	74,  // 134: kcore.vault.Vault.ListEvents:output_type -> kcore.vault.ListEventsResponse
-	76,  // 135: kcore.vault.Vault.CancelRestoreJob:output_type -> kcore.vault.CancelRestoreJobResponse
-	78,  // 136: kcore.vault.Vault.CancelVerifyJob:output_type -> kcore.vault.CancelVerifyJobResponse
-	81,  // 137: kcore.vault.Vault.ListInventory:output_type -> kcore.vault.ListInventoryResponse
-	83,  // 138: kcore.vault.Vault.GetDashboardSummary:output_type -> kcore.vault.GetDashboardSummaryResponse
-	86,  // 139: kcore.vault.Vault.ListNotifications:output_type -> kcore.vault.ListNotificationsResponse
-	88,  // 140: kcore.vault.Vault.AckNotification:output_type -> kcore.vault.AckNotificationResponse
-	90,  // 141: kcore.vault.Vault.OpenFileRestore:output_type -> kcore.vault.OpenFileRestoreResponse
-	93,  // 142: kcore.vault.Vault.ListDir:output_type -> kcore.vault.ListDirResponse
-	96,  // 143: kcore.vault.Vault.GetFile:output_type -> kcore.vault.GetFileResponse
-	96,  // 144: kcore.vault.Vault.DownloadArchive:output_type -> kcore.vault.GetFileResponse
-	98,  // 145: kcore.vault.Vault.CloseFileRestore:output_type -> kcore.vault.CloseFileRestoreResponse
-	100, // 146: kcore.vault.Vault.GetSettings:output_type -> kcore.vault.GetSettingsResponse
-	102, // 147: kcore.vault.Vault.ApplySettings:output_type -> kcore.vault.ApplySettingsResponse
-	104, // 148: kcore.vault.VaultMover.OpenLease:output_type -> kcore.vault.OpenLeaseResponse
-	106, // 149: kcore.vault.VaultMover.CloseLease:output_type -> kcore.vault.CloseLeaseResponse
-	108, // 150: kcore.vault.VaultMover.ReadChunks:output_type -> kcore.vault.ChunkPayload
-	104, // [104:151] is the sub-list for method output_type
-	57,  // [57:104] is the sub-list for method input_type
-	57,  // [57:57] is the sub-list for extension type_name
-	57,  // [57:57] is the sub-list for extension extendee
-	0,   // [0:57] is the sub-list for field type_name
+	115, // 28: kcore.vault.RestoreJob.started_at:type_name -> google.protobuf.Timestamp
+	115, // 29: kcore.vault.RestoreJob.finished_at:type_name -> google.protobuf.Timestamp
+	112, // 30: kcore.vault.RestoreJob.network_map:type_name -> kcore.vault.RestoreJob.NetworkMapEntry
+	113, // 31: kcore.vault.CreateRestoreJobRequest.network_map:type_name -> kcore.vault.CreateRestoreJobRequest.NetworkMapEntry
+	39,  // 32: kcore.vault.CreateRestoreJobResponse.job:type_name -> kcore.vault.RestoreJob
+	39,  // 33: kcore.vault.GetRestoreJobResponse.job:type_name -> kcore.vault.RestoreJob
+	39,  // 34: kcore.vault.ListRestoreJobsResponse.jobs:type_name -> kcore.vault.RestoreJob
+	2,   // 35: kcore.vault.VerifyJob.phase:type_name -> kcore.vault.JobPhase
+	115, // 36: kcore.vault.VerifyJob.started_at:type_name -> google.protobuf.Timestamp
+	115, // 37: kcore.vault.VerifyJob.finished_at:type_name -> google.protobuf.Timestamp
+	48,  // 38: kcore.vault.CreateVerifyJobResponse.job:type_name -> kcore.vault.VerifyJob
+	48,  // 39: kcore.vault.GetVerifyJobResponse.job:type_name -> kcore.vault.VerifyJob
+	48,  // 40: kcore.vault.ListVerifyJobsResponse.jobs:type_name -> kcore.vault.VerifyJob
+	1,   // 41: kcore.vault.BackupInfo.consistency:type_name -> kcore.vault.ConsistencyLevel
+	0,   // 42: kcore.vault.BackupInfo.grade:type_name -> kcore.vault.ImmutabilityGrade
+	115, // 43: kcore.vault.BackupInfo.created_at:type_name -> google.protobuf.Timestamp
+	115, // 44: kcore.vault.BackupInfo.retain_until:type_name -> google.protobuf.Timestamp
+	55,  // 45: kcore.vault.ListBackupsResponse.backups:type_name -> kcore.vault.BackupInfo
+	55,  // 46: kcore.vault.GetBackupResponse.backup:type_name -> kcore.vault.BackupInfo
+	2,   // 47: kcore.vault.ReplicationJob.phase:type_name -> kcore.vault.JobPhase
+	115, // 48: kcore.vault.ReplicationJob.started_at:type_name -> google.protobuf.Timestamp
+	115, // 49: kcore.vault.ReplicationJob.finished_at:type_name -> google.protobuf.Timestamp
+	62,  // 50: kcore.vault.CreateReplicationJobResponse.job:type_name -> kcore.vault.ReplicationJob
+	62,  // 51: kcore.vault.GetReplicationJobResponse.job:type_name -> kcore.vault.ReplicationJob
+	62,  // 52: kcore.vault.ListReplicationJobsResponse.jobs:type_name -> kcore.vault.ReplicationJob
+	73,  // 53: kcore.vault.ListEventsResponse.events:type_name -> kcore.vault.VaultEvent
+	114, // 54: kcore.vault.InventoryVm.labels:type_name -> kcore.vault.InventoryVm.LabelsEntry
+	81,  // 55: kcore.vault.ListInventoryResponse.vms:type_name -> kcore.vault.InventoryVm
+	86,  // 56: kcore.vault.ListNotificationsResponse.notifications:type_name -> kcore.vault.Notification
+	93,  // 57: kcore.vault.ListDirResponse.entries:type_name -> kcore.vault.DirEntry
+	3,   // 58: kcore.vault.Vault.GetVaultStatus:input_type -> kcore.vault.GetVaultStatusRequest
+	11,  // 59: kcore.vault.Vault.ApplyTarget:input_type -> kcore.vault.ApplyTargetRequest
+	13,  // 60: kcore.vault.Vault.GetTarget:input_type -> kcore.vault.GetTargetRequest
+	15,  // 61: kcore.vault.Vault.ListTargets:input_type -> kcore.vault.ListTargetsRequest
+	17,  // 62: kcore.vault.Vault.DeleteTarget:input_type -> kcore.vault.DeleteTargetRequest
+	22,  // 63: kcore.vault.Vault.ApplyBackupPolicy:input_type -> kcore.vault.ApplyBackupPolicyRequest
+	24,  // 64: kcore.vault.Vault.GetBackupPolicy:input_type -> kcore.vault.GetBackupPolicyRequest
+	26,  // 65: kcore.vault.Vault.ListBackupPolicies:input_type -> kcore.vault.ListBackupPoliciesRequest
+	28,  // 66: kcore.vault.Vault.DeleteBackupPolicy:input_type -> kcore.vault.DeleteBackupPolicyRequest
+	31,  // 67: kcore.vault.Vault.CreateBackupJob:input_type -> kcore.vault.CreateBackupJobRequest
+	33,  // 68: kcore.vault.Vault.GetBackupJob:input_type -> kcore.vault.GetBackupJobRequest
+	35,  // 69: kcore.vault.Vault.ListBackupJobs:input_type -> kcore.vault.ListBackupJobsRequest
+	37,  // 70: kcore.vault.Vault.CancelBackupJob:input_type -> kcore.vault.CancelBackupJobRequest
+	40,  // 71: kcore.vault.Vault.CreateRestoreJob:input_type -> kcore.vault.CreateRestoreJobRequest
+	42,  // 72: kcore.vault.Vault.GetRestoreJob:input_type -> kcore.vault.GetRestoreJobRequest
+	44,  // 73: kcore.vault.Vault.ListRestoreJobs:input_type -> kcore.vault.ListRestoreJobsRequest
+	46,  // 74: kcore.vault.Vault.FinalizeInstantRecovery:input_type -> kcore.vault.FinalizeInstantRecoveryRequest
+	49,  // 75: kcore.vault.Vault.CreateVerifyJob:input_type -> kcore.vault.CreateVerifyJobRequest
+	51,  // 76: kcore.vault.Vault.GetVerifyJob:input_type -> kcore.vault.GetVerifyJobRequest
+	53,  // 77: kcore.vault.Vault.ListVerifyJobs:input_type -> kcore.vault.ListVerifyJobsRequest
+	56,  // 78: kcore.vault.Vault.ListBackups:input_type -> kcore.vault.ListBackupsRequest
+	58,  // 79: kcore.vault.Vault.GetBackup:input_type -> kcore.vault.GetBackupRequest
+	60,  // 80: kcore.vault.Vault.ImportCatalog:input_type -> kcore.vault.ImportCatalogRequest
+	63,  // 81: kcore.vault.Vault.CreateReplicationJob:input_type -> kcore.vault.CreateReplicationJobRequest
+	65,  // 82: kcore.vault.Vault.GetReplicationJob:input_type -> kcore.vault.GetReplicationJobRequest
+	67,  // 83: kcore.vault.Vault.ListReplicationJobs:input_type -> kcore.vault.ListReplicationJobsRequest
+	69,  // 84: kcore.vault.Vault.DeleteReplicationJob:input_type -> kcore.vault.DeleteReplicationJobRequest
+	71,  // 85: kcore.vault.Vault.RunGarbageCollection:input_type -> kcore.vault.RunGarbageCollectionRequest
+	6,   // 86: kcore.vault.Vault.InstallLicence:input_type -> kcore.vault.InstallLicenceRequest
+	8,   // 87: kcore.vault.Vault.GetLicence:input_type -> kcore.vault.GetLicenceRequest
+	74,  // 88: kcore.vault.Vault.WatchEvents:input_type -> kcore.vault.WatchEventsRequest
+	75,  // 89: kcore.vault.Vault.ListEvents:input_type -> kcore.vault.ListEventsRequest
+	77,  // 90: kcore.vault.Vault.CancelRestoreJob:input_type -> kcore.vault.CancelRestoreJobRequest
+	79,  // 91: kcore.vault.Vault.CancelVerifyJob:input_type -> kcore.vault.CancelVerifyJobRequest
+	82,  // 92: kcore.vault.Vault.ListInventory:input_type -> kcore.vault.ListInventoryRequest
+	84,  // 93: kcore.vault.Vault.GetDashboardSummary:input_type -> kcore.vault.GetDashboardSummaryRequest
+	87,  // 94: kcore.vault.Vault.ListNotifications:input_type -> kcore.vault.ListNotificationsRequest
+	89,  // 95: kcore.vault.Vault.AckNotification:input_type -> kcore.vault.AckNotificationRequest
+	91,  // 96: kcore.vault.Vault.OpenFileRestore:input_type -> kcore.vault.OpenFileRestoreRequest
+	94,  // 97: kcore.vault.Vault.ListDir:input_type -> kcore.vault.ListDirRequest
+	96,  // 98: kcore.vault.Vault.GetFile:input_type -> kcore.vault.GetFileRequest
+	97,  // 99: kcore.vault.Vault.DownloadArchive:input_type -> kcore.vault.DownloadArchiveRequest
+	99,  // 100: kcore.vault.Vault.CloseFileRestore:input_type -> kcore.vault.CloseFileRestoreRequest
+	101, // 101: kcore.vault.Vault.GetSettings:input_type -> kcore.vault.GetSettingsRequest
+	103, // 102: kcore.vault.Vault.ApplySettings:input_type -> kcore.vault.ApplySettingsRequest
+	105, // 103: kcore.vault.VaultMover.OpenLease:input_type -> kcore.vault.OpenLeaseRequest
+	107, // 104: kcore.vault.VaultMover.CloseLease:input_type -> kcore.vault.CloseLeaseRequest
+	109, // 105: kcore.vault.VaultMover.ReadChunks:input_type -> kcore.vault.ReadChunksRequest
+	4,   // 106: kcore.vault.Vault.GetVaultStatus:output_type -> kcore.vault.GetVaultStatusResponse
+	12,  // 107: kcore.vault.Vault.ApplyTarget:output_type -> kcore.vault.ApplyTargetResponse
+	14,  // 108: kcore.vault.Vault.GetTarget:output_type -> kcore.vault.GetTargetResponse
+	16,  // 109: kcore.vault.Vault.ListTargets:output_type -> kcore.vault.ListTargetsResponse
+	18,  // 110: kcore.vault.Vault.DeleteTarget:output_type -> kcore.vault.DeleteTargetResponse
+	23,  // 111: kcore.vault.Vault.ApplyBackupPolicy:output_type -> kcore.vault.ApplyBackupPolicyResponse
+	25,  // 112: kcore.vault.Vault.GetBackupPolicy:output_type -> kcore.vault.GetBackupPolicyResponse
+	27,  // 113: kcore.vault.Vault.ListBackupPolicies:output_type -> kcore.vault.ListBackupPoliciesResponse
+	29,  // 114: kcore.vault.Vault.DeleteBackupPolicy:output_type -> kcore.vault.DeleteBackupPolicyResponse
+	32,  // 115: kcore.vault.Vault.CreateBackupJob:output_type -> kcore.vault.CreateBackupJobResponse
+	34,  // 116: kcore.vault.Vault.GetBackupJob:output_type -> kcore.vault.GetBackupJobResponse
+	36,  // 117: kcore.vault.Vault.ListBackupJobs:output_type -> kcore.vault.ListBackupJobsResponse
+	38,  // 118: kcore.vault.Vault.CancelBackupJob:output_type -> kcore.vault.CancelBackupJobResponse
+	41,  // 119: kcore.vault.Vault.CreateRestoreJob:output_type -> kcore.vault.CreateRestoreJobResponse
+	43,  // 120: kcore.vault.Vault.GetRestoreJob:output_type -> kcore.vault.GetRestoreJobResponse
+	45,  // 121: kcore.vault.Vault.ListRestoreJobs:output_type -> kcore.vault.ListRestoreJobsResponse
+	47,  // 122: kcore.vault.Vault.FinalizeInstantRecovery:output_type -> kcore.vault.FinalizeInstantRecoveryResponse
+	50,  // 123: kcore.vault.Vault.CreateVerifyJob:output_type -> kcore.vault.CreateVerifyJobResponse
+	52,  // 124: kcore.vault.Vault.GetVerifyJob:output_type -> kcore.vault.GetVerifyJobResponse
+	54,  // 125: kcore.vault.Vault.ListVerifyJobs:output_type -> kcore.vault.ListVerifyJobsResponse
+	57,  // 126: kcore.vault.Vault.ListBackups:output_type -> kcore.vault.ListBackupsResponse
+	59,  // 127: kcore.vault.Vault.GetBackup:output_type -> kcore.vault.GetBackupResponse
+	61,  // 128: kcore.vault.Vault.ImportCatalog:output_type -> kcore.vault.ImportCatalogResponse
+	64,  // 129: kcore.vault.Vault.CreateReplicationJob:output_type -> kcore.vault.CreateReplicationJobResponse
+	66,  // 130: kcore.vault.Vault.GetReplicationJob:output_type -> kcore.vault.GetReplicationJobResponse
+	68,  // 131: kcore.vault.Vault.ListReplicationJobs:output_type -> kcore.vault.ListReplicationJobsResponse
+	70,  // 132: kcore.vault.Vault.DeleteReplicationJob:output_type -> kcore.vault.DeleteReplicationJobResponse
+	72,  // 133: kcore.vault.Vault.RunGarbageCollection:output_type -> kcore.vault.RunGarbageCollectionResponse
+	7,   // 134: kcore.vault.Vault.InstallLicence:output_type -> kcore.vault.InstallLicenceResponse
+	9,   // 135: kcore.vault.Vault.GetLicence:output_type -> kcore.vault.GetLicenceResponse
+	73,  // 136: kcore.vault.Vault.WatchEvents:output_type -> kcore.vault.VaultEvent
+	76,  // 137: kcore.vault.Vault.ListEvents:output_type -> kcore.vault.ListEventsResponse
+	78,  // 138: kcore.vault.Vault.CancelRestoreJob:output_type -> kcore.vault.CancelRestoreJobResponse
+	80,  // 139: kcore.vault.Vault.CancelVerifyJob:output_type -> kcore.vault.CancelVerifyJobResponse
+	83,  // 140: kcore.vault.Vault.ListInventory:output_type -> kcore.vault.ListInventoryResponse
+	85,  // 141: kcore.vault.Vault.GetDashboardSummary:output_type -> kcore.vault.GetDashboardSummaryResponse
+	88,  // 142: kcore.vault.Vault.ListNotifications:output_type -> kcore.vault.ListNotificationsResponse
+	90,  // 143: kcore.vault.Vault.AckNotification:output_type -> kcore.vault.AckNotificationResponse
+	92,  // 144: kcore.vault.Vault.OpenFileRestore:output_type -> kcore.vault.OpenFileRestoreResponse
+	95,  // 145: kcore.vault.Vault.ListDir:output_type -> kcore.vault.ListDirResponse
+	98,  // 146: kcore.vault.Vault.GetFile:output_type -> kcore.vault.GetFileResponse
+	98,  // 147: kcore.vault.Vault.DownloadArchive:output_type -> kcore.vault.GetFileResponse
+	100, // 148: kcore.vault.Vault.CloseFileRestore:output_type -> kcore.vault.CloseFileRestoreResponse
+	102, // 149: kcore.vault.Vault.GetSettings:output_type -> kcore.vault.GetSettingsResponse
+	104, // 150: kcore.vault.Vault.ApplySettings:output_type -> kcore.vault.ApplySettingsResponse
+	106, // 151: kcore.vault.VaultMover.OpenLease:output_type -> kcore.vault.OpenLeaseResponse
+	108, // 152: kcore.vault.VaultMover.CloseLease:output_type -> kcore.vault.CloseLeaseResponse
+	110, // 153: kcore.vault.VaultMover.ReadChunks:output_type -> kcore.vault.ChunkPayload
+	106, // [106:154] is the sub-list for method output_type
+	58,  // [58:106] is the sub-list for method input_type
+	58,  // [58:58] is the sub-list for extension type_name
+	58,  // [58:58] is the sub-list for extension extendee
+	0,   // [0:58] is the sub-list for field type_name
 }
 
 func init() { file_vault_proto_init() }
@@ -7313,7 +7596,7 @@ func file_vault_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_vault_proto_rawDesc), len(file_vault_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   109,
+			NumMessages:   112,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

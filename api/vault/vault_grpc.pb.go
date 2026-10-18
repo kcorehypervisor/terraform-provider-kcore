@@ -45,6 +45,7 @@ const (
 	Vault_CreateReplicationJob_FullMethodName    = "/kcore.vault.Vault/CreateReplicationJob"
 	Vault_GetReplicationJob_FullMethodName       = "/kcore.vault.Vault/GetReplicationJob"
 	Vault_ListReplicationJobs_FullMethodName     = "/kcore.vault.Vault/ListReplicationJobs"
+	Vault_DeleteReplicationJob_FullMethodName    = "/kcore.vault.Vault/DeleteReplicationJob"
 	Vault_RunGarbageCollection_FullMethodName    = "/kcore.vault.Vault/RunGarbageCollection"
 	Vault_InstallLicence_FullMethodName          = "/kcore.vault.Vault/InstallLicence"
 	Vault_GetLicence_FullMethodName              = "/kcore.vault.Vault/GetLicence"
@@ -108,6 +109,8 @@ type VaultClient interface {
 	CreateReplicationJob(ctx context.Context, in *CreateReplicationJobRequest, opts ...grpc.CallOption) (*CreateReplicationJobResponse, error)
 	GetReplicationJob(ctx context.Context, in *GetReplicationJobRequest, opts ...grpc.CallOption) (*GetReplicationJobResponse, error)
 	ListReplicationJobs(ctx context.Context, in *ListReplicationJobsRequest, opts ...grpc.CallOption) (*ListReplicationJobsResponse, error)
+	// Removes the job row. Objects already copied stay until retention and GC.
+	DeleteReplicationJob(ctx context.Context, in *DeleteReplicationJobRequest, opts ...grpc.CallOption) (*DeleteReplicationJobResponse, error)
 	// Garbage collection of unreferenced, unlocked packs.
 	RunGarbageCollection(ctx context.Context, in *RunGarbageCollectionRequest, opts ...grpc.CallOption) (*RunGarbageCollectionResponse, error)
 	// Licence (advisory in v1; enforce is a config flag)
@@ -127,7 +130,7 @@ type VaultClient interface {
 	OpenFileRestore(ctx context.Context, in *OpenFileRestoreRequest, opts ...grpc.CallOption) (*OpenFileRestoreResponse, error)
 	ListDir(ctx context.Context, in *ListDirRequest, opts ...grpc.CallOption) (*ListDirResponse, error)
 	GetFile(ctx context.Context, in *GetFileRequest, opts ...grpc.CallOption) (*GetFileResponse, error)
-	DownloadArchive(ctx context.Context, in *DownloadArchiveRequest, opts ...grpc.CallOption) (*GetFileResponse, error)
+	DownloadArchive(ctx context.Context, in *DownloadArchiveRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetFileResponse], error)
 	CloseFileRestore(ctx context.Context, in *CloseFileRestoreRequest, opts ...grpc.CallOption) (*CloseFileRestoreResponse, error)
 	// Appliance settings the dashboard edits (SMTP, webhooks, schedules).
 	GetSettings(ctx context.Context, in *GetSettingsRequest, opts ...grpc.CallOption) (*GetSettingsResponse, error)
@@ -402,6 +405,16 @@ func (c *vaultClient) ListReplicationJobs(ctx context.Context, in *ListReplicati
 	return out, nil
 }
 
+func (c *vaultClient) DeleteReplicationJob(ctx context.Context, in *DeleteReplicationJobRequest, opts ...grpc.CallOption) (*DeleteReplicationJobResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteReplicationJobResponse)
+	err := c.cc.Invoke(ctx, Vault_DeleteReplicationJob_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *vaultClient) RunGarbageCollection(ctx context.Context, in *RunGarbageCollectionRequest, opts ...grpc.CallOption) (*RunGarbageCollectionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RunGarbageCollectionResponse)
@@ -551,15 +564,24 @@ func (c *vaultClient) GetFile(ctx context.Context, in *GetFileRequest, opts ...g
 	return out, nil
 }
 
-func (c *vaultClient) DownloadArchive(ctx context.Context, in *DownloadArchiveRequest, opts ...grpc.CallOption) (*GetFileResponse, error) {
+func (c *vaultClient) DownloadArchive(ctx context.Context, in *DownloadArchiveRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetFileResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetFileResponse)
-	err := c.cc.Invoke(ctx, Vault_DownloadArchive_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Vault_ServiceDesc.Streams[1], Vault_DownloadArchive_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grpc.GenericClientStream[DownloadArchiveRequest, GetFileResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Vault_DownloadArchiveClient = grpc.ServerStreamingClient[GetFileResponse]
 
 func (c *vaultClient) CloseFileRestore(ctx context.Context, in *CloseFileRestoreRequest, opts ...grpc.CallOption) (*CloseFileRestoreResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -634,6 +656,8 @@ type VaultServer interface {
 	CreateReplicationJob(context.Context, *CreateReplicationJobRequest) (*CreateReplicationJobResponse, error)
 	GetReplicationJob(context.Context, *GetReplicationJobRequest) (*GetReplicationJobResponse, error)
 	ListReplicationJobs(context.Context, *ListReplicationJobsRequest) (*ListReplicationJobsResponse, error)
+	// Removes the job row. Objects already copied stay until retention and GC.
+	DeleteReplicationJob(context.Context, *DeleteReplicationJobRequest) (*DeleteReplicationJobResponse, error)
 	// Garbage collection of unreferenced, unlocked packs.
 	RunGarbageCollection(context.Context, *RunGarbageCollectionRequest) (*RunGarbageCollectionResponse, error)
 	// Licence (advisory in v1; enforce is a config flag)
@@ -653,7 +677,7 @@ type VaultServer interface {
 	OpenFileRestore(context.Context, *OpenFileRestoreRequest) (*OpenFileRestoreResponse, error)
 	ListDir(context.Context, *ListDirRequest) (*ListDirResponse, error)
 	GetFile(context.Context, *GetFileRequest) (*GetFileResponse, error)
-	DownloadArchive(context.Context, *DownloadArchiveRequest) (*GetFileResponse, error)
+	DownloadArchive(*DownloadArchiveRequest, grpc.ServerStreamingServer[GetFileResponse]) error
 	CloseFileRestore(context.Context, *CloseFileRestoreRequest) (*CloseFileRestoreResponse, error)
 	// Appliance settings the dashboard edits (SMTP, webhooks, schedules).
 	GetSettings(context.Context, *GetSettingsRequest) (*GetSettingsResponse, error)
@@ -746,6 +770,9 @@ func (UnimplementedVaultServer) GetReplicationJob(context.Context, *GetReplicati
 func (UnimplementedVaultServer) ListReplicationJobs(context.Context, *ListReplicationJobsRequest) (*ListReplicationJobsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListReplicationJobs not implemented")
 }
+func (UnimplementedVaultServer) DeleteReplicationJob(context.Context, *DeleteReplicationJobRequest) (*DeleteReplicationJobResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteReplicationJob not implemented")
+}
 func (UnimplementedVaultServer) RunGarbageCollection(context.Context, *RunGarbageCollectionRequest) (*RunGarbageCollectionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RunGarbageCollection not implemented")
 }
@@ -788,8 +815,8 @@ func (UnimplementedVaultServer) ListDir(context.Context, *ListDirRequest) (*List
 func (UnimplementedVaultServer) GetFile(context.Context, *GetFileRequest) (*GetFileResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetFile not implemented")
 }
-func (UnimplementedVaultServer) DownloadArchive(context.Context, *DownloadArchiveRequest) (*GetFileResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method DownloadArchive not implemented")
+func (UnimplementedVaultServer) DownloadArchive(*DownloadArchiveRequest, grpc.ServerStreamingServer[GetFileResponse]) error {
+	return status.Error(codes.Unimplemented, "method DownloadArchive not implemented")
 }
 func (UnimplementedVaultServer) CloseFileRestore(context.Context, *CloseFileRestoreRequest) (*CloseFileRestoreResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CloseFileRestore not implemented")
@@ -1289,6 +1316,24 @@ func _Vault_ListReplicationJobs_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Vault_DeleteReplicationJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteReplicationJobRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VaultServer).DeleteReplicationJob(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Vault_DeleteReplicationJob_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VaultServer).DeleteReplicationJob(ctx, req.(*DeleteReplicationJobRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Vault_RunGarbageCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RunGarbageCollectionRequest)
 	if err := dec(in); err != nil {
@@ -1534,23 +1579,16 @@ func _Vault_GetFile_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Vault_DownloadArchive_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DownloadArchiveRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _Vault_DownloadArchive_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(DownloadArchiveRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(VaultServer).DownloadArchive(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Vault_DownloadArchive_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VaultServer).DownloadArchive(ctx, req.(*DownloadArchiveRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(VaultServer).DownloadArchive(m, &grpc.GenericServerStream[DownloadArchiveRequest, GetFileResponse]{ServerStream: stream})
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Vault_DownloadArchiveServer = grpc.ServerStreamingServer[GetFileResponse]
 
 func _Vault_CloseFileRestore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CloseFileRestoreRequest)
@@ -1718,6 +1756,10 @@ var Vault_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Vault_ListReplicationJobs_Handler,
 		},
 		{
+			MethodName: "DeleteReplicationJob",
+			Handler:    _Vault_DeleteReplicationJob_Handler,
+		},
+		{
 			MethodName: "RunGarbageCollection",
 			Handler:    _Vault_RunGarbageCollection_Handler,
 		},
@@ -1770,10 +1812,6 @@ var Vault_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Vault_GetFile_Handler,
 		},
 		{
-			MethodName: "DownloadArchive",
-			Handler:    _Vault_DownloadArchive_Handler,
-		},
-		{
 			MethodName: "CloseFileRestore",
 			Handler:    _Vault_CloseFileRestore_Handler,
 		},
@@ -1790,6 +1828,11 @@ var Vault_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "WatchEvents",
 			Handler:       _Vault_WatchEvents_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "DownloadArchive",
+			Handler:       _Vault_DownloadArchive_Handler,
 			ServerStreams: true,
 		},
 	},
