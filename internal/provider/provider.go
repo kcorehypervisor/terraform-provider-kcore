@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	pb "github.com/kcorehypervisor/terraform-provider-kcore/api/controller"
+	vaultpb "github.com/kcorehypervisor/terraform-provider-kcore/api/vault"
 )
 
 // New returns a new provider instance
@@ -49,6 +50,12 @@ func New() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("KCORE_INSECURE", false),
 				Description: "Disable TLS verification (not recommended for production)",
 			},
+			"vault_address": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("KCORE_VAULT_ENDPOINT", ""),
+				Description: "Address of the kcore Vault coordinator. Required by kcore_vault_policy, kcore_vault_target, and kcore_vault_replication.",
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"kcore_cluster":                   resourceCluster(),
@@ -70,6 +77,9 @@ func New() *schema.Provider {
 			"kcore_cluster_update":            resourceClusterUpdate(),
 			"kcore_workload":                  resourceWorkload(),
 			"kcore_kubernetes_cluster":        resourceKubernetesCluster(),
+			"kcore_vault_policy":              resourceVaultPolicy(),
+			"kcore_vault_target":              resourceVaultTarget(),
+			"kcore_vault_replication":         resourceVaultReplication(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"kcore_vm":                  dataSourceVM(),
@@ -85,6 +95,14 @@ func New() *schema.Provider {
 type apiClient struct {
 	conn       *grpc.ClientConn
 	controller pb.ControllerClient
+	vault      vaultpb.VaultClient
+}
+
+func (c *apiClient) requireVault() (vaultpb.VaultClient, error) {
+	if c.vault == nil {
+		return nil, fmt.Errorf("vault_address is not set")
+	}
+	return c.vault, nil
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -142,6 +160,13 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	client := &apiClient{
 		conn:       conn,
 		controller: pb.NewControllerClient(conn),
+	}
+	if vaultAddr := d.Get("vault_address").(string); vaultAddr != "" {
+		vaultConn, err := grpc.Dial(vaultAddr, opts...)
+		if err != nil {
+			return nil, diag.FromErr(fmt.Errorf("failed to connect to vault: %w", err))
+		}
+		client.vault = vaultpb.NewVaultClient(vaultConn)
 	}
 
 	return client, diags
