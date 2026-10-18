@@ -366,6 +366,8 @@ message UpdateVmRequest {
   string target_node = 2;  // Optional
   int32 cpu = 3;            // New CPU count (0 = no change)
   int64 memory_bytes = 4;   // New memory (0 = no change)
+  // Keys merged into the stored VM label map. Empty leaves labels unchanged.
+  map<string, string> labels = 5;
 }
 
 message UpdateVmResponse {
@@ -411,6 +413,7 @@ message GetVmResponse {
   VmStatus status = 2;
   string node_id = 3;  // Which node it's on
   string assigned_ip = 4; // Controller-assigned VM IP (static/reserved when available)
+  bool guest_reachable = 5;
 }
 
 message ListVmsRequest {
@@ -654,6 +657,7 @@ message VmInfo {
   google.protobuf.Timestamp created_at = 7;
   string storage_backend = 8;   // filesystem, lvm, zfs
   int64 storage_size_bytes = 9; // Provisioned volume size
+  map<string, string> labels = 10;
 }
 
 // Node Operations
@@ -701,6 +705,11 @@ message VmSpec {
   string storage_backend = 7;   // filesystem, lvm, zfs
   int64 storage_size_bytes = 8; // Provisioned volume size
   VmDesiredState desired_state = 9; // declarative desired state (running|stopped)
+  // PCI addresses and named devices. Empty leaves a stored list unchanged.
+  repeated string pci_devices = 10;
+  repeated string gpus = 11;
+  // VM labels. Example: "kcore-vault/restore" = "<job>".
+  map<string, string> labels = 12;
 }
 
 message Disk {
