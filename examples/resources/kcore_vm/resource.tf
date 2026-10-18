@@ -29,6 +29,10 @@ resource "kcore_vm" "app" {
 
   desired_state = "running"
 
+  labels = {
+    env = "lab"
+  }
+
   # Optional cloud-init / SSH keys registered with the controller
   # cloud_init_user_data = file("${path.module}/cloud-init.yaml")
   # ssh_key_names        = ["alice-workstation"]
