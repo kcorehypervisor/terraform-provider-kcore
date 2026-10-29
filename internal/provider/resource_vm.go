@@ -175,6 +175,12 @@ func resourceVM() *schema.Resource {
 				Description:  "Desired state of the VM (running or stopped)",
 				ValidateFunc: validation.StringInSlice([]string{"running", "stopped"}, false),
 			},
+			"labels": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "VM labels. Use kcore-vault/restore to mark a Vault restore VM.",
+			},
 			"state": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -239,6 +245,7 @@ func resourceVMCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 		StorageBackend:   normalizeStorageBackendSpec(d.Get("storage_backend").(string)),
 		StorageSizeBytes: sizeBytes,
 		DesiredState:     vmDesiredStateProto(d.Get("desired_state").(string)),
+		Labels:           vmLabels(d),
 	}
 
 	if v, ok := d.GetOk("disk"); ok {
@@ -346,6 +353,9 @@ func resourceVMRead(ctx context.Context, d *schema.ResourceData, meta interface{
 	if ds := vmDesiredStateTerraform(resp.Spec.DesiredState); ds != "" {
 		d.Set("desired_state", ds)
 	}
+	if resp.Spec.Labels != nil {
+		d.Set("labels", resp.Spec.Labels)
+	}
 
 	if resp.Status.CreatedAt != nil {
 		d.Set("created_at", resp.Status.CreatedAt.AsTime().Format(time.RFC3339))
@@ -398,6 +408,25 @@ func resourceVMUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 		}
 	}
 
+	if d.HasChange("labels") || d.HasChange("cpu") || d.HasChange("memory_bytes") {
+		req := &pb.UpdateVmRequest{
+			VmId:   d.Id(),
+			Labels: vmLabels(d),
+		}
+		if d.HasChange("cpu") {
+			req.Cpu = int32(d.Get("cpu").(int))
+		}
+		if d.HasChange("memory_bytes") {
+			req.MemoryBytes = int64(d.Get("memory_bytes").(int))
+		}
+		if tn := vmOptionalTargetNode(d); tn != "" {
+			req.TargetNode = tn
+		}
+		if _, err := client.controller.UpdateVm(ctx, req); err != nil {
+			return diag.FromErr(fmt.Errorf("failed to update VM: %w", err))
+		}
+	}
+
 	return resourceVMRead(ctx, d, meta)
 }
 
@@ -421,4 +450,19 @@ func resourceVMDelete(ctx context.Context, d *schema.ResourceData, meta interfac
 
 	d.SetId("")
 	return diags
+}
+
+func vmLabels(d *schema.ResourceData) map[string]string {
+	raw, ok := d.GetOk("labels")
+	if !ok {
+		return nil
+	}
+	out := map[string]string{}
+	for key, value := range raw.(map[string]interface{}) {
+		out[key] = fmt.Sprint(value)
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
 }
