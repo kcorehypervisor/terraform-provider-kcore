@@ -25,6 +25,7 @@ func resourceNode() *schema.Resource {
 	return &schema.Resource{
 		Description: "Install a node from the live ISO (`kctl node install`). " +
 			"Set bootstrap on the first controller. Other nodes set join_controller to that node's controller_address so Terraform creates the bootstrap node first. " +
+			"When this node runs a controller, apply waits until that node's controller accepts RPCs. The install RPC returns when the script starts, and the script reboots the machine. " +
 			"Destroy drops Terraform state and leaves the installed disk in place.",
 		CreateContext: resourceNodeCreate,
 		ReadContext:   resourceNodeRead,
@@ -238,7 +239,7 @@ func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	if runController {
 		controllerAddr = host + ":9090"
 	}
-	if bootstrap {
+	if installWaitsForController(runController) {
 		if err := waitForController(ctx, controllerAddr, dir); err != nil {
 			return diag.FromErr(fmt.Errorf("installer accepted node %s; controller %s did not become ready: %w", nodeID, controllerAddr, err))
 		}
@@ -249,6 +250,15 @@ func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	d.Set("luks_method", resp.LuksMethod)
 	d.Set("message", resp.Message)
 	return nil
+}
+
+// installWaitsForController is true for the bootstrap controller and for
+// every additional controller. Agent-only nodes have no controller to dial.
+// InstallToDisk returns as soon as the script is running; a joining
+// controller used to be stored at that moment, including when the script
+// later failed.
+func installWaitsForController(runController bool) bool {
+	return runController
 }
 
 func waitForController(ctx context.Context, addr, dir string) error {

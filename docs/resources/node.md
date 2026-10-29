@@ -3,12 +3,12 @@
 page_title: "kcore_node Resource - kcore"
 subcategory: ""
 description: |-
-  Install a node from the live ISO. bootstrap marks the first controller. Other nodes join it through controller_address.
+  Install a node from the live ISO. bootstrap marks the first controller. Other nodes join it through controller_address. A node that runs a controller waits until that controller accepts RPCs.
 ---
 
 # kcore_node (Resource)
 
-Install a node from the live ISO (`kctl node install`). Set `bootstrap` on the first controller. Other nodes set `join_controller` to that node's `controller_address`, which makes Terraform create the bootstrap node first. Destroy drops Terraform state and leaves the installed disk in place.
+Install a node from the live ISO (`kctl node install`). Set `bootstrap` on the first controller. Other nodes set `join_controller` to that node's `controller_address`, which makes Terraform create the bootstrap node first. When this node runs a controller, apply waits until that node's controller accepts RPCs. The install RPC returns when the script starts, and the script reboots the machine. Destroy drops Terraform state and leaves the installed disk in place.
 
 ## Example Usage
 
