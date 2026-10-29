@@ -11,7 +11,7 @@ Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terra
 | Resource | kctl |
 |----------|------|
 | `kcore_cluster` | `kctl create cluster` (local PKI) |
-| `kcore_node` | `kctl node install`. `bootstrap = true` is the first controller; other nodes set `join_controller` to its `controller_address` |
+| `kcore_node` | `kctl node install`. `bootstrap = true` is the first controller; other nodes set `join_controller` to its `controller_address`. Apply waits until a controller node accepts RPCs |
 | `kcore_vm` | `kctl create vm` |
 | `kcore_workload` | `kctl create container` |
 | `kcore_network` | `kctl create network` |
