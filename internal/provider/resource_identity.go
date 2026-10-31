@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -18,8 +19,13 @@ func resourceSSHKey() *schema.Resource {
 		ReadContext:   resourceSSHKeyRead,
 		DeleteContext: resourceSSHKeyDelete,
 		Schema: map[string]*schema.Schema{
-			"name":       {Type: schema.TypeString, Required: true, ForceNew: true},
-			"public_key": {Type: schema.TypeString, Required: true, ForceNew: true},
+			"name": {Type: schema.TypeString, Required: true, ForceNew: true},
+			"public_key": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: sshPublicKeyDiffSuppress,
+			},
 		},
 	}
 }
@@ -27,7 +33,7 @@ func resourceSSHKey() *schema.Resource {
 func resourceSSHKeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	resp, err := api(meta).controller.CreateSshKey(ctx, &pb.CreateSshKeyRequest{
 		Name:      s(d, "name"),
-		PublicKey: s(d, "public_key"),
+		PublicKey: strings.TrimSpace(s(d, "public_key")),
 	})
 	if err != nil {
 		return diag.FromErr(err)
@@ -46,8 +52,15 @@ func resourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return nil
 	}
 	d.Set("name", resp.Key.Name)
-	d.Set("public_key", resp.Key.PublicKey)
+	d.Set("public_key", strings.TrimSpace(resp.Key.PublicKey))
 	return nil
+}
+
+// sshPublicKeyDiffSuppress ignores the trailing newline that
+// tls_private_key.public_key_openssh adds. The controller stores the key
+// without that newline, and ForceNew would otherwise replace it on every plan.
+func sshPublicKeyDiffSuppress(_, oldValue, newValue string, _ *schema.ResourceData) bool {
+	return strings.TrimSpace(oldValue) == strings.TrimSpace(newValue)
 }
 
 func resourceSSHKeyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
