@@ -38,6 +38,10 @@ const (
 	Controller_CreateNetwork_FullMethodName               = "/kcore.controller.Controller/CreateNetwork"
 	Controller_DeleteNetwork_FullMethodName               = "/kcore.controller.Controller/DeleteNetwork"
 	Controller_ListNetworks_FullMethodName                = "/kcore.controller.Controller/ListNetworks"
+	Controller_CreatePostgresql_FullMethodName            = "/kcore.controller.Controller/CreatePostgresql"
+	Controller_DeletePostgresql_FullMethodName            = "/kcore.controller.Controller/DeletePostgresql"
+	Controller_GetPostgresql_FullMethodName               = "/kcore.controller.Controller/GetPostgresql"
+	Controller_ListPostgresqls_FullMethodName             = "/kcore.controller.Controller/ListPostgresqls"
 	Controller_CreateSecurityGroup_FullMethodName         = "/kcore.controller.Controller/CreateSecurityGroup"
 	Controller_GetSecurityGroup_FullMethodName            = "/kcore.controller.Controller/GetSecurityGroup"
 	Controller_ListSecurityGroups_FullMethodName          = "/kcore.controller.Controller/ListSecurityGroups"
@@ -46,6 +50,11 @@ const (
 	Controller_DetachSecurityGroup_FullMethodName         = "/kcore.controller.Controller/DetachSecurityGroup"
 	Controller_ListNodes_FullMethodName                   = "/kcore.controller.Controller/ListNodes"
 	Controller_GetNode_FullMethodName                     = "/kcore.controller.Controller/GetNode"
+	Controller_ListGpus_FullMethodName                    = "/kcore.controller.Controller/ListGpus"
+	Controller_ListPciDevices_FullMethodName              = "/kcore.controller.Controller/ListPciDevices"
+	Controller_ConfigureNodeVgpu_FullMethodName           = "/kcore.controller.Controller/ConfigureNodeVgpu"
+	Controller_GetNodeVgpu_FullMethodName                 = "/kcore.controller.Controller/GetNodeVgpu"
+	Controller_RebootNode_FullMethodName                  = "/kcore.controller.Controller/RebootNode"
 	Controller_CreateSshKey_FullMethodName                = "/kcore.controller.Controller/CreateSshKey"
 	Controller_DeleteSshKey_FullMethodName                = "/kcore.controller.Controller/DeleteSshKey"
 	Controller_ListSshKeys_FullMethodName                 = "/kcore.controller.Controller/ListSshKeys"
@@ -60,6 +69,8 @@ const (
 	Controller_UncordonNode_FullMethodName                = "/kcore.controller.Controller/UncordonNode"
 	Controller_DeleteNode_FullMethodName                  = "/kcore.controller.Controller/DeleteNode"
 	Controller_GetClusterHealth_FullMethodName            = "/kcore.controller.Controller/GetClusterHealth"
+	Controller_GetHaStatus_FullMethodName                 = "/kcore.controller.Controller/GetHaStatus"
+	Controller_ListHaEvents_FullMethodName                = "/kcore.controller.Controller/ListHaEvents"
 	Controller_BackupCluster_FullMethodName               = "/kcore.controller.Controller/BackupCluster"
 	Controller_RestoreCluster_FullMethodName              = "/kcore.controller.Controller/RestoreCluster"
 	Controller_RenewNodeCert_FullMethodName               = "/kcore.controller.Controller/RenewNodeCert"
@@ -93,6 +104,17 @@ const (
 	Controller_RestoreVolume_FullMethodName               = "/kcore.controller.Controller/RestoreVolume"
 	Controller_FlattenVolume_FullMethodName               = "/kcore.controller.Controller/FlattenVolume"
 	Controller_ResizeVolume_FullMethodName                = "/kcore.controller.Controller/ResizeVolume"
+	Controller_ExposeVolumeSnapshot_FullMethodName        = "/kcore.controller.Controller/ExposeVolumeSnapshot"
+	Controller_UnexposeVolumeSnapshot_FullMethodName      = "/kcore.controller.Controller/UnexposeVolumeSnapshot"
+	Controller_ListVolumeChangedExtents_FullMethodName    = "/kcore.controller.Controller/ListVolumeChangedExtents"
+	Controller_ReadVolumeBlocks_FullMethodName            = "/kcore.controller.Controller/ReadVolumeBlocks"
+	Controller_WriteVolumeBlocks_FullMethodName           = "/kcore.controller.Controller/WriteVolumeBlocks"
+	Controller_FreezeVmFilesystems_FullMethodName         = "/kcore.controller.Controller/FreezeVmFilesystems"
+	Controller_PrepareInstantRecovery_FullMethodName      = "/kcore.controller.Controller/PrepareInstantRecovery"
+	Controller_FinalizeInstantRecovery_FullMethodName     = "/kcore.controller.Controller/FinalizeInstantRecovery"
+	Controller_FormatVolume_FullMethodName                = "/kcore.controller.Controller/FormatVolume"
+	Controller_MountVolume_FullMethodName                 = "/kcore.controller.Controller/MountVolume"
+	Controller_UnmountVolume_FullMethodName               = "/kcore.controller.Controller/UnmountVolume"
 	Controller_EncryptVolume_FullMethodName               = "/kcore.controller.Controller/EncryptVolume"
 	Controller_CreateSnapshotPolicy_FullMethodName        = "/kcore.controller.Controller/CreateSnapshotPolicy"
 	Controller_GetSnapshotPolicy_FullMethodName           = "/kcore.controller.Controller/GetSnapshotPolicy"
@@ -110,10 +132,15 @@ const (
 	Controller_ApproveClusterUpdate_FullMethodName        = "/kcore.controller.Controller/ApproveClusterUpdate"
 	Controller_CancelClusterUpdate_FullMethodName         = "/kcore.controller.Controller/CancelClusterUpdate"
 	Controller_RollbackClusterUpdate_FullMethodName       = "/kcore.controller.Controller/RollbackClusterUpdate"
+	Controller_RebootClusterUpdateNode_FullMethodName     = "/kcore.controller.Controller/RebootClusterUpdateNode"
+	Controller_PlanCephCluster_FullMethodName             = "/kcore.controller.Controller/PlanCephCluster"
 	Controller_CreateCephCluster_FullMethodName           = "/kcore.controller.Controller/CreateCephCluster"
 	Controller_GetCephCluster_FullMethodName              = "/kcore.controller.Controller/GetCephCluster"
 	Controller_ListCephClusters_FullMethodName            = "/kcore.controller.Controller/ListCephClusters"
 	Controller_DeleteCephCluster_FullMethodName           = "/kcore.controller.Controller/DeleteCephCluster"
+	Controller_GetCephClusterCapacity_FullMethodName      = "/kcore.controller.Controller/GetCephClusterCapacity"
+	Controller_GetCephDashboardCredentials_FullMethodName = "/kcore.controller.Controller/GetCephDashboardCredentials"
+	Controller_SetCephDashboardCredentials_FullMethodName = "/kcore.controller.Controller/SetCephDashboardCredentials"
 	Controller_CreateSharedFilesystem_FullMethodName      = "/kcore.controller.Controller/CreateSharedFilesystem"
 	Controller_GetSharedFilesystem_FullMethodName         = "/kcore.controller.Controller/GetSharedFilesystem"
 	Controller_ListSharedFilesystems_FullMethodName       = "/kcore.controller.Controller/ListSharedFilesystems"
@@ -170,6 +197,11 @@ type ControllerClient interface {
 	CreateNetwork(ctx context.Context, in *CreateNetworkRequest, opts ...grpc.CallOption) (*CreateNetworkResponse, error)
 	DeleteNetwork(ctx context.Context, in *DeleteNetworkRequest, opts ...grpc.CallOption) (*DeleteNetworkResponse, error)
 	ListNetworks(ctx context.Context, in *ListNetworksRequest, opts ...grpc.CallOption) (*ListNetworksResponse, error)
+	// One NixOS services.postgresql database per node. v1 is a single database.
+	CreatePostgresql(ctx context.Context, in *CreatePostgresqlRequest, opts ...grpc.CallOption) (*CreatePostgresqlResponse, error)
+	DeletePostgresql(ctx context.Context, in *DeletePostgresqlRequest, opts ...grpc.CallOption) (*DeletePostgresqlResponse, error)
+	GetPostgresql(ctx context.Context, in *GetPostgresqlRequest, opts ...grpc.CallOption) (*GetPostgresqlResponse, error)
+	ListPostgresqls(ctx context.Context, in *ListPostgresqlsRequest, opts ...grpc.CallOption) (*ListPostgresqlsResponse, error)
 	CreateSecurityGroup(ctx context.Context, in *CreateSecurityGroupRequest, opts ...grpc.CallOption) (*CreateSecurityGroupResponse, error)
 	GetSecurityGroup(ctx context.Context, in *GetSecurityGroupRequest, opts ...grpc.CallOption) (*GetSecurityGroupResponse, error)
 	ListSecurityGroups(ctx context.Context, in *ListSecurityGroupsRequest, opts ...grpc.CallOption) (*ListSecurityGroupsResponse, error)
@@ -179,6 +211,15 @@ type ControllerClient interface {
 	// Node operations
 	ListNodes(ctx context.Context, in *ListNodesRequest, opts ...grpc.CallOption) (*ListNodesResponse, error)
 	GetNode(ctx context.Context, in *GetNodeRequest, opts ...grpc.CallOption) (*GetNodeResponse, error)
+	// GPUs reported by node agents. Names (radeon0) are per node.
+	ListGpus(ctx context.Context, in *ListGpusRequest, opts ...grpc.CallOption) (*ListGpusResponse, error)
+	// Full PCI inventory: AI GPUs, NICs, NVMe, and raw groups.
+	ListPciDevices(ctx context.Context, in *ListGpusRequest, opts ...grpc.CallOption) (*ListGpusResponse, error)
+	// Stage the Virtual GPU Manager on a node and render ch-vm.vgpu.
+	ConfigureNodeVgpu(ctx context.Context, in *ConfigureNodeVgpuRequest, opts ...grpc.CallOption) (*ConfigureNodeVgpuResponse, error)
+	GetNodeVgpu(ctx context.Context, in *GetNodeVgpuRequest, opts ...grpc.CallOption) (*GetNodeVgpuResponse, error)
+	// Reboot a node. Refused while it still has running VMs unless force is set.
+	RebootNode(ctx context.Context, in *RebootNodeRequest, opts ...grpc.CallOption) (*RebootNodeResponse, error)
 	// SSH key management
 	CreateSshKey(ctx context.Context, in *CreateSshKeyRequest, opts ...grpc.CallOption) (*CreateSshKeyResponse, error)
 	DeleteSshKey(ctx context.Context, in *DeleteSshKeyRequest, opts ...grpc.CallOption) (*DeleteSshKeyResponse, error)
@@ -208,6 +249,9 @@ type ControllerClient interface {
 	// Summary of node readiness, VM placement, certificate expiry, and
 	// replication conflicts. Read-only.
 	GetClusterHealth(ctx context.Context, in *GetClusterHealthRequest, opts ...grpc.CallOption) (*GetClusterHealthResponse, error)
+	// Failover lease, admission headroom, and the loss deadline.
+	GetHaStatus(ctx context.Context, in *GetHaStatusRequest, opts ...grpc.CallOption) (*GetHaStatusResponse, error)
+	ListHaEvents(ctx context.Context, in *ListHaEventsRequest, opts ...grpc.CallOption) (*ListHaEventsResponse, error)
 	// Consistent SQLite snapshot of the controller database.
 	BackupCluster(ctx context.Context, in *BackupClusterRequest, opts ...grpc.CallOption) (*BackupClusterResponse, error)
 	// Replace the controller database from a snapshot. `confirm` must be true.
@@ -245,7 +289,7 @@ type ControllerClient interface {
 	// Storage overview: cluster-wide VM data-plane backends (filesystem / LVM / ZFS), LUKS stats,
 	// and per-node block inventory from each node agent (lsblk).
 	GetStorageOverview(ctx context.Context, in *GetStorageOverviewRequest, opts ...grpc.CallOption) (*GetStorageOverviewResponse, error)
-	// Volume inventory and lifecycle (Ceph RBD; many volumes per VM).
+	// Volume inventory and lifecycle. Ceph RBD, plus LVM and ZFS volumes on one node.
 	ListVolumes(ctx context.Context, in *ListVolumesRequest, opts ...grpc.CallOption) (*ListVolumesResponse, error)
 	CreateVolume(ctx context.Context, in *CreateVolumeRequest, opts ...grpc.CallOption) (*CreateVolumeResponse, error)
 	GetVolume(ctx context.Context, in *GetVolumeRequest, opts ...grpc.CallOption) (*GetVolumeResponse, error)
@@ -256,13 +300,28 @@ type ControllerClient interface {
 	ListVmOperations(ctx context.Context, in *ListVmOperationsRequest, opts ...grpc.CallOption) (*ListVmOperationsResponse, error)
 	GetVmOperation(ctx context.Context, in *GetVmOperationRequest, opts ...grpc.CallOption) (*GetVmOperationResponse, error)
 	CancelVmOperation(ctx context.Context, in *CancelVmOperationRequest, opts ...grpc.CallOption) (*CancelVmOperationResponse, error)
-	// Volume snapshots (Ceph RBD crash-consistent).
+	// Volume snapshots (Ceph RBD, ZFS, LVM thin).
 	CreateVolumeSnapshot(ctx context.Context, in *CreateVolumeSnapshotRequest, opts ...grpc.CallOption) (*CreateVolumeSnapshotResponse, error)
 	ListVolumeSnapshots(ctx context.Context, in *ListVolumeSnapshotsRequest, opts ...grpc.CallOption) (*ListVolumeSnapshotsResponse, error)
 	DeleteVolumeSnapshot(ctx context.Context, in *DeleteVolumeSnapshotRequest, opts ...grpc.CallOption) (*DeleteVolumeSnapshotResponse, error)
 	RestoreVolume(ctx context.Context, in *RestoreVolumeRequest, opts ...grpc.CallOption) (*RestoreVolumeResponse, error)
 	FlattenVolume(ctx context.Context, in *FlattenVolumeRequest, opts ...grpc.CallOption) (*FlattenVolumeResponse, error)
 	ResizeVolume(ctx context.Context, in *ResizeVolumeRequest, opts ...grpc.CallOption) (*ResizeVolumeResponse, error)
+	// Snapshot export hooks (docs/backup.md). Controllers proxy to NodeStorage.
+	ExposeVolumeSnapshot(ctx context.Context, in *ExposeVolumeSnapshotRequest, opts ...grpc.CallOption) (*ExposeVolumeSnapshotResponse, error)
+	UnexposeVolumeSnapshot(ctx context.Context, in *UnexposeVolumeSnapshotRequest, opts ...grpc.CallOption) (*UnexposeVolumeSnapshotResponse, error)
+	ListVolumeChangedExtents(ctx context.Context, in *ListVolumeChangedExtentsRequest, opts ...grpc.CallOption) (*ListVolumeChangedExtentsResponse, error)
+	ReadVolumeBlocks(ctx context.Context, in *ReadVolumeBlocksRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[VolumeBlock], error)
+	WriteVolumeBlocks(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[WriteVolumeBlocksRequest, WriteVolumeBlocksResponse], error)
+	FreezeVmFilesystems(ctx context.Context, in *FreezeVmFilesystemsRequest, opts ...grpc.CallOption) (*FreezeVmFilesystemsResponse, error)
+	// Instant recovery: the node builds a qcow2 overlay on a vault NBD export and boots it.
+	PrepareInstantRecovery(ctx context.Context, in *PrepareInstantRecoveryRequest, opts ...grpc.CallOption) (*PrepareInstantRecoveryResponse, error)
+	// Copy overlay extents onto a cluster volume and leave that volume as the guest disk.
+	FinalizeInstantRecovery(ctx context.Context, in *FinalizeInstantRecoveryRequest, opts ...grpc.CallOption) (*FinalizeInstantRecoveryResponse, error)
+	// Format, mount, and unmount an LVM or ZFS volume on the node that owns it.
+	FormatVolume(ctx context.Context, in *FormatVolumeRequest, opts ...grpc.CallOption) (*FormatVolumeResponse, error)
+	MountVolume(ctx context.Context, in *MountVolumeRequest, opts ...grpc.CallOption) (*MountVolumeResponse, error)
+	UnmountVolume(ctx context.Context, in *UnmountVolumeRequest, opts ...grpc.CallOption) (*UnmountVolumeResponse, error)
 	// In-place LUKS over an existing plain RBD image (data-destructive; see destroy_data).
 	EncryptVolume(ctx context.Context, in *EncryptVolumeRequest, opts ...grpc.CallOption) (*EncryptVolumeResponse, error)
 	CreateSnapshotPolicy(ctx context.Context, in *CreateSnapshotPolicyRequest, opts ...grpc.CallOption) (*CreateSnapshotPolicyResponse, error)
@@ -290,11 +349,20 @@ type ControllerClient interface {
 	ApproveClusterUpdate(ctx context.Context, in *ApproveClusterUpdateRequest, opts ...grpc.CallOption) (*ApproveClusterUpdateResponse, error)
 	CancelClusterUpdate(ctx context.Context, in *CancelClusterUpdateRequest, opts ...grpc.CallOption) (*CancelClusterUpdateResponse, error)
 	RollbackClusterUpdate(ctx context.Context, in *RollbackClusterUpdateRequest, opts ...grpc.CallOption) (*RollbackClusterUpdateResponse, error)
+	// Migrate guests off one node, then boot a staged kernel. Not part of apply.
+	RebootClusterUpdateNode(ctx context.Context, in *RebootClusterUpdateNodeRequest, opts ...grpc.CallOption) (*RebootClusterUpdateNodeResponse, error)
 	// CephCluster — declarative cluster-scoped Ceph SAN configuration.
+	PlanCephCluster(ctx context.Context, in *PlanCephClusterRequest, opts ...grpc.CallOption) (*PlanCephClusterResponse, error)
 	CreateCephCluster(ctx context.Context, in *CreateCephClusterRequest, opts ...grpc.CallOption) (*CreateCephClusterResponse, error)
 	GetCephCluster(ctx context.Context, in *GetCephClusterRequest, opts ...grpc.CallOption) (*GetCephClusterResponse, error)
 	ListCephClusters(ctx context.Context, in *ListCephClustersRequest, opts ...grpc.CallOption) (*ListCephClustersResponse, error)
 	DeleteCephCluster(ctx context.Context, in *DeleteCephClusterRequest, opts ...grpc.CallOption) (*DeleteCephClusterResponse, error)
+	// On-demand capacity from a live member (`ceph df`). Read-only.
+	GetCephClusterCapacity(ctx context.Context, in *GetCephClusterCapacityRequest, opts ...grpc.CallOption) (*GetCephClusterCapacityResponse, error)
+	// Upstream Ceph Manager Dashboard login material stored by the controller.
+	// Ceph itself keeps only a password hash, so plaintext is served from kcore.
+	GetCephDashboardCredentials(ctx context.Context, in *GetCephDashboardCredentialsRequest, opts ...grpc.CallOption) (*GetCephDashboardCredentialsResponse, error)
+	SetCephDashboardCredentials(ctx context.Context, in *SetCephDashboardCredentialsRequest, opts ...grpc.CallOption) (*SetCephDashboardCredentialsResponse, error)
 	// SharedFilesystem (CephFS) — cluster-scoped POSIX file service on Ceph.
 	CreateSharedFilesystem(ctx context.Context, in *CreateSharedFilesystemRequest, opts ...grpc.CallOption) (*CreateSharedFilesystemResponse, error)
 	GetSharedFilesystem(ctx context.Context, in *GetSharedFilesystemRequest, opts ...grpc.CallOption) (*GetSharedFilesystemResponse, error)
@@ -315,7 +383,7 @@ type ControllerClient interface {
 	GrantOperatorRole(ctx context.Context, in *GrantOperatorRoleRequest, opts ...grpc.CallOption) (*GrantOperatorRoleResponse, error)
 	RevokeOperatorRole(ctx context.Context, in *RevokeOperatorRoleRequest, opts ...grpc.CallOption) (*RevokeOperatorRoleResponse, error)
 	IssueOperatorCert(ctx context.Context, in *IssueOperatorCertRequest, opts ...grpc.CallOption) (*IssueOperatorCertResponse, error)
-	// Kubernetes cluster lifecycle, including the local volume provisioner.
+	// Kubernetes cluster lifecycle
 	PlanKubernetesCluster(ctx context.Context, in *PlanKubernetesClusterRequest, opts ...grpc.CallOption) (*PlanKubernetesClusterResponse, error)
 	CreateKubernetesCluster(ctx context.Context, in *CreateKubernetesClusterRequest, opts ...grpc.CallOption) (*CreateKubernetesClusterResponse, error)
 	UpdateKubernetesCluster(ctx context.Context, in *UpdateKubernetesClusterRequest, opts ...grpc.CallOption) (*UpdateKubernetesClusterResponse, error)
@@ -527,6 +595,46 @@ func (c *controllerClient) ListNetworks(ctx context.Context, in *ListNetworksReq
 	return out, nil
 }
 
+func (c *controllerClient) CreatePostgresql(ctx context.Context, in *CreatePostgresqlRequest, opts ...grpc.CallOption) (*CreatePostgresqlResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreatePostgresqlResponse)
+	err := c.cc.Invoke(ctx, Controller_CreatePostgresql_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) DeletePostgresql(ctx context.Context, in *DeletePostgresqlRequest, opts ...grpc.CallOption) (*DeletePostgresqlResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeletePostgresqlResponse)
+	err := c.cc.Invoke(ctx, Controller_DeletePostgresql_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetPostgresql(ctx context.Context, in *GetPostgresqlRequest, opts ...grpc.CallOption) (*GetPostgresqlResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPostgresqlResponse)
+	err := c.cc.Invoke(ctx, Controller_GetPostgresql_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListPostgresqls(ctx context.Context, in *ListPostgresqlsRequest, opts ...grpc.CallOption) (*ListPostgresqlsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPostgresqlsResponse)
+	err := c.cc.Invoke(ctx, Controller_ListPostgresqls_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controllerClient) CreateSecurityGroup(ctx context.Context, in *CreateSecurityGroupRequest, opts ...grpc.CallOption) (*CreateSecurityGroupResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateSecurityGroupResponse)
@@ -601,6 +709,56 @@ func (c *controllerClient) GetNode(ctx context.Context, in *GetNodeRequest, opts
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetNodeResponse)
 	err := c.cc.Invoke(ctx, Controller_GetNode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListGpus(ctx context.Context, in *ListGpusRequest, opts ...grpc.CallOption) (*ListGpusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListGpusResponse)
+	err := c.cc.Invoke(ctx, Controller_ListGpus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListPciDevices(ctx context.Context, in *ListGpusRequest, opts ...grpc.CallOption) (*ListGpusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListGpusResponse)
+	err := c.cc.Invoke(ctx, Controller_ListPciDevices_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ConfigureNodeVgpu(ctx context.Context, in *ConfigureNodeVgpuRequest, opts ...grpc.CallOption) (*ConfigureNodeVgpuResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ConfigureNodeVgpuResponse)
+	err := c.cc.Invoke(ctx, Controller_ConfigureNodeVgpu_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetNodeVgpu(ctx context.Context, in *GetNodeVgpuRequest, opts ...grpc.CallOption) (*GetNodeVgpuResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetNodeVgpuResponse)
+	err := c.cc.Invoke(ctx, Controller_GetNodeVgpu_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) RebootNode(ctx context.Context, in *RebootNodeRequest, opts ...grpc.CallOption) (*RebootNodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RebootNodeResponse)
+	err := c.cc.Invoke(ctx, Controller_RebootNode_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -741,6 +899,26 @@ func (c *controllerClient) GetClusterHealth(ctx context.Context, in *GetClusterH
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetClusterHealthResponse)
 	err := c.cc.Invoke(ctx, Controller_GetClusterHealth_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetHaStatus(ctx context.Context, in *GetHaStatusRequest, opts ...grpc.CallOption) (*GetHaStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetHaStatusResponse)
+	err := c.cc.Invoke(ctx, Controller_GetHaStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListHaEvents(ctx context.Context, in *ListHaEventsRequest, opts ...grpc.CallOption) (*ListHaEventsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListHaEventsResponse)
+	err := c.cc.Invoke(ctx, Controller_ListHaEvents_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1077,6 +1255,128 @@ func (c *controllerClient) ResizeVolume(ctx context.Context, in *ResizeVolumeReq
 	return out, nil
 }
 
+func (c *controllerClient) ExposeVolumeSnapshot(ctx context.Context, in *ExposeVolumeSnapshotRequest, opts ...grpc.CallOption) (*ExposeVolumeSnapshotResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExposeVolumeSnapshotResponse)
+	err := c.cc.Invoke(ctx, Controller_ExposeVolumeSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) UnexposeVolumeSnapshot(ctx context.Context, in *UnexposeVolumeSnapshotRequest, opts ...grpc.CallOption) (*UnexposeVolumeSnapshotResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UnexposeVolumeSnapshotResponse)
+	err := c.cc.Invoke(ctx, Controller_UnexposeVolumeSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListVolumeChangedExtents(ctx context.Context, in *ListVolumeChangedExtentsRequest, opts ...grpc.CallOption) (*ListVolumeChangedExtentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListVolumeChangedExtentsResponse)
+	err := c.cc.Invoke(ctx, Controller_ListVolumeChangedExtents_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ReadVolumeBlocks(ctx context.Context, in *ReadVolumeBlocksRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[VolumeBlock], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Controller_ServiceDesc.Streams[1], Controller_ReadVolumeBlocks_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[ReadVolumeBlocksRequest, VolumeBlock]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Controller_ReadVolumeBlocksClient = grpc.ServerStreamingClient[VolumeBlock]
+
+func (c *controllerClient) WriteVolumeBlocks(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[WriteVolumeBlocksRequest, WriteVolumeBlocksResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Controller_ServiceDesc.Streams[2], Controller_WriteVolumeBlocks_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[WriteVolumeBlocksRequest, WriteVolumeBlocksResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Controller_WriteVolumeBlocksClient = grpc.ClientStreamingClient[WriteVolumeBlocksRequest, WriteVolumeBlocksResponse]
+
+func (c *controllerClient) FreezeVmFilesystems(ctx context.Context, in *FreezeVmFilesystemsRequest, opts ...grpc.CallOption) (*FreezeVmFilesystemsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FreezeVmFilesystemsResponse)
+	err := c.cc.Invoke(ctx, Controller_FreezeVmFilesystems_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) PrepareInstantRecovery(ctx context.Context, in *PrepareInstantRecoveryRequest, opts ...grpc.CallOption) (*PrepareInstantRecoveryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PrepareInstantRecoveryResponse)
+	err := c.cc.Invoke(ctx, Controller_PrepareInstantRecovery_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) FinalizeInstantRecovery(ctx context.Context, in *FinalizeInstantRecoveryRequest, opts ...grpc.CallOption) (*FinalizeInstantRecoveryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FinalizeInstantRecoveryResponse)
+	err := c.cc.Invoke(ctx, Controller_FinalizeInstantRecovery_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) FormatVolume(ctx context.Context, in *FormatVolumeRequest, opts ...grpc.CallOption) (*FormatVolumeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FormatVolumeResponse)
+	err := c.cc.Invoke(ctx, Controller_FormatVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) MountVolume(ctx context.Context, in *MountVolumeRequest, opts ...grpc.CallOption) (*MountVolumeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MountVolumeResponse)
+	err := c.cc.Invoke(ctx, Controller_MountVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) UnmountVolume(ctx context.Context, in *UnmountVolumeRequest, opts ...grpc.CallOption) (*UnmountVolumeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UnmountVolumeResponse)
+	err := c.cc.Invoke(ctx, Controller_UnmountVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controllerClient) EncryptVolume(ctx context.Context, in *EncryptVolumeRequest, opts ...grpc.CallOption) (*EncryptVolumeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(EncryptVolumeResponse)
@@ -1247,6 +1547,26 @@ func (c *controllerClient) RollbackClusterUpdate(ctx context.Context, in *Rollba
 	return out, nil
 }
 
+func (c *controllerClient) RebootClusterUpdateNode(ctx context.Context, in *RebootClusterUpdateNodeRequest, opts ...grpc.CallOption) (*RebootClusterUpdateNodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RebootClusterUpdateNodeResponse)
+	err := c.cc.Invoke(ctx, Controller_RebootClusterUpdateNode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) PlanCephCluster(ctx context.Context, in *PlanCephClusterRequest, opts ...grpc.CallOption) (*PlanCephClusterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PlanCephClusterResponse)
+	err := c.cc.Invoke(ctx, Controller_PlanCephCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controllerClient) CreateCephCluster(ctx context.Context, in *CreateCephClusterRequest, opts ...grpc.CallOption) (*CreateCephClusterResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateCephClusterResponse)
@@ -1281,6 +1601,36 @@ func (c *controllerClient) DeleteCephCluster(ctx context.Context, in *DeleteCeph
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteCephClusterResponse)
 	err := c.cc.Invoke(ctx, Controller_DeleteCephCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetCephClusterCapacity(ctx context.Context, in *GetCephClusterCapacityRequest, opts ...grpc.CallOption) (*GetCephClusterCapacityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCephClusterCapacityResponse)
+	err := c.cc.Invoke(ctx, Controller_GetCephClusterCapacity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetCephDashboardCredentials(ctx context.Context, in *GetCephDashboardCredentialsRequest, opts ...grpc.CallOption) (*GetCephDashboardCredentialsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCephDashboardCredentialsResponse)
+	err := c.cc.Invoke(ctx, Controller_GetCephDashboardCredentials_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) SetCephDashboardCredentials(ctx context.Context, in *SetCephDashboardCredentialsRequest, opts ...grpc.CallOption) (*SetCephDashboardCredentialsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetCephDashboardCredentialsResponse)
+	err := c.cc.Invoke(ctx, Controller_SetCephDashboardCredentials_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1566,6 +1916,11 @@ type ControllerServer interface {
 	CreateNetwork(context.Context, *CreateNetworkRequest) (*CreateNetworkResponse, error)
 	DeleteNetwork(context.Context, *DeleteNetworkRequest) (*DeleteNetworkResponse, error)
 	ListNetworks(context.Context, *ListNetworksRequest) (*ListNetworksResponse, error)
+	// One NixOS services.postgresql database per node. v1 is a single database.
+	CreatePostgresql(context.Context, *CreatePostgresqlRequest) (*CreatePostgresqlResponse, error)
+	DeletePostgresql(context.Context, *DeletePostgresqlRequest) (*DeletePostgresqlResponse, error)
+	GetPostgresql(context.Context, *GetPostgresqlRequest) (*GetPostgresqlResponse, error)
+	ListPostgresqls(context.Context, *ListPostgresqlsRequest) (*ListPostgresqlsResponse, error)
 	CreateSecurityGroup(context.Context, *CreateSecurityGroupRequest) (*CreateSecurityGroupResponse, error)
 	GetSecurityGroup(context.Context, *GetSecurityGroupRequest) (*GetSecurityGroupResponse, error)
 	ListSecurityGroups(context.Context, *ListSecurityGroupsRequest) (*ListSecurityGroupsResponse, error)
@@ -1575,6 +1930,15 @@ type ControllerServer interface {
 	// Node operations
 	ListNodes(context.Context, *ListNodesRequest) (*ListNodesResponse, error)
 	GetNode(context.Context, *GetNodeRequest) (*GetNodeResponse, error)
+	// GPUs reported by node agents. Names (radeon0) are per node.
+	ListGpus(context.Context, *ListGpusRequest) (*ListGpusResponse, error)
+	// Full PCI inventory: AI GPUs, NICs, NVMe, and raw groups.
+	ListPciDevices(context.Context, *ListGpusRequest) (*ListGpusResponse, error)
+	// Stage the Virtual GPU Manager on a node and render ch-vm.vgpu.
+	ConfigureNodeVgpu(context.Context, *ConfigureNodeVgpuRequest) (*ConfigureNodeVgpuResponse, error)
+	GetNodeVgpu(context.Context, *GetNodeVgpuRequest) (*GetNodeVgpuResponse, error)
+	// Reboot a node. Refused while it still has running VMs unless force is set.
+	RebootNode(context.Context, *RebootNodeRequest) (*RebootNodeResponse, error)
 	// SSH key management
 	CreateSshKey(context.Context, *CreateSshKeyRequest) (*CreateSshKeyResponse, error)
 	DeleteSshKey(context.Context, *DeleteSshKeyRequest) (*DeleteSshKeyResponse, error)
@@ -1604,6 +1968,9 @@ type ControllerServer interface {
 	// Summary of node readiness, VM placement, certificate expiry, and
 	// replication conflicts. Read-only.
 	GetClusterHealth(context.Context, *GetClusterHealthRequest) (*GetClusterHealthResponse, error)
+	// Failover lease, admission headroom, and the loss deadline.
+	GetHaStatus(context.Context, *GetHaStatusRequest) (*GetHaStatusResponse, error)
+	ListHaEvents(context.Context, *ListHaEventsRequest) (*ListHaEventsResponse, error)
 	// Consistent SQLite snapshot of the controller database.
 	BackupCluster(context.Context, *BackupClusterRequest) (*BackupClusterResponse, error)
 	// Replace the controller database from a snapshot. `confirm` must be true.
@@ -1641,7 +2008,7 @@ type ControllerServer interface {
 	// Storage overview: cluster-wide VM data-plane backends (filesystem / LVM / ZFS), LUKS stats,
 	// and per-node block inventory from each node agent (lsblk).
 	GetStorageOverview(context.Context, *GetStorageOverviewRequest) (*GetStorageOverviewResponse, error)
-	// Volume inventory and lifecycle (Ceph RBD; many volumes per VM).
+	// Volume inventory and lifecycle. Ceph RBD, plus LVM and ZFS volumes on one node.
 	ListVolumes(context.Context, *ListVolumesRequest) (*ListVolumesResponse, error)
 	CreateVolume(context.Context, *CreateVolumeRequest) (*CreateVolumeResponse, error)
 	GetVolume(context.Context, *GetVolumeRequest) (*GetVolumeResponse, error)
@@ -1652,13 +2019,28 @@ type ControllerServer interface {
 	ListVmOperations(context.Context, *ListVmOperationsRequest) (*ListVmOperationsResponse, error)
 	GetVmOperation(context.Context, *GetVmOperationRequest) (*GetVmOperationResponse, error)
 	CancelVmOperation(context.Context, *CancelVmOperationRequest) (*CancelVmOperationResponse, error)
-	// Volume snapshots (Ceph RBD crash-consistent).
+	// Volume snapshots (Ceph RBD, ZFS, LVM thin).
 	CreateVolumeSnapshot(context.Context, *CreateVolumeSnapshotRequest) (*CreateVolumeSnapshotResponse, error)
 	ListVolumeSnapshots(context.Context, *ListVolumeSnapshotsRequest) (*ListVolumeSnapshotsResponse, error)
 	DeleteVolumeSnapshot(context.Context, *DeleteVolumeSnapshotRequest) (*DeleteVolumeSnapshotResponse, error)
 	RestoreVolume(context.Context, *RestoreVolumeRequest) (*RestoreVolumeResponse, error)
 	FlattenVolume(context.Context, *FlattenVolumeRequest) (*FlattenVolumeResponse, error)
 	ResizeVolume(context.Context, *ResizeVolumeRequest) (*ResizeVolumeResponse, error)
+	// Snapshot export hooks (docs/backup.md). Controllers proxy to NodeStorage.
+	ExposeVolumeSnapshot(context.Context, *ExposeVolumeSnapshotRequest) (*ExposeVolumeSnapshotResponse, error)
+	UnexposeVolumeSnapshot(context.Context, *UnexposeVolumeSnapshotRequest) (*UnexposeVolumeSnapshotResponse, error)
+	ListVolumeChangedExtents(context.Context, *ListVolumeChangedExtentsRequest) (*ListVolumeChangedExtentsResponse, error)
+	ReadVolumeBlocks(*ReadVolumeBlocksRequest, grpc.ServerStreamingServer[VolumeBlock]) error
+	WriteVolumeBlocks(grpc.ClientStreamingServer[WriteVolumeBlocksRequest, WriteVolumeBlocksResponse]) error
+	FreezeVmFilesystems(context.Context, *FreezeVmFilesystemsRequest) (*FreezeVmFilesystemsResponse, error)
+	// Instant recovery: the node builds a qcow2 overlay on a vault NBD export and boots it.
+	PrepareInstantRecovery(context.Context, *PrepareInstantRecoveryRequest) (*PrepareInstantRecoveryResponse, error)
+	// Copy overlay extents onto a cluster volume and leave that volume as the guest disk.
+	FinalizeInstantRecovery(context.Context, *FinalizeInstantRecoveryRequest) (*FinalizeInstantRecoveryResponse, error)
+	// Format, mount, and unmount an LVM or ZFS volume on the node that owns it.
+	FormatVolume(context.Context, *FormatVolumeRequest) (*FormatVolumeResponse, error)
+	MountVolume(context.Context, *MountVolumeRequest) (*MountVolumeResponse, error)
+	UnmountVolume(context.Context, *UnmountVolumeRequest) (*UnmountVolumeResponse, error)
 	// In-place LUKS over an existing plain RBD image (data-destructive; see destroy_data).
 	EncryptVolume(context.Context, *EncryptVolumeRequest) (*EncryptVolumeResponse, error)
 	CreateSnapshotPolicy(context.Context, *CreateSnapshotPolicyRequest) (*CreateSnapshotPolicyResponse, error)
@@ -1686,11 +2068,20 @@ type ControllerServer interface {
 	ApproveClusterUpdate(context.Context, *ApproveClusterUpdateRequest) (*ApproveClusterUpdateResponse, error)
 	CancelClusterUpdate(context.Context, *CancelClusterUpdateRequest) (*CancelClusterUpdateResponse, error)
 	RollbackClusterUpdate(context.Context, *RollbackClusterUpdateRequest) (*RollbackClusterUpdateResponse, error)
+	// Migrate guests off one node, then boot a staged kernel. Not part of apply.
+	RebootClusterUpdateNode(context.Context, *RebootClusterUpdateNodeRequest) (*RebootClusterUpdateNodeResponse, error)
 	// CephCluster — declarative cluster-scoped Ceph SAN configuration.
+	PlanCephCluster(context.Context, *PlanCephClusterRequest) (*PlanCephClusterResponse, error)
 	CreateCephCluster(context.Context, *CreateCephClusterRequest) (*CreateCephClusterResponse, error)
 	GetCephCluster(context.Context, *GetCephClusterRequest) (*GetCephClusterResponse, error)
 	ListCephClusters(context.Context, *ListCephClustersRequest) (*ListCephClustersResponse, error)
 	DeleteCephCluster(context.Context, *DeleteCephClusterRequest) (*DeleteCephClusterResponse, error)
+	// On-demand capacity from a live member (`ceph df`). Read-only.
+	GetCephClusterCapacity(context.Context, *GetCephClusterCapacityRequest) (*GetCephClusterCapacityResponse, error)
+	// Upstream Ceph Manager Dashboard login material stored by the controller.
+	// Ceph itself keeps only a password hash, so plaintext is served from kcore.
+	GetCephDashboardCredentials(context.Context, *GetCephDashboardCredentialsRequest) (*GetCephDashboardCredentialsResponse, error)
+	SetCephDashboardCredentials(context.Context, *SetCephDashboardCredentialsRequest) (*SetCephDashboardCredentialsResponse, error)
 	// SharedFilesystem (CephFS) — cluster-scoped POSIX file service on Ceph.
 	CreateSharedFilesystem(context.Context, *CreateSharedFilesystemRequest) (*CreateSharedFilesystemResponse, error)
 	GetSharedFilesystem(context.Context, *GetSharedFilesystemRequest) (*GetSharedFilesystemResponse, error)
@@ -1711,7 +2102,7 @@ type ControllerServer interface {
 	GrantOperatorRole(context.Context, *GrantOperatorRoleRequest) (*GrantOperatorRoleResponse, error)
 	RevokeOperatorRole(context.Context, *RevokeOperatorRoleRequest) (*RevokeOperatorRoleResponse, error)
 	IssueOperatorCert(context.Context, *IssueOperatorCertRequest) (*IssueOperatorCertResponse, error)
-	// Kubernetes cluster lifecycle, including the local volume provisioner.
+	// Kubernetes cluster lifecycle
 	PlanKubernetesCluster(context.Context, *PlanKubernetesClusterRequest) (*PlanKubernetesClusterResponse, error)
 	CreateKubernetesCluster(context.Context, *CreateKubernetesClusterRequest) (*CreateKubernetesClusterResponse, error)
 	UpdateKubernetesCluster(context.Context, *UpdateKubernetesClusterRequest) (*UpdateKubernetesClusterResponse, error)
@@ -1787,6 +2178,18 @@ func (UnimplementedControllerServer) DeleteNetwork(context.Context, *DeleteNetwo
 func (UnimplementedControllerServer) ListNetworks(context.Context, *ListNetworksRequest) (*ListNetworksResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListNetworks not implemented")
 }
+func (UnimplementedControllerServer) CreatePostgresql(context.Context, *CreatePostgresqlRequest) (*CreatePostgresqlResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreatePostgresql not implemented")
+}
+func (UnimplementedControllerServer) DeletePostgresql(context.Context, *DeletePostgresqlRequest) (*DeletePostgresqlResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeletePostgresql not implemented")
+}
+func (UnimplementedControllerServer) GetPostgresql(context.Context, *GetPostgresqlRequest) (*GetPostgresqlResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPostgresql not implemented")
+}
+func (UnimplementedControllerServer) ListPostgresqls(context.Context, *ListPostgresqlsRequest) (*ListPostgresqlsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListPostgresqls not implemented")
+}
 func (UnimplementedControllerServer) CreateSecurityGroup(context.Context, *CreateSecurityGroupRequest) (*CreateSecurityGroupResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateSecurityGroup not implemented")
 }
@@ -1810,6 +2213,21 @@ func (UnimplementedControllerServer) ListNodes(context.Context, *ListNodesReques
 }
 func (UnimplementedControllerServer) GetNode(context.Context, *GetNodeRequest) (*GetNodeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetNode not implemented")
+}
+func (UnimplementedControllerServer) ListGpus(context.Context, *ListGpusRequest) (*ListGpusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListGpus not implemented")
+}
+func (UnimplementedControllerServer) ListPciDevices(context.Context, *ListGpusRequest) (*ListGpusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListPciDevices not implemented")
+}
+func (UnimplementedControllerServer) ConfigureNodeVgpu(context.Context, *ConfigureNodeVgpuRequest) (*ConfigureNodeVgpuResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConfigureNodeVgpu not implemented")
+}
+func (UnimplementedControllerServer) GetNodeVgpu(context.Context, *GetNodeVgpuRequest) (*GetNodeVgpuResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetNodeVgpu not implemented")
+}
+func (UnimplementedControllerServer) RebootNode(context.Context, *RebootNodeRequest) (*RebootNodeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RebootNode not implemented")
 }
 func (UnimplementedControllerServer) CreateSshKey(context.Context, *CreateSshKeyRequest) (*CreateSshKeyResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateSshKey not implemented")
@@ -1852,6 +2270,12 @@ func (UnimplementedControllerServer) DeleteNode(context.Context, *DeleteNodeRequ
 }
 func (UnimplementedControllerServer) GetClusterHealth(context.Context, *GetClusterHealthRequest) (*GetClusterHealthResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetClusterHealth not implemented")
+}
+func (UnimplementedControllerServer) GetHaStatus(context.Context, *GetHaStatusRequest) (*GetHaStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetHaStatus not implemented")
+}
+func (UnimplementedControllerServer) ListHaEvents(context.Context, *ListHaEventsRequest) (*ListHaEventsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListHaEvents not implemented")
 }
 func (UnimplementedControllerServer) BackupCluster(context.Context, *BackupClusterRequest) (*BackupClusterResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method BackupCluster not implemented")
@@ -1952,6 +2376,39 @@ func (UnimplementedControllerServer) FlattenVolume(context.Context, *FlattenVolu
 func (UnimplementedControllerServer) ResizeVolume(context.Context, *ResizeVolumeRequest) (*ResizeVolumeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ResizeVolume not implemented")
 }
+func (UnimplementedControllerServer) ExposeVolumeSnapshot(context.Context, *ExposeVolumeSnapshotRequest) (*ExposeVolumeSnapshotResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExposeVolumeSnapshot not implemented")
+}
+func (UnimplementedControllerServer) UnexposeVolumeSnapshot(context.Context, *UnexposeVolumeSnapshotRequest) (*UnexposeVolumeSnapshotResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UnexposeVolumeSnapshot not implemented")
+}
+func (UnimplementedControllerServer) ListVolumeChangedExtents(context.Context, *ListVolumeChangedExtentsRequest) (*ListVolumeChangedExtentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListVolumeChangedExtents not implemented")
+}
+func (UnimplementedControllerServer) ReadVolumeBlocks(*ReadVolumeBlocksRequest, grpc.ServerStreamingServer[VolumeBlock]) error {
+	return status.Error(codes.Unimplemented, "method ReadVolumeBlocks not implemented")
+}
+func (UnimplementedControllerServer) WriteVolumeBlocks(grpc.ClientStreamingServer[WriteVolumeBlocksRequest, WriteVolumeBlocksResponse]) error {
+	return status.Error(codes.Unimplemented, "method WriteVolumeBlocks not implemented")
+}
+func (UnimplementedControllerServer) FreezeVmFilesystems(context.Context, *FreezeVmFilesystemsRequest) (*FreezeVmFilesystemsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method FreezeVmFilesystems not implemented")
+}
+func (UnimplementedControllerServer) PrepareInstantRecovery(context.Context, *PrepareInstantRecoveryRequest) (*PrepareInstantRecoveryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PrepareInstantRecovery not implemented")
+}
+func (UnimplementedControllerServer) FinalizeInstantRecovery(context.Context, *FinalizeInstantRecoveryRequest) (*FinalizeInstantRecoveryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method FinalizeInstantRecovery not implemented")
+}
+func (UnimplementedControllerServer) FormatVolume(context.Context, *FormatVolumeRequest) (*FormatVolumeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method FormatVolume not implemented")
+}
+func (UnimplementedControllerServer) MountVolume(context.Context, *MountVolumeRequest) (*MountVolumeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method MountVolume not implemented")
+}
+func (UnimplementedControllerServer) UnmountVolume(context.Context, *UnmountVolumeRequest) (*UnmountVolumeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UnmountVolume not implemented")
+}
 func (UnimplementedControllerServer) EncryptVolume(context.Context, *EncryptVolumeRequest) (*EncryptVolumeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method EncryptVolume not implemented")
 }
@@ -2003,6 +2460,12 @@ func (UnimplementedControllerServer) CancelClusterUpdate(context.Context, *Cance
 func (UnimplementedControllerServer) RollbackClusterUpdate(context.Context, *RollbackClusterUpdateRequest) (*RollbackClusterUpdateResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RollbackClusterUpdate not implemented")
 }
+func (UnimplementedControllerServer) RebootClusterUpdateNode(context.Context, *RebootClusterUpdateNodeRequest) (*RebootClusterUpdateNodeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RebootClusterUpdateNode not implemented")
+}
+func (UnimplementedControllerServer) PlanCephCluster(context.Context, *PlanCephClusterRequest) (*PlanCephClusterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PlanCephCluster not implemented")
+}
 func (UnimplementedControllerServer) CreateCephCluster(context.Context, *CreateCephClusterRequest) (*CreateCephClusterResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateCephCluster not implemented")
 }
@@ -2014,6 +2477,15 @@ func (UnimplementedControllerServer) ListCephClusters(context.Context, *ListCeph
 }
 func (UnimplementedControllerServer) DeleteCephCluster(context.Context, *DeleteCephClusterRequest) (*DeleteCephClusterResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteCephCluster not implemented")
+}
+func (UnimplementedControllerServer) GetCephClusterCapacity(context.Context, *GetCephClusterCapacityRequest) (*GetCephClusterCapacityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCephClusterCapacity not implemented")
+}
+func (UnimplementedControllerServer) GetCephDashboardCredentials(context.Context, *GetCephDashboardCredentialsRequest) (*GetCephDashboardCredentialsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCephDashboardCredentials not implemented")
+}
+func (UnimplementedControllerServer) SetCephDashboardCredentials(context.Context, *SetCephDashboardCredentialsRequest) (*SetCephDashboardCredentialsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetCephDashboardCredentials not implemented")
 }
 func (UnimplementedControllerServer) CreateSharedFilesystem(context.Context, *CreateSharedFilesystemRequest) (*CreateSharedFilesystemResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateSharedFilesystem not implemented")
@@ -2442,6 +2914,78 @@ func _Controller_ListNetworks_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_CreatePostgresql_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePostgresqlRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).CreatePostgresql(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_CreatePostgresql_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).CreatePostgresql(ctx, req.(*CreatePostgresqlRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_DeletePostgresql_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePostgresqlRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).DeletePostgresql(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_DeletePostgresql_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).DeletePostgresql(ctx, req.(*DeletePostgresqlRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetPostgresql_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPostgresqlRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetPostgresql(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_GetPostgresql_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetPostgresql(ctx, req.(*GetPostgresqlRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ListPostgresqls_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPostgresqlsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ListPostgresqls(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ListPostgresqls_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ListPostgresqls(ctx, req.(*ListPostgresqlsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Controller_CreateSecurityGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateSecurityGroupRequest)
 	if err := dec(in); err != nil {
@@ -2582,6 +3126,96 @@ func _Controller_GetNode_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ControllerServer).GetNode(ctx, req.(*GetNodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ListGpus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListGpusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ListGpus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ListGpus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ListGpus(ctx, req.(*ListGpusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ListPciDevices_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListGpusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ListPciDevices(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ListPciDevices_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ListPciDevices(ctx, req.(*ListGpusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ConfigureNodeVgpu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfigureNodeVgpuRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ConfigureNodeVgpu(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ConfigureNodeVgpu_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ConfigureNodeVgpu(ctx, req.(*ConfigureNodeVgpuRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetNodeVgpu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNodeVgpuRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetNodeVgpu(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_GetNodeVgpu_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetNodeVgpu(ctx, req.(*GetNodeVgpuRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_RebootNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RebootNodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).RebootNode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_RebootNode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).RebootNode(ctx, req.(*RebootNodeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2834,6 +3468,42 @@ func _Controller_GetClusterHealth_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ControllerServer).GetClusterHealth(ctx, req.(*GetClusterHealthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetHaStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetHaStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetHaStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_GetHaStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetHaStatus(ctx, req.(*GetHaStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ListHaEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListHaEventsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ListHaEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ListHaEvents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ListHaEvents(ctx, req.(*ListHaEventsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -3432,6 +4102,186 @@ func _Controller_ResizeVolume_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_ExposeVolumeSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExposeVolumeSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ExposeVolumeSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ExposeVolumeSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ExposeVolumeSnapshot(ctx, req.(*ExposeVolumeSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_UnexposeVolumeSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnexposeVolumeSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).UnexposeVolumeSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_UnexposeVolumeSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).UnexposeVolumeSnapshot(ctx, req.(*UnexposeVolumeSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ListVolumeChangedExtents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListVolumeChangedExtentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ListVolumeChangedExtents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ListVolumeChangedExtents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ListVolumeChangedExtents(ctx, req.(*ListVolumeChangedExtentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ReadVolumeBlocks_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ReadVolumeBlocksRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ControllerServer).ReadVolumeBlocks(m, &grpc.GenericServerStream[ReadVolumeBlocksRequest, VolumeBlock]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Controller_ReadVolumeBlocksServer = grpc.ServerStreamingServer[VolumeBlock]
+
+func _Controller_WriteVolumeBlocks_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ControllerServer).WriteVolumeBlocks(&grpc.GenericServerStream[WriteVolumeBlocksRequest, WriteVolumeBlocksResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Controller_WriteVolumeBlocksServer = grpc.ClientStreamingServer[WriteVolumeBlocksRequest, WriteVolumeBlocksResponse]
+
+func _Controller_FreezeVmFilesystems_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FreezeVmFilesystemsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).FreezeVmFilesystems(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_FreezeVmFilesystems_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).FreezeVmFilesystems(ctx, req.(*FreezeVmFilesystemsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_PrepareInstantRecovery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PrepareInstantRecoveryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).PrepareInstantRecovery(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_PrepareInstantRecovery_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).PrepareInstantRecovery(ctx, req.(*PrepareInstantRecoveryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_FinalizeInstantRecovery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FinalizeInstantRecoveryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).FinalizeInstantRecovery(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_FinalizeInstantRecovery_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).FinalizeInstantRecovery(ctx, req.(*FinalizeInstantRecoveryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_FormatVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FormatVolumeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).FormatVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_FormatVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).FormatVolume(ctx, req.(*FormatVolumeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_MountVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MountVolumeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).MountVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_MountVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).MountVolume(ctx, req.(*MountVolumeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_UnmountVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnmountVolumeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).UnmountVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_UnmountVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).UnmountVolume(ctx, req.(*UnmountVolumeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Controller_EncryptVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(EncryptVolumeRequest)
 	if err := dec(in); err != nil {
@@ -3738,6 +4588,42 @@ func _Controller_RollbackClusterUpdate_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_RebootClusterUpdateNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RebootClusterUpdateNodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).RebootClusterUpdateNode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_RebootClusterUpdateNode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).RebootClusterUpdateNode(ctx, req.(*RebootClusterUpdateNodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_PlanCephCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlanCephClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).PlanCephCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_PlanCephCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).PlanCephCluster(ctx, req.(*PlanCephClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Controller_CreateCephCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateCephClusterRequest)
 	if err := dec(in); err != nil {
@@ -3806,6 +4692,60 @@ func _Controller_DeleteCephCluster_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ControllerServer).DeleteCephCluster(ctx, req.(*DeleteCephClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetCephClusterCapacity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCephClusterCapacityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetCephClusterCapacity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_GetCephClusterCapacity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetCephClusterCapacity(ctx, req.(*GetCephClusterCapacityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetCephDashboardCredentials_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCephDashboardCredentialsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetCephDashboardCredentials(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_GetCephDashboardCredentials_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetCephDashboardCredentials(ctx, req.(*GetCephDashboardCredentialsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_SetCephDashboardCredentials_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetCephDashboardCredentialsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).SetCephDashboardCredentials(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_SetCephDashboardCredentials_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).SetCephDashboardCredentials(ctx, req.(*SetCephDashboardCredentialsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -4340,6 +5280,22 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Controller_ListNetworks_Handler,
 		},
 		{
+			MethodName: "CreatePostgresql",
+			Handler:    _Controller_CreatePostgresql_Handler,
+		},
+		{
+			MethodName: "DeletePostgresql",
+			Handler:    _Controller_DeletePostgresql_Handler,
+		},
+		{
+			MethodName: "GetPostgresql",
+			Handler:    _Controller_GetPostgresql_Handler,
+		},
+		{
+			MethodName: "ListPostgresqls",
+			Handler:    _Controller_ListPostgresqls_Handler,
+		},
+		{
 			MethodName: "CreateSecurityGroup",
 			Handler:    _Controller_CreateSecurityGroup_Handler,
 		},
@@ -4370,6 +5326,26 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetNode",
 			Handler:    _Controller_GetNode_Handler,
+		},
+		{
+			MethodName: "ListGpus",
+			Handler:    _Controller_ListGpus_Handler,
+		},
+		{
+			MethodName: "ListPciDevices",
+			Handler:    _Controller_ListPciDevices_Handler,
+		},
+		{
+			MethodName: "ConfigureNodeVgpu",
+			Handler:    _Controller_ConfigureNodeVgpu_Handler,
+		},
+		{
+			MethodName: "GetNodeVgpu",
+			Handler:    _Controller_GetNodeVgpu_Handler,
+		},
+		{
+			MethodName: "RebootNode",
+			Handler:    _Controller_RebootNode_Handler,
 		},
 		{
 			MethodName: "CreateSshKey",
@@ -4426,6 +5402,14 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetClusterHealth",
 			Handler:    _Controller_GetClusterHealth_Handler,
+		},
+		{
+			MethodName: "GetHaStatus",
+			Handler:    _Controller_GetHaStatus_Handler,
+		},
+		{
+			MethodName: "ListHaEvents",
+			Handler:    _Controller_ListHaEvents_Handler,
 		},
 		{
 			MethodName: "BackupCluster",
@@ -4560,6 +5544,42 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Controller_ResizeVolume_Handler,
 		},
 		{
+			MethodName: "ExposeVolumeSnapshot",
+			Handler:    _Controller_ExposeVolumeSnapshot_Handler,
+		},
+		{
+			MethodName: "UnexposeVolumeSnapshot",
+			Handler:    _Controller_UnexposeVolumeSnapshot_Handler,
+		},
+		{
+			MethodName: "ListVolumeChangedExtents",
+			Handler:    _Controller_ListVolumeChangedExtents_Handler,
+		},
+		{
+			MethodName: "FreezeVmFilesystems",
+			Handler:    _Controller_FreezeVmFilesystems_Handler,
+		},
+		{
+			MethodName: "PrepareInstantRecovery",
+			Handler:    _Controller_PrepareInstantRecovery_Handler,
+		},
+		{
+			MethodName: "FinalizeInstantRecovery",
+			Handler:    _Controller_FinalizeInstantRecovery_Handler,
+		},
+		{
+			MethodName: "FormatVolume",
+			Handler:    _Controller_FormatVolume_Handler,
+		},
+		{
+			MethodName: "MountVolume",
+			Handler:    _Controller_MountVolume_Handler,
+		},
+		{
+			MethodName: "UnmountVolume",
+			Handler:    _Controller_UnmountVolume_Handler,
+		},
+		{
 			MethodName: "EncryptVolume",
 			Handler:    _Controller_EncryptVolume_Handler,
 		},
@@ -4628,6 +5648,14 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Controller_RollbackClusterUpdate_Handler,
 		},
 		{
+			MethodName: "RebootClusterUpdateNode",
+			Handler:    _Controller_RebootClusterUpdateNode_Handler,
+		},
+		{
+			MethodName: "PlanCephCluster",
+			Handler:    _Controller_PlanCephCluster_Handler,
+		},
+		{
 			MethodName: "CreateCephCluster",
 			Handler:    _Controller_CreateCephCluster_Handler,
 		},
@@ -4642,6 +5670,18 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteCephCluster",
 			Handler:    _Controller_DeleteCephCluster_Handler,
+		},
+		{
+			MethodName: "GetCephClusterCapacity",
+			Handler:    _Controller_GetCephClusterCapacity_Handler,
+		},
+		{
+			MethodName: "GetCephDashboardCredentials",
+			Handler:    _Controller_GetCephDashboardCredentials_Handler,
+		},
+		{
+			MethodName: "SetCephDashboardCredentials",
+			Handler:    _Controller_SetCephDashboardCredentials_Handler,
 		},
 		{
 			MethodName: "CreateSharedFilesystem",
@@ -4749,6 +5789,16 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "AttachVmConsole",
 			Handler:       _Controller_AttachVmConsole_Handler,
 			ServerStreams: true,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "ReadVolumeBlocks",
+			Handler:       _Controller_ReadVolumeBlocks_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "WriteVolumeBlocks",
+			Handler:       _Controller_WriteVolumeBlocks_Handler,
 			ClientStreams: true,
 		},
 	},
