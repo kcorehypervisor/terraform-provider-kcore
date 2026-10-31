@@ -32,6 +32,11 @@ service Controller {
   rpc CreateNetwork(CreateNetworkRequest) returns (CreateNetworkResponse);
   rpc DeleteNetwork(DeleteNetworkRequest) returns (DeleteNetworkResponse);
   rpc ListNetworks(ListNetworksRequest) returns (ListNetworksResponse);
+  // One NixOS services.postgresql database per node. v1 is a single database.
+  rpc CreatePostgresql(CreatePostgresqlRequest) returns (CreatePostgresqlResponse);
+  rpc DeletePostgresql(DeletePostgresqlRequest) returns (DeletePostgresqlResponse);
+  rpc GetPostgresql(GetPostgresqlRequest) returns (GetPostgresqlResponse);
+  rpc ListPostgresqls(ListPostgresqlsRequest) returns (ListPostgresqlsResponse);
   rpc CreateSecurityGroup(CreateSecurityGroupRequest) returns (CreateSecurityGroupResponse);
   rpc GetSecurityGroup(GetSecurityGroupRequest) returns (GetSecurityGroupResponse);
   rpc ListSecurityGroups(ListSecurityGroupsRequest) returns (ListSecurityGroupsResponse);
@@ -42,6 +47,15 @@ service Controller {
   // Node operations
   rpc ListNodes(ListNodesRequest) returns (ListNodesResponse);
   rpc GetNode(GetNodeRequest) returns (GetNodeResponse);
+  // GPUs reported by node agents. Names (radeon0) are per node.
+  rpc ListGpus(ListGpusRequest) returns (ListGpusResponse);
+  // Full PCI inventory: AI GPUs, NICs, NVMe, and raw groups.
+  rpc ListPciDevices(ListGpusRequest) returns (ListGpusResponse);
+  // Stage the Virtual GPU Manager on a node and render ch-vm.vgpu.
+  rpc ConfigureNodeVgpu(ConfigureNodeVgpuRequest) returns (ConfigureNodeVgpuResponse);
+  rpc GetNodeVgpu(GetNodeVgpuRequest) returns (GetNodeVgpuResponse);
+  // Reboot a node. Refused while it still has running VMs unless force is set.
+  rpc RebootNode(RebootNodeRequest) returns (RebootNodeResponse);
 
   // SSH key management
   rpc CreateSshKey(CreateSshKeyRequest) returns (CreateSshKeyResponse);
@@ -75,6 +89,9 @@ service Controller {
   // Summary of node readiness, VM placement, certificate expiry, and
   // replication conflicts. Read-only.
   rpc GetClusterHealth(GetClusterHealthRequest) returns (GetClusterHealthResponse);
+  // Failover lease, admission headroom, and the loss deadline.
+  rpc GetHaStatus(GetHaStatusRequest) returns (GetHaStatusResponse);
+  rpc ListHaEvents(ListHaEventsRequest) returns (ListHaEventsResponse);
   // Consistent SQLite snapshot of the controller database.
   rpc BackupCluster(BackupClusterRequest) returns (BackupClusterResponse);
   // Replace the controller database from a snapshot. `confirm` must be true.
@@ -118,7 +135,7 @@ service Controller {
   // and per-node block inventory from each node agent (lsblk).
   rpc GetStorageOverview(GetStorageOverviewRequest) returns (GetStorageOverviewResponse);
 
-  // Volume inventory and lifecycle (Ceph RBD; many volumes per VM).
+  // Volume inventory and lifecycle. Ceph RBD, plus LVM and ZFS volumes on one node.
   rpc ListVolumes(ListVolumesRequest) returns (ListVolumesResponse);
   rpc CreateVolume(CreateVolumeRequest) returns (CreateVolumeResponse);
   rpc GetVolume(GetVolumeRequest) returns (GetVolumeResponse);
@@ -131,13 +148,29 @@ service Controller {
   rpc GetVmOperation(GetVmOperationRequest) returns (GetVmOperationResponse);
   rpc CancelVmOperation(CancelVmOperationRequest) returns (CancelVmOperationResponse);
 
-  // Volume snapshots (Ceph RBD crash-consistent).
+  // Volume snapshots (Ceph RBD, ZFS, LVM thin).
   rpc CreateVolumeSnapshot(CreateVolumeSnapshotRequest) returns (CreateVolumeSnapshotResponse);
   rpc ListVolumeSnapshots(ListVolumeSnapshotsRequest) returns (ListVolumeSnapshotsResponse);
   rpc DeleteVolumeSnapshot(DeleteVolumeSnapshotRequest) returns (DeleteVolumeSnapshotResponse);
   rpc RestoreVolume(RestoreVolumeRequest) returns (RestoreVolumeResponse);
   rpc FlattenVolume(FlattenVolumeRequest) returns (FlattenVolumeResponse);
   rpc ResizeVolume(ResizeVolumeRequest) returns (ResizeVolumeResponse);
+
+  // Snapshot export hooks (docs/backup.md). Controllers proxy to NodeStorage.
+  rpc ExposeVolumeSnapshot(ExposeVolumeSnapshotRequest) returns (ExposeVolumeSnapshotResponse);
+  rpc UnexposeVolumeSnapshot(UnexposeVolumeSnapshotRequest) returns (UnexposeVolumeSnapshotResponse);
+  rpc ListVolumeChangedExtents(ListVolumeChangedExtentsRequest) returns (ListVolumeChangedExtentsResponse);
+  rpc ReadVolumeBlocks(ReadVolumeBlocksRequest) returns (stream VolumeBlock);
+  rpc WriteVolumeBlocks(stream WriteVolumeBlocksRequest) returns (WriteVolumeBlocksResponse);
+  rpc FreezeVmFilesystems(FreezeVmFilesystemsRequest) returns (FreezeVmFilesystemsResponse);
+  // Instant recovery: the node builds a qcow2 overlay on a vault NBD export and boots it.
+  rpc PrepareInstantRecovery(PrepareInstantRecoveryRequest) returns (PrepareInstantRecoveryResponse);
+  // Copy overlay extents onto a cluster volume and leave that volume as the guest disk.
+  rpc FinalizeInstantRecovery(FinalizeInstantRecoveryRequest) returns (FinalizeInstantRecoveryResponse);
+  // Format, mount, and unmount an LVM or ZFS volume on the node that owns it.
+  rpc FormatVolume(FormatVolumeRequest) returns (FormatVolumeResponse);
+  rpc MountVolume(MountVolumeRequest) returns (MountVolumeResponse);
+  rpc UnmountVolume(UnmountVolumeRequest) returns (UnmountVolumeResponse);
   // In-place LUKS over an existing plain RBD image (data-destructive; see destroy_data).
   rpc EncryptVolume(EncryptVolumeRequest) returns (EncryptVolumeResponse);
 
@@ -169,12 +202,24 @@ service Controller {
   rpc ApproveClusterUpdate(ApproveClusterUpdateRequest) returns (ApproveClusterUpdateResponse);
   rpc CancelClusterUpdate(CancelClusterUpdateRequest) returns (CancelClusterUpdateResponse);
   rpc RollbackClusterUpdate(RollbackClusterUpdateRequest) returns (RollbackClusterUpdateResponse);
+  // Migrate guests off one node, then boot a staged kernel. Not part of apply.
+  rpc RebootClusterUpdateNode(RebootClusterUpdateNodeRequest) returns (RebootClusterUpdateNodeResponse);
 
   // CephCluster — declarative cluster-scoped Ceph SAN configuration.
+  rpc PlanCephCluster(PlanCephClusterRequest) returns (PlanCephClusterResponse);
   rpc CreateCephCluster(CreateCephClusterRequest) returns (CreateCephClusterResponse);
   rpc GetCephCluster(GetCephClusterRequest) returns (GetCephClusterResponse);
   rpc ListCephClusters(ListCephClustersRequest) returns (ListCephClustersResponse);
   rpc DeleteCephCluster(DeleteCephClusterRequest) returns (DeleteCephClusterResponse);
+  // On-demand capacity from a live member (`ceph df`). Read-only.
+  rpc GetCephClusterCapacity(GetCephClusterCapacityRequest)
+      returns (GetCephClusterCapacityResponse);
+  // Upstream Ceph Manager Dashboard login material stored by the controller.
+  // Ceph itself keeps only a password hash, so plaintext is served from kcore.
+  rpc GetCephDashboardCredentials(GetCephDashboardCredentialsRequest)
+      returns (GetCephDashboardCredentialsResponse);
+  rpc SetCephDashboardCredentials(SetCephDashboardCredentialsRequest)
+      returns (SetCephDashboardCredentialsResponse);
 
   // SharedFilesystem (CephFS) — cluster-scoped POSIX file service on Ceph.
   rpc CreateSharedFilesystem(CreateSharedFilesystemRequest) returns (CreateSharedFilesystemResponse);
@@ -198,8 +243,8 @@ service Controller {
   rpc GrantOperatorRole(GrantOperatorRoleRequest) returns (GrantOperatorRoleResponse);
   rpc RevokeOperatorRole(RevokeOperatorRoleRequest) returns (RevokeOperatorRoleResponse);
   rpc IssueOperatorCert(IssueOperatorCertRequest) returns (IssueOperatorCertResponse);
-
-  // Kubernetes cluster lifecycle, including the local volume provisioner.
+  
+  // Kubernetes cluster lifecycle
   rpc PlanKubernetesCluster(PlanKubernetesClusterRequest) returns (PlanKubernetesClusterResponse);
   rpc CreateKubernetesCluster(CreateKubernetesClusterRequest) returns (CreateKubernetesClusterResponse);
   rpc UpdateKubernetesCluster(UpdateKubernetesClusterRequest) returns (UpdateKubernetesClusterResponse);
@@ -234,10 +279,134 @@ message HeartbeatRequest {
   NodeUsage usage = 2;
   int32 cert_expiry_days = 3; // Days until node TLS certificate expires
   string luks_method = 4;     // "tpm2", "key-file", or "" (not reported)
+  // Present only when the node agent scanned PCI. Empty with gpus_reported
+  // means the node has no PCI devices. Omitted (gpus_reported false) leaves
+  // inventory alone. Rows are GPUs, NICs, NVMe, and raw groups; see GpuInfo.kind.
+  repeated GpuInfo gpus = 5;
+  bool gpus_reported = 6;
+  // Product version from /etc/kcore/version when the node has one.
+  string kcore_version = 7;
+  // Nix store path of the booted system (`/run/booted-system`).
+  string booted_generation = 8;
+  // Nix store path of the current system profile.
+  string nixos_generation = 9;
+  // Includes "nixos-generation" once the agent can stage a host flake.
+  repeated string update_capabilities = 10;
+  // Controller schema this node opened. 0 on a worker.
+  int32 schema_version = 11;
+  string nixpkgs_rev = 12;
+  // Actions this host took while it could not reach a controller, or while
+  // a guest heartbeat went stale. "isolation-poweroff:<vm>" and
+  // "monitor-restart:<vm>".
+  repeated string ha_actions = 13;
+  // ok, or degraded when this host's own OSDs are down while the agent is up.
+  string host_health = 14;
+  string host_health_reason = 15;
+}
+
+message GpuInfo {
+  string name = 1;            // radeon0, nic0, nvme0, or a raw BDF
+  string family = 2;          // radeon, nvidia, intel, accel, nic, nvme, raw
+  string model = 3;           // AMD 1002:744c
+  string address = 4;         // primary function, 0000:03:00.0
+  repeated string pci_devices = 5;
+  int32 iommu_group = 6;      // -1 when the device has no IOMMU group
+  bool assignable = 7;
+  string blocked_reason = 8;
+  string node_id = 9;         // set by the controller when listing
+  string assigned_vm = 10;    // VM name when this device is in use
+  string kind = 11;           // gpu, nic, nvme, raw; empty means gpu
+  string role = 12;           // compute (AI), platform (host iGPU), passthrough
+  string class_code = 13;     // 0x030200
+  string characteristics = 14; // purpose=ai class=... vendor=... iommu-companions=...
+  string driver = 15;
+  // Card name for a slice (nvidia0). Empty on a whole device.
+  string parent = 16;
+  // Current vGPU type on a slice (A2-4C). Empty when none is programmed.
+  string profile = 17;
+  // Types this slice can take now.
+  repeated string profiles = 18;
+}
+
+message ListGpusRequest {
+  string node_id = 1; // empty lists every node
+}
+
+message ListGpusResponse {
+  repeated GpuInfo gpus = 1;
+}
+
+message VgpuManager {
+  // HTTP(S) URL of the NVIDIA Virtual GPU Manager .run file.
+  string url = 1;
+  string sha256 = 2;
+  string file = 3;
+  string version = 4;
+}
+
+message ConfigureNodeVgpuRequest {
+  string node_id = 1;
+  bool enabled = 2;
+  // Physical functions that stay on the NVIDIA host driver, e.g. 0000:61:00.0.
+  repeated string host_cards = 3;
+  // 0 asks sriov-manage for every function the card supports.
+  int32 num_vfs = 4;
+  VgpuManager manager = 5;
+}
+
+message ConfigureNodeVgpuResponse {
+  bool success = 1;
+  string message = 2;
+  // The node's kernel has no IOMMU groups yet, or the card is still on nouveau.
+  bool reboot_required = 3;
+  string store_path = 4;
+}
+
+message GetNodeVgpuRequest {
+  string node_id = 1;
+}
+
+message GetNodeVgpuResponse {
+  bool enabled = 1;
+  repeated string host_cards = 2;
+  int32 num_vfs = 3;
+  string manager_file = 4;
+  string manager_sha256 = 5;
+  string manager_version = 6;
+  string staged_store_path = 7;
+}
+
+message RebootNodeRequest {
+  string node_id = 1;
+  // Reboot even when the node still has a VM whose desired state is running.
+  bool force = 2;
+}
+
+message RebootNodeResponse {
+  bool success = 1;
+  string message = 2;
 }
 
 message HeartbeatResponse {
   bool success = 1;
+  // VM names (the unit and socket name) the controller still places on this
+  // node. Meaningful only when assignment_confirmed is true; an older
+  // controller leaves both empty.
+  repeated string assigned_vm_ids = 2;
+  bool assignment_confirmed = 3;
+  // Guest-heartbeat restarts the node should perform. restart_after_secs
+  // of 0 means monitoring is off for that VM.
+  repeated VmMonitor vm_monitors = 4;
+  // Guests this host must mask before the controller lifts its fence.
+  // A reinstall no longer lists them in vm-placement, so the agent cannot
+  // discover the names locally. Empty when no fence is held. An older
+  // agent ignores the field and its fence stays until it reports the masks.
+  repeated string fence_vm_ids = 5;
+}
+
+message VmMonitor {
+  string vm_name = 1;
+  int32 restart_after_secs = 2;
 }
 
 message SyncVmStateRequest {
@@ -351,6 +520,16 @@ message CreateVmRequest {
   string target_dc = 11;    // Datacenter preference (optional; controller picks any DC if empty)
   repeated string node_labels = 12; // required node labels, e.g. "dc=dc-a"
   string anti_affinity = 13; // HA group: do not colocate two VMs with the same value
+  // high, medium (default), or low. Failover restarts higher priorities first.
+  string restart_priority = 14;
+  // ZFS only. The node that receives asynchronous replicas of this VM.
+  string replica_node = 15;
+  int32 replica_interval_secs = 16;
+  // off (default) or restart. Restart needs a guest heartbeat file.
+  string vm_monitoring = 17;
+  int32 vm_monitoring_secs = 18;
+  // Place the VM even when it would leave a host failure unabsorbable.
+  bool ignore_admission_control = 19;
 }
 
 message CreateVmResponse {
@@ -368,6 +547,15 @@ message UpdateVmRequest {
   int64 memory_bytes = 4;   // New memory (0 = no change)
   // Keys merged into the stored VM label map. Empty leaves labels unchanged.
   map<string, string> labels = 5;
+  // Whole-GPU selectors. Empty leaves the stored assignment unchanged.
+  // The VM must be stopped. Mutually exclusive with vgpus.
+  repeated string gpus = 6;
+  // vGPU slice selectors (A2-4C, nvidia0=A2-4C). Empty leaves the stored
+  // list unchanged. The VM must be stopped.
+  repeated string vgpus = 7;
+  // Raw PCI functions. Empty leaves the stored list unchanged. The VM must
+  // be stopped. Mutually exclusive with gpus and vgpus.
+  repeated string pci_devices = 8;
 }
 
 message UpdateVmResponse {
@@ -413,7 +601,14 @@ message GetVmResponse {
   VmStatus status = 2;
   string node_id = 3;  // Which node it's on
   string assigned_ip = 4; // Controller-assigned VM IP (static/reserved when available)
+  // Cheap GuestOps signal: true when the guest answered an SSH probe, or when
+  // the VM is running and already has an assigned IP and no admin client is up.
   bool guest_reachable = 5;
+  string ha_protection = 6;
+  string restart_priority = 7;
+  string replica_node = 8;
+  int32 replica_interval_secs = 9;
+  string vm_monitoring = 10;
 }
 
 message ListVmsRequest {
@@ -561,6 +756,59 @@ message NetworkInfo {
   bool east_west_firewall = 13;
 }
 
+// A single PostgreSQL database realized by the NixOS services.postgresql module
+// (pkgs.postgresql or a pinned major). v1 allows one instance per node and
+// does not open TCP; clients use the local Unix socket.
+message PostgresqlInfo {
+  string name = 1;
+  string database = 2;
+  string package = 3;
+  int32 port = 4;
+  string node_id = 5;
+}
+
+message CreatePostgresqlRequest {
+  string name = 1;
+  string database = 2;  // empty uses name when name is a PostgreSQL identifier
+  string package = 3;   // empty selects pkgs.postgresql
+  int32 port = 4;       // 0 selects 5432
+  string target_node = 5;
+}
+
+message CreatePostgresqlResponse {
+  bool success = 1;
+  string message = 2;
+  string node_id = 3;
+  ApplyAction action = 4;
+  repeated string changed_fields = 5;
+  PostgresqlInfo postgresql = 6;
+}
+
+message DeletePostgresqlRequest {
+  string name = 1;
+}
+
+message DeletePostgresqlResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetPostgresqlRequest {
+  string name = 1;
+}
+
+message GetPostgresqlResponse {
+  PostgresqlInfo postgresql = 1;
+}
+
+message ListPostgresqlsRequest {
+  string target_node = 1;
+}
+
+message ListPostgresqlsResponse {
+  repeated PostgresqlInfo postgresqls = 1;
+}
+
 enum SecurityGroupTargetKind {
   SECURITY_GROUP_TARGET_KIND_UNSPECIFIED = 0;
   SECURITY_GROUP_TARGET_KIND_VM = 1;
@@ -658,6 +906,18 @@ message VmInfo {
   string storage_backend = 8;   // filesystem, lvm, zfs
   int64 storage_size_bytes = 9; // Provisioned volume size
   map<string, string> labels = 10;
+  // protected, async, or unprotected. Derived from storage; empty on a
+  // heartbeat sync from a node.
+  string ha_protection = 11;
+  string restart_priority = 12;
+  string replica_node = 13;
+  int32 replica_interval_secs = 14;
+  // Unix seconds the guest last reported in. 0 when the node has no sample.
+  int64 guest_heartbeat_unix = 15;
+  // Whole-GPU names assigned to this VM.
+  repeated string gpus = 16;
+  // vGPU bindings stored as name=profile.
+  repeated string vgpus = 17;
 }
 
 // Node Operations
@@ -683,6 +943,12 @@ message NodeInfo {
   int32 cert_expiry_days = 12; // Days until node TLS certificate expires (-1 = unknown)
   string luks_method = 13;     // "tpm2", "key-file", or "" (unknown/not reported)
   string dc_id = 14;           // Datacenter identifier (e.g., "DC1", "DC2")
+  string kcore_version = 15;
+  string booted_generation = 16;
+  string nixos_generation = 17;
+  repeated string update_capabilities = 18;
+  int32 schema_version = 19;
+  string nixpkgs_rev = 20;
 }
 
 message GetNodeRequest {
@@ -705,11 +971,18 @@ message VmSpec {
   string storage_backend = 7;   // filesystem, lvm, zfs
   int64 storage_size_bytes = 8; // Provisioned volume size
   VmDesiredState desired_state = 9; // declarative desired state (running|stopped)
-  // PCI addresses and named devices. Empty leaves a stored list unchanged.
+  // PCI addresses to pass through (VFIO). Canonical form is 0000:03:00.0.
+  // Every function in the IOMMU group must be listed. Empty leaves a stored
+  // list unchanged on apply.
   repeated string pci_devices = 10;
+  // Named devices: GPU (radeon0), NIC (nic0), NVMe (nvme0), or a family
+  // (radeon, nic, nvme) meaning the first free device of that family.
+  // GPUs are AI compute devices. Empty leaves a stored assignment unchanged.
   repeated string gpus = 11;
-  // VM labels. Example: "kcore-vault/restore" = "<job>".
   map<string, string> labels = 12;
+  // NVIDIA vGPU slices. A profile is always present: A2-4C, nvidia0=A2-4C,
+  // or nvidia0/3=A2-4C. Empty leaves a stored list unchanged.
+  repeated string vgpus = 13;
 }
 
 message Disk {
@@ -920,6 +1193,13 @@ message MigrateVmRequest {
   string target_node = 2;
   // When true, fall back to cold reassignment (drain-style) if live migrate fails.
   bool allow_cold_fallback = 3;
+  bool ignore_admission_control = 6;
+  // Destination devices. Empty picks a free device of the same family for
+  // each named device the VM has now (a radeon on the source becomes a free
+  // radeon on the target). Ignored for VMs with no PCI devices.
+  repeated string gpus = 4;
+  // Destination vGPU slices. Empty takes a free slice of the same profile.
+  repeated string vgpus = 5;
 }
 
 message MigrateVmResponse {
@@ -1069,6 +1349,51 @@ message GetClusterHealthResponse {
   int32 replication_conflicts = 8;
   int32 certificates_expiring_soon = 9;
   repeated string conditions = 10;
+  // How many host failures admission control can currently absorb. 0 when
+  // it is off, not applicable, or the placement does not fit.
+  int32 host_failures_tolerated = 11;
+  // sufficient, insufficient, disabled, or not-applicable.
+  string failover_capacity = 12;
+  int64 failover_memory_headroom_bytes = 13;
+  string ha_lease_holder = 14;
+  int64 ha_lease_term = 15;
+  int32 unprotected_vms_on_lost_nodes = 16;
+}
+
+message GetHaStatusRequest {}
+
+message GetHaStatusResponse {
+  bool enabled = 1;
+  bool acting = 2;
+  string lease_holder = 3;
+  int64 lease_term = 4;
+  int64 lease_expires_at_ms = 5;
+  int32 node_timeout_secs = 6;
+  int32 detect_interval_secs = 7;
+  string isolation_response = 8;
+  int32 host_failures_to_tolerate = 9;
+  string failover_capacity = 10;
+  int64 memory_headroom_bytes = 11;
+  string controller_id = 12;
+}
+
+message ListHaEventsRequest {
+  string node_id = 1;
+  string vm_id = 2;
+  int32 limit = 3;
+}
+
+message HaEvent {
+  int64 id = 1;
+  string node_id = 2;
+  string vm_id = 3;
+  string phase = 4;
+  string detail = 5;
+  string created_at = 6;
+}
+
+message ListHaEventsResponse {
+  repeated HaEvent events = 1;
 }
 
 message BackupClusterRequest {}
@@ -1216,6 +1541,7 @@ enum OperatorRoleKind {
   OPERATOR_ROLE_KIND_READ_ONLY = 1;
   OPERATOR_ROLE_KIND_VM_ADMIN = 2;
   OPERATOR_ROLE_KIND_CLUSTER_ADMIN = 3;
+  OPERATOR_ROLE_KIND_BACKUP_OPERATOR = 4;
 }
 
 message Operator {
@@ -1419,6 +1745,9 @@ message GetStorageOverviewResponse {
   int32 nodes_luks_unknown = 9;
   int32 total_block_devices = 10;
   repeated NodeStorageOverview nodes = 11;
+  // Nodes whose VM data plane is Ceph. Controllers that predate this field
+  // counted those nodes as unspecified.
+  int32 backend_ceph_nodes = 12;
 }
 
 // Volume inventory
@@ -1454,19 +1783,26 @@ message VolumeInfo {
   string guest_checked_at = 18;
   // Host-side LUKS over RBD (E2). Transparent to the guest block device.
   bool encrypted = 19;
+  // Set for an LVM or ZFS volume mounted on its node.
+  string mount_point = 20;
+  string fs_type = 21;
 }
 
 message CreateVolumeRequest {
   string name = 1;
   int64 size_bytes = 2;
-  string storage_class = 3; // ceph
-  // Optional VM id or name to attach immediately (VM must be stopped).
+  string storage_class = 3; // ceph, lvm, or zfs. Empty means ceph.
+  // Optional VM id or name to attach immediately (Ceph only; VM must be stopped).
   string vm = 4;
   string guest_format_json = 5;
-  // Optional snapshot id or name to clone from (size_bytes ignored when set).
+  // Optional snapshot id or name to clone from (Ceph only; size_bytes ignored when set).
   string from_snapshot = 6;
-  // Format LUKS on the RBD image (host dm-crypt). Immutable after create.
+  // Format LUKS on the RBD image (host dm-crypt). Immutable after create. Ceph only.
   bool encrypt = 7;
+  // Node id. Required for lvm and zfs. The node's storage backend must match storage_class.
+  string node = 8;
+  // LVM logical volume or ZFS zvol name. Empty keeps the kcore- prefix.
+  string volume_name = 9;
 }
 
 message CreateVolumeResponse {
@@ -1644,14 +1980,158 @@ message DeleteSnapshotPolicyResponse {
   string message = 2;
 }
 
+message ExposeVolumeSnapshotRequest {
+  string volume_name = 1;
+  string snapshot_name = 2;
+  int32 lease_seconds = 3;
+}
+
+message ExposeVolumeSnapshotResponse {
+  string lease_id = 1;
+  string node_id = 2;
+  string node_address = 3;
+  string device_path = 4;
+  int64 size_bytes = 5;
+  int32 block_size = 6;
+}
+
+message UnexposeVolumeSnapshotRequest { string lease_id = 1; }
+message UnexposeVolumeSnapshotResponse {}
+
+message VolumeExtent {
+  int64 offset = 1;
+  int64 length = 2;
+}
+
+message ListVolumeChangedExtentsRequest {
+  string volume_name = 1;
+  string from_snapshot = 2;
+  string to_snapshot = 3;
+}
+
+message ListVolumeChangedExtentsResponse {
+  repeated VolumeExtent extents = 1;
+  bool supported = 2;
+  string source = 3;
+}
+
+message ReadVolumeBlocksRequest {
+  string lease_id = 1;
+  repeated VolumeExtent extents = 2;
+  int32 block_size = 3;
+  bool elide_zero_blocks = 4;
+}
+
+message VolumeBlock {
+  int64 offset = 1;
+  oneof body {
+    bytes data = 2;
+    int64 zero_length = 3;
+  }
+}
+
+message WriteVolumeBlocksRequest {
+  oneof msg {
+    WriteVolumeBlocksTarget target = 1;
+    VolumeBlock block = 2;
+  }
+}
+
+message WriteVolumeBlocksTarget {
+  string volume_name = 1;
+  bool punch_zero_runs = 2;
+}
+
+message WriteVolumeBlocksResponse {
+  int64 bytes_written = 1;
+  int64 blocks_written = 2;
+  int64 zero_runs = 3;
+}
+
+message FreezeVmFilesystemsRequest {
+  string vm_name = 1;
+  bool freeze = 2;
+  int32 timeout_ms = 3;
+  // Shell run in the guest over GuestOps SSH before fsfreeze. Empty skips it.
+  // The script must be idempotent. A non-zero exit fails the freeze.
+  string pre_script = 4;
+  // Shell run after fsfreeze (or after unfreeze when freeze is false).
+  string post_script = 5;
+}
+
+message FreezeVmFilesystemsResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message PrepareInstantRecoveryRequest {
+  string node = 1;
+  string nbd_url = 2;
+  string vm_name = 3;
+  int64 memory_bytes = 4;
+  int32 vcpus = 5;
+}
+message PrepareInstantRecoveryResponse {
+  bool success = 1;
+  string message = 2;
+  string disk_path = 3;
+}
+message FinalizeInstantRecoveryRequest {
+  string node = 1;
+  string overlay_path = 2;
+  string volume_name = 3;
+  string vm_name = 4;
+}
+message FinalizeInstantRecoveryResponse {
+  bool success = 1;
+  string message = 2;
+  int64 bytes_written = 3;
+  string volume_path = 4;
+}
+
 message ResizeVolumeRequest {
   string name = 1; // volume id or name
   int64 size_bytes = 2;
-  // When true and VM is running with SSH, attempt guest growpart/resize.
+  // When true and VM is running with SSH, attempt guest growpart/resize. Ceph only.
   bool grow_filesystem = 3;
-  // Shrink only when volume is detached; runs `rbd resize --allow-shrink` (destroys
-  // tail of the image). Refused on attached/running workloads.
+  // Shrink a detached Ceph image, or an unmounted ext4 LVM/ZFS volume.
   bool allow_shrink = 4;
+}
+
+message FormatVolumeRequest {
+  string name = 1; // volume id or name
+  string fs_type = 2; // ext4 or xfs
+  bool force = 3; // replace an existing filesystem
+}
+
+message FormatVolumeResponse {
+  bool success = 1;
+  string message = 2;
+  VolumeInfo volume = 3;
+}
+
+message MountVolumeRequest {
+  string name = 1; // volume id or name
+  string mount_point = 2; // under /var/lib/kcore or /mnt/kcore
+  string fs_type = 3; // empty uses the filesystem already on the volume
+  bool persistent = 4; // systemd mount unit
+}
+
+message MountVolumeResponse {
+  bool success = 1;
+  string message = 2;
+  VolumeInfo volume = 3;
+}
+
+message UnmountVolumeRequest {
+  string name = 1; // volume id or name
+  bool persistent = 2; // also remove the systemd mount unit
+}
+
+message UnmountVolumeResponse {
+  bool success = 1;
+  string message = 2;
+  VolumeInfo volume = 3;
 }
 
 message ResizeVolumeResponse {
@@ -1886,6 +2366,7 @@ enum NodeUpdatePhase {
   NODE_UPDATE_PHASE_FAILED = 4;
   NODE_UPDATE_PHASE_CANCELLED = 5;
   NODE_UPDATE_PHASE_ROLLING_BACK = 6;
+  NODE_UPDATE_PHASE_REBOOT_REQUIRED = 7;
 }
 
 message NodeUpdateStatus {
@@ -1973,6 +2454,16 @@ message RollbackClusterUpdateResponse {
   ClusterUpdate cluster_update = 2;
 }
 
+message RebootClusterUpdateNodeRequest {
+  string name = 1;
+  string node_id = 2;
+}
+
+message RebootClusterUpdateNodeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
 // --- CephCluster ----------------------------------------------------------------------------
 
 enum CephClusterPhase {
@@ -2024,6 +2515,25 @@ message CephCluster {
   google.protobuf.Timestamp updated_at = 6;
 }
 
+message PlanCephClusterRequest { CephCluster ceph_cluster = 1; }
+message CephNodePlanResult {
+  string node_id = 1;
+  bool ok = 2;
+  repeated string issues = 3;
+}
+message PlanCephClusterResponse {
+  bool ok = 1;
+  // Loud notice about encryptOsds (default true / immutable after create).
+  string encrypt_osds_notice = 2;
+  repeated CephNodePlanResult nodes = 3;
+  repeated string cluster_issues = 4;
+  // Non-blocking notes, e.g. what retiring a member will do to the cluster.
+  repeated string cluster_warnings = 5;
+  // Members the applied spec drops; each is drained, purged and has its
+  // monitor removed by the reconciler, one apply at a time.
+  repeated string removing_members = 6;
+}
+
 message CreateCephClusterRequest { CephCluster ceph_cluster = 1; }
 message CreateCephClusterResponse {
   bool success = 1;
@@ -2042,6 +2552,51 @@ message DeleteCephClusterRequest {
   bool force = 2;
 }
 message DeleteCephClusterResponse { bool success = 1; }
+
+message GetCephClusterCapacityRequest { string name = 1; }
+message GetCephClusterCapacityResponse {
+  bool ok = 1;
+  string message = 2;
+  string queried_node = 3;
+  int64 total_bytes = 4;
+  int64 used_bytes = 5;
+  int64 avail_bytes = 6;
+  repeated CephDeviceClassCapacity by_class = 7;
+  repeated CephPoolCapacity pools = 8;
+}
+
+message GetCephDashboardCredentialsRequest { string name = 1; }
+message GetCephDashboardCredentialsResponse {
+  string name = 1;
+  string url = 2;
+  string username = 3;
+  string password = 4;
+  string updated_at = 5;
+}
+
+message SetCephDashboardCredentialsRequest {
+  string name = 1;
+  string url = 2;
+  string username = 3;
+  string password = 4;
+}
+message SetCephDashboardCredentialsResponse {
+  bool success = 1;
+  GetCephDashboardCredentialsResponse credentials = 2;
+}
+message CephDeviceClassCapacity {
+  string device_class = 1;
+  int64 total_bytes = 2;
+  int64 used_bytes = 3;
+  int64 avail_bytes = 4;
+}
+message CephPoolCapacity {
+  string name = 1;
+  int64 stored_bytes = 2;
+  int64 objects = 3;
+  int32 percent_used_bp = 4;
+  int64 max_avail_bytes = 5;
+}
 
 // --- SharedFilesystem (CephFS) -------------------------------------------------------------
 
@@ -2327,6 +2882,7 @@ message GetPkiStatusResponse {
   // Active certificates sorted by soonest not_after (at most 20 rows).
   repeated CertificateInfo soonest_expiring = 17;
 }
+
 // ============================================================================
 // Kubernetes Cluster Management
 // ============================================================================

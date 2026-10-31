@@ -44,6 +44,10 @@ resource "kcore_vm" "app" {
 
   desired_state = "running"
 
+  labels = {
+    env = "lab"
+  }
+
   # Optional cloud-init / SSH keys registered with the controller
   # cloud_init_user_data = file("${path.module}/cloud-init.yaml")
   # ssh_key_names        = ["alice-workstation"]
@@ -70,15 +74,19 @@ resource "kcore_vm" "app" {
 - `cloud_init_user_data` (String) Optional cloud-init user-data (YAML)
 - `desired_state` (String) Desired state of the VM (running or stopped)
 - `disk` (Block List) Disk configuration (see [below for nested schema](#nestedblock--disk))
+- `gpus` (List of String) Whole GPU, NIC, or NVMe names. The VM must be stopped to change this. Mutually exclusive with vgpus and pci_devices.
 - `image_format` (String) Format when using image_path (qcow2 or raw)
 - `image_path` (String) Node-local image path (alternative to image_url/image_sha256)
 - `image_sha256` (String) SHA256 checksum when using image_url
 - `image_url` (String) HTTPS URL of the VM disk image to download on the target node (use with image_sha256)
+- `labels` (Map of String) VM labels. Use kcore-vault/restore to mark a Vault restore VM.
 - `nic` (Block List) Network interface configuration (see [below for nested schema](#nestedblock--nic))
+- `pci_devices` (List of String) Raw PCI functions. The VM must be stopped to change this. Mutually exclusive with gpus and vgpus.
 - `ssh_key_names` (List of String) SSH key names registered with the controller to inject into the guest
 - `target_dc` (String) Datacenter preference for scheduling (optional)
 - `target_node` (String) Target node to create the VM on (optional, controller will schedule if not specified)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `vgpus` (List of String) vGPU slice selectors such as A2-4C or nvidia0/0=A2-4C. A profile matches the slice the controller assigns. The VM must be stopped to change this.
 
 ### Read-Only
 
@@ -87,6 +95,7 @@ resource "kcore_vm" "app" {
 - `id` (String) The ID of this resource.
 - `node_id` (String) Node ID where the VM is running
 - `state` (String) Current state of the VM
+- `vgpu_slices` (List of String) Slice bindings the controller stored, for example nvidia0/0=A2-4C.
 
 <a id="nestedblock--disk"></a>
 ### Nested Schema for `disk`

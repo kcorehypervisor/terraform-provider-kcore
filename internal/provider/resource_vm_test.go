@@ -8,6 +8,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func TestVgpuDiffSuppressesRequestedProfile(t *testing.T) {
+	if !vgpuDiffSuppress("vgpus.0", "nvidia0/0=A2-4C", "A2-4C", nil) {
+		t.Fatal("A2-4C should match the stored slice nvidia0/0=A2-4C")
+	}
+	if vgpuDiffSuppress("vgpus.0", "nvidia0/0=A2-4C", "nvidia0/1=A2-4C", nil) {
+		t.Fatal("an explicit slice selector must stay visible to Terraform")
+	}
+	if vgpuDiffSuppress("vgpus.0", "nvidia0/0=A2-4C", "A2-8C", nil) {
+		t.Fatal("a different profile must stay visible")
+	}
+}
+
 func TestAccKcoreVM_basic(t *testing.T) {
 	resourceName := "kcore_vm.test"
 

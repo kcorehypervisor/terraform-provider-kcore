@@ -80,9 +80,11 @@ func New() *schema.Provider {
 			"kcore_vault_policy":              resourceVaultPolicy(),
 			"kcore_vault_target":              resourceVaultTarget(),
 			"kcore_vault_replication":         resourceVaultReplication(),
+			"kcore_vgpu_host":                 resourceVgpuHost(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"kcore_vm":                  dataSourceVM(),
+			"kcore_gpus":                dataSourceGpus(),
 			"kcore_node":                dataSourceNode(),
 			"kcore_nodes":               dataSourceNodes(),
 			"kcore_kubernetes_cluster":  dataSourceKubernetesCluster(),
