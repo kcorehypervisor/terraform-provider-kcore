@@ -82,6 +82,9 @@ func New() *schema.Provider {
 			"kcore_vault_replication":         resourceVaultReplication(),
 			"kcore_vgpu_host":                 resourceVgpuHost(),
 			"kcore_slurm_cluster":             resourceSlurmCluster(),
+			"kcore_ingress_gateway":           resourceIngressGateway(),
+			"kcore_ingress_route":             resourceIngressRoute(),
+			"kcore_waf_policy":                resourceWafPolicy(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"kcore_vm":                  dataSourceVM(),
