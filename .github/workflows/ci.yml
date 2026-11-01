@@ -1,0 +1,149 @@
+name: ci
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Latest patch of this minor release. A bare go.mod version pins the .0
+  # release, which carries every standard-library advisory fixed since.
+  GO_VERSION: "1.26"
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+
+      - name: gofmt
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "These files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: go mod tidy
+        run: go mod tidy -diff
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: golangci-lint (staticcheck, errcheck, gosec and more)
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.13.2
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: terraform fmt on the examples
+        run: terraform fmt -check -recursive -diff examples
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+
+      - name: go test (race detector, coverage)
+        run: go test -race -count=1 -covermode=atomic -coverprofile=coverage.out ./...
+
+      - name: Coverage summary
+        run: go tool cover -func=coverage.out | tail -n 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.out
+          retention-days: 7
+
+  security:
+    name: security
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
+
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          version=8.28.0
+          archive="gitleaks_${version}_linux_x64.tar.gz"
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${version}/${archive}" -o "/tmp/${archive}"
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_checksums.txt" -o /tmp/gitleaks-checksums.txt
+          (cd /tmp && grep " ${archive}$" gitleaks-checksums.txt | sha256sum -c -)
+          tar -C /tmp -xzf "/tmp/${archive}" gitleaks
+          sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
+
+      - name: gitleaks
+        run: gitleaks detect --no-git --redact --source .
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+
+      - name: go build
+        run: go build -trimpath ./...
+
+      - name: Cross-platform snapshot build (GoReleaser, no signing, no publishing)
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: build --snapshot --clean --skip=validate
+
+      - name: Provider binary reports its version
+        run: |
+          binary="$(find dist -type f -path '*linux_amd64*' -name 'terraform-provider-kcore_v*' | head -n 1)"
+          "$binary" -version
+
+  required:
+    name: required
+    if: always()
+    needs: [lint, test, security, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every job succeeded
+        run: |
+          echo '${{ toJSON(needs) }}' | jq -e 'to_entries | all(.value.result == "success")'

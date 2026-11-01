@@ -22,7 +22,6 @@ type fakeIngressController struct {
 	routeSpecs   []string
 	gatewaySpecs []string
 	policySpecs  []string
-	gatewayReady bool
 }
 
 func (f *fakeIngressController) PlanIngress(_ context.Context, req *pb.PlanIngressRequest) (*pb.PlanIngressResponse, error) {
@@ -96,7 +95,7 @@ func newControllerClient(t *testing.T, fake pb.ControllerServer) *apiClient {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		conn.Close()
+		_ = conn.Close()
 		server.Stop()
 	})
 	return &apiClient{conn: conn, controller: pb.NewControllerClient(conn)}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/kcorehypervisor/terraform-provider-kcore/internal/provider"
@@ -16,8 +17,16 @@ var (
 func main() {
 	var debugMode bool
 
+	var showVersion bool
+
 	flag.BoolVar(&debugMode, "debug", false, "set to true to run the provider with support for debuggers like delve")
+	flag.BoolVar(&showVersion, "version", false, "print the provider version and exit")
 	flag.Parse()
+
+	if showVersion {
+		fmt.Printf("terraform-provider-kcore %s (%s)\n", version, commit)
+		return
+	}
 
 	opts := &plugin.ServeOpts{
 		ProviderFunc: provider.New,

@@ -193,7 +193,7 @@ func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("dial installer %s: %w", addr, err))
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	backend := nodepb.StorageBackendType_STORAGE_BACKEND_TYPE_FILESYSTEM
 	switch s(d, "storage_backend") {
@@ -266,7 +266,7 @@ func waitForController(ctx context.Context, addr, dir string) error {
 	if err != nil {
 		return fmt.Errorf("load kctl certificate: %w", err)
 	}
-	caPEM, err := os.ReadFile(filepath.Join(dir, "ca.crt"))
+	caPEM, err := os.ReadFile(filepath.Join(dir, "ca.crt")) //nolint:gosec // dir is the operator-chosen certificate directory
 	if err != nil {
 		return err
 	}
@@ -288,7 +288,7 @@ func waitForController(ctx context.Context, addr, dir string) error {
 		conn, err := grpc.DialContext(dialCtx, addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
 		if err == nil {
 			_, err = pb.NewControllerClient(conn).GetClusterHealth(dialCtx, &pb.GetClusterHealthRequest{})
-			conn.Close()
+			_ = conn.Close()
 		}
 		cancel()
 		if err == nil {
@@ -297,7 +297,7 @@ func waitForController(ctx context.Context, addr, dir string) error {
 		last = err
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("%w (last dial: %v)", ctx.Err(), last)
+			return fmt.Errorf("%w (last dial: %w)", ctx.Err(), last)
 		case <-ticker.C:
 		}
 	}

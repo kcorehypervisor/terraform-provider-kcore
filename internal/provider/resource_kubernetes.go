@@ -216,11 +216,11 @@ func mbool(row map[string]interface{}, key string) bool {
 func mint(row map[string]interface{}, key string) int32 {
 	switch n := row[key].(type) {
 	case int:
-		return int32(n)
+		return toInt32(n)
 	case int32:
 		return n
 	case int64:
-		return int32(n)
+		return saturateInt32(n)
 	default:
 		return 0
 	}

@@ -144,8 +144,8 @@ func securityGroupFromState(d *schema.ResourceData) *pb.SecurityGroup {
 		m := item.(map[string]interface{})
 		sg.Rules = append(sg.Rules, &pb.SecurityGroupRule{
 			Protocol:   m["protocol"].(string),
-			HostPort:   int32(m["host_port"].(int)),
-			TargetPort: int32(m["target_port"].(int)),
+			HostPort:   toInt32(m["host_port"].(int)),
+			TargetPort: toInt32(m["target_port"].(int)),
 			SourceCidr: m["source_cidr"].(string),
 			TargetVm:   m["target_vm"].(string),
 			EnableDnat: m["enable_dnat"].(bool),

@@ -271,7 +271,7 @@ func resourceVMCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 	sizeBytes := int64(d.Get("storage_size_bytes").(int))
 	spec := &pb.VmSpec{
 		Name:             d.Get("name").(string),
-		Cpu:              int32(d.Get("cpu").(int)),
+		Cpu:              toInt32(d.Get("cpu").(int)),
 		MemoryBytes:      int64(d.Get("memory_bytes").(int)),
 		StorageBackend:   normalizeStorageBackendSpec(d.Get("storage_backend").(string)),
 		StorageSizeBytes: sizeBytes,
@@ -445,7 +445,7 @@ func resourceVMUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 			Labels: vmLabels(d),
 		}
 		if d.HasChange("cpu") {
-			req.Cpu = int32(d.Get("cpu").(int))
+			req.Cpu = toInt32(d.Get("cpu").(int))
 		}
 		if d.HasChange("memory_bytes") {
 			req.MemoryBytes = int64(d.Get("memory_bytes").(int))

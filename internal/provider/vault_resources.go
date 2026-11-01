@@ -130,12 +130,12 @@ func vaultPolicyApply(ctx context.Context, d *schema.ResourceData, meta interfac
 		return diag.FromErr(err)
 	}
 	keep := &vaultpb.RetentionKeep{
-		Hourly:  int32(d.Get("keep_hourly").(int)),
-		Daily:   int32(d.Get("keep_daily").(int)),
-		Weekly:  int32(d.Get("keep_weekly").(int)),
-		Monthly: int32(d.Get("keep_monthly").(int)),
-		Yearly:  int32(d.Get("keep_yearly").(int)),
-		Recent:  int32(d.Get("keep_recent").(int)),
+		Hourly:  toInt32(d.Get("keep_hourly").(int)),
+		Daily:   toInt32(d.Get("keep_daily").(int)),
+		Weekly:  toInt32(d.Get("keep_weekly").(int)),
+		Monthly: toInt32(d.Get("keep_monthly").(int)),
+		Yearly:  toInt32(d.Get("keep_yearly").(int)),
+		Recent:  toInt32(d.Get("keep_recent").(int)),
 	}
 	var vms []string
 	for _, raw := range d.Get("vms").([]interface{}) {
