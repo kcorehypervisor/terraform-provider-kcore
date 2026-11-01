@@ -86,7 +86,7 @@ resource "kcore_vm" "app" {
 - `target_dc` (String) Datacenter preference for scheduling (optional)
 - `target_node` (String) Target node to create the VM on (optional, controller will schedule if not specified)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `vgpus` (List of String) vGPU slice selectors such as A2-4C or nvidia0/0=A2-4C. A profile matches the slice the controller assigns. The VM must be stopped to change this.
+- `vgpus` (List of String) vGPU slice selectors such as A2-4C, nvidia0/0=A2-4C, intel-2vf, or radeon-4vf. A profile matches the slice the controller assigns. The VM must be stopped to change this.
 
 ### Read-Only
 

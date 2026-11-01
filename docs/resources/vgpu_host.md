@@ -8,7 +8,9 @@ description: |-
 
 # kcore_vgpu_host (Resource)
 
-Turns a node into an NVIDIA vGPU host. Apply stages the Virtual GPU Manager, pushes the Nix configuration, reboots when the kernel needs it, and waits until a slice is visible.
+Turns a node into a vGPU host. For NVIDIA, apply stages the Virtual GPU Manager. Intel (`xe`, for example Arc Pro B50/B70) and AMD (GIM, for example Radeon Pro V710) cards split with SR-IOV into `num_vfs` equal slices that VMs request as `intel-2vf` or `radeon-4vf`. Apply pushes the Nix configuration, reboots when the kernel needs it, and waits until a slice is visible.
+
+The Intel and AMD paths are not yet tested on real cards.
 
 ## Example Usage
 
@@ -24,6 +26,19 @@ resource "kcore_vgpu_host" "a2" {
     create = "30m"
   }
 }
+
+resource "kcore_vgpu_host" "b50" {
+  node_id    = "node-7"
+  vendor     = "intel"
+  host_cards = ["0000:03:00.0"]
+  num_vfs    = 2
+}
+
+resource "kcore_vm" "web" {
+  # ...
+  target_node = kcore_vgpu_host.b50.node_id
+  vgpus       = ["intel-2vf"]
+}
 ```
 
 
@@ -35,18 +50,19 @@ resource "kcore_vgpu_host" "a2" {
 
 ### Required
 
-- `host_cards` (List of String) Physical functions that stay on the NVIDIA host driver, for example 0000:61:00.0.
-- `manager_file` (String) Installer filename. The node stores the file under this name.
-- `manager_sha256` (String) SHA256 of the .run file.
-- `manager_url` (String) HTTP or HTTPS URL of the NVIDIA Virtual GPU Manager .run file.
-- `node_id` (String) Node that owns the NVIDIA card.
+- `host_cards` (List of String) Physical functions that stay on the host driver, for example 0000:61:00.0.
+- `node_id` (String) Node that owns the card.
 
 ### Optional
 
+- `manager_file` (String) Installer filename. The node stores the file under this name. Required for nvidia.
+- `manager_sha256` (String) SHA256 of the .run file. Required for nvidia.
+- `manager_url` (String) HTTP or HTTPS URL of the NVIDIA Virtual GPU Manager .run file. Required for nvidia.
 - `manager_version` (String) Driver version recorded in the host configuration.
-- `num_vfs` (Number) Virtual functions to create. 0 asks the card for every function it supports.
+- `num_vfs` (Number) Virtual functions to create on each card. Required for intel and amd. For nvidia, 0 asks the card for every function it supports.
 - `reboot` (Boolean) Reboot the node when the kernel has no IOMMU groups yet or the card is still on nouveau.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `vendor` (String) Card vendor. nvidia stages the Virtual GPU Manager. intel (xe) and amd (GIM) split the card with SR-IOV into num_vfs slices named like intel-2vf or radeon-4vf.
 
 ### Read-Only
 

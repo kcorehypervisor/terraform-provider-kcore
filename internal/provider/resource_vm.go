@@ -192,7 +192,7 @@ func resourceVM() *schema.Resource {
 			"vgpus": {
 				Type:             schema.TypeList,
 				Optional:         true,
-				Description:      "vGPU slice selectors such as A2-4C or nvidia0/0=A2-4C. A profile matches the slice the controller assigns. The VM must be stopped to change this.",
+				Description:      "vGPU slice selectors such as A2-4C, nvidia0/0=A2-4C, intel-2vf, or radeon-4vf. A profile matches the slice the controller assigns. The VM must be stopped to change this.",
 				DiffSuppressFunc: vgpuDiffSuppress,
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,

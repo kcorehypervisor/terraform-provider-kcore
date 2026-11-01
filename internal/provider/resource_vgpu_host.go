@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	pb "github.com/kcorehypervisor/terraform-provider-kcore/api/controller"
 )
@@ -18,6 +19,7 @@ func resourceVgpuHost() *schema.Resource {
 		ReadContext:   resourceVgpuHostRead,
 		UpdateContext: resourceVgpuHostUpsert,
 		DeleteContext: resourceVgpuHostDelete,
+		CustomizeDiff: resourceVgpuHostCustomizeDiff,
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
@@ -27,12 +29,19 @@ func resourceVgpuHost() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "Node that owns the NVIDIA card.",
+				Description: "Node that owns the card.",
+			},
+			"vendor": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "nvidia",
+				ValidateFunc: validation.StringInSlice([]string{"nvidia", "intel", "amd"}, false),
+				Description:  "Card vendor. nvidia stages the Virtual GPU Manager. intel (xe) and amd (GIM) split the card with SR-IOV into num_vfs slices named like intel-2vf or radeon-4vf.",
 			},
 			"host_cards": {
 				Type:        schema.TypeList,
 				Required:    true,
-				Description: "Physical functions that stay on the NVIDIA host driver, for example 0000:61:00.0.",
+				Description: "Physical functions that stay on the host driver, for example 0000:61:00.0.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				MinItems:    1,
 			},
@@ -40,22 +49,22 @@ func resourceVgpuHost() *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     0,
-				Description: "Virtual functions to create. 0 asks the card for every function it supports.",
+				Description: "Virtual functions to create on each card. Required for intel and amd. For nvidia, 0 asks the card for every function it supports.",
 			},
 			"manager_url": {
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "HTTP or HTTPS URL of the NVIDIA Virtual GPU Manager .run file.",
+				Optional:    true,
+				Description: "HTTP or HTTPS URL of the NVIDIA Virtual GPU Manager .run file. Required for nvidia.",
 			},
 			"manager_sha256": {
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "SHA256 of the .run file.",
+				Optional:    true,
+				Description: "SHA256 of the .run file. Required for nvidia.",
 			},
 			"manager_file": {
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Installer filename. The node stores the file under this name.",
+				Optional:    true,
+				Description: "Installer filename. The node stores the file under this name. Required for nvidia.",
 			},
 			"manager_version": {
 				Type:        schema.TypeString,
@@ -86,18 +95,23 @@ func resourceVgpuHost() *schema.Resource {
 func resourceVgpuHostUpsert(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*apiClient)
 	nodeID := strings.TrimSpace(d.Get("node_id").(string))
-	resp, err := client.controller.ConfigureNodeVgpu(ctx, &pb.ConfigureNodeVgpuRequest{
+	vendor := d.Get("vendor").(string)
+	req := &pb.ConfigureNodeVgpuRequest{
 		NodeId:    nodeID,
 		Enabled:   true,
 		HostCards: schemaStringList(d, "host_cards"),
 		NumVfs:    int32(d.Get("num_vfs").(int)),
-		Manager: &pb.VgpuManager{
+		Vendor:    vendor,
+	}
+	if vendor == "nvidia" {
+		req.Manager = &pb.VgpuManager{
 			Url:     strings.TrimSpace(d.Get("manager_url").(string)),
 			Sha256:  strings.TrimSpace(d.Get("manager_sha256").(string)),
 			File:    strings.TrimSpace(d.Get("manager_file").(string)),
 			Version: strings.TrimSpace(d.Get("manager_version").(string)),
-		},
-	})
+		}
+	}
+	resp, err := client.controller.ConfigureNodeVgpu(ctx, req)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("configuring vGPU host on %s: %w", nodeID, err))
 	}
@@ -126,6 +140,34 @@ func resourceVgpuHostUpsert(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(err)
 	}
 	return resourceVgpuHostRead(ctx, d, meta)
+}
+
+func resourceVgpuHostCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	return validateVgpuHost(
+		d.Get("vendor").(string),
+		d.Get("num_vfs").(int),
+		d.Get("manager_url").(string),
+		d.Get("manager_sha256").(string),
+		d.Get("manager_file").(string),
+	)
+}
+
+func validateVgpuHost(vendor string, numVfs int, url, sha256, file string) error {
+	if vendor == "nvidia" || vendor == "" {
+		for _, field := range [][2]string{{"manager_url", url}, {"manager_sha256", sha256}, {"manager_file", file}} {
+			if strings.TrimSpace(field[1]) == "" {
+				return fmt.Errorf("%s is required when vendor is nvidia", field[0])
+			}
+		}
+		return nil
+	}
+	if numVfs < 1 {
+		return fmt.Errorf("num_vfs is required when vendor is %s", vendor)
+	}
+	if url != "" || sha256 != "" || file != "" {
+		return fmt.Errorf("manager_url, manager_sha256, and manager_file stage the NVIDIA manager; %s cards do not use them", vendor)
+	}
+	return nil
 }
 
 func waitForVgpuSlices(ctx context.Context, client *apiClient, nodeID string, timeout time.Duration) error {
@@ -173,10 +215,17 @@ func resourceVgpuHostRead(ctx context.Context, d *schema.ResourceData, meta inte
 	d.Set("node_id", nodeID)
 	d.Set("host_cards", resp.HostCards)
 	d.Set("num_vfs", resp.NumVfs)
-	d.Set("manager_file", resp.ManagerFile)
-	d.Set("manager_sha256", resp.ManagerSha256)
-	d.Set("manager_version", resp.ManagerVersion)
-	d.Set("store_path", resp.StagedStorePath)
+	vendor := resp.Vendor
+	if vendor == "" {
+		vendor = "nvidia"
+	}
+	d.Set("vendor", vendor)
+	if vendor == "nvidia" {
+		d.Set("manager_file", resp.ManagerFile)
+		d.Set("manager_sha256", resp.ManagerSha256)
+		d.Set("manager_version", resp.ManagerVersion)
+		d.Set("store_path", resp.StagedStorePath)
+	}
 	return diags
 }
 
