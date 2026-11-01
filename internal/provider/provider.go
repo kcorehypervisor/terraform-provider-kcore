@@ -81,6 +81,7 @@ func New() *schema.Provider {
 			"kcore_vault_target":              resourceVaultTarget(),
 			"kcore_vault_replication":         resourceVaultReplication(),
 			"kcore_vgpu_host":                 resourceVgpuHost(),
+			"kcore_slurm_cluster":             resourceSlurmCluster(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"kcore_vm":                  dataSourceVM(),
@@ -89,6 +90,7 @@ func New() *schema.Provider {
 			"kcore_nodes":               dataSourceNodes(),
 			"kcore_kubernetes_cluster":  dataSourceKubernetesCluster(),
 			"kcore_kubernetes_clusters": dataSourceKubernetesClusters(),
+			"kcore_slurm_cluster":       dataSourceSlurmCluster(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
