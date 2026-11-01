@@ -30,6 +30,7 @@ Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terra
 | `kcore_cluster_update` | `kctl update cluster` (destroy cancels; reboot stays `kctl`) |
 | `kcore_kubernetes_cluster` | `kctl kubernetes apply`. `local_provisioner` mode `shared` installs local-path; mode `lvm` creates one thin pool per node |
 | `kcore_vgpu_host` | `kctl node vgpu enable`. `vendor` is `nvidia`, `intel`, or `amd` |
+| `kcore_waf_policy`, `kcore_ingress_gateway`, `kcore_ingress_route` | `kctl apply -f` with `kind: WafPolicy`, `IngressGateway`, `IngressRoute`; `spec` is the manifest spec as `jsonencode(...)` |
 | `kcore_slurm_cluster` | `kctl apply -f` with `kind: SlurmCluster` (data source of the same name reads status) |
 
 Console, drain (including `kctl slurm drain-node`), migrate, backup, restore, cert rotation, certificate revoke, and node approval stay as `kctl` commands. Destroying `kcore_node` drops it from state and leaves the installed disk in place.
@@ -84,6 +85,7 @@ Runnable snippets live under [`examples/`](examples/):
 | [`examples/data-sources/kcore_node/`](examples/data-sources/kcore_node/) | Read a hypervisor node |
 | [`examples/data-sources/kcore_nodes/`](examples/data-sources/kcore_nodes/) | List all nodes |
 | [`examples/resources/kcore_kubernetes_cluster/`](examples/resources/kcore_kubernetes_cluster/) | Kubernetes cluster with a shared local-path provisioner or an LVM thin pool |
+| [`examples/resources/kcore_ingress_gateway/`](examples/resources/kcore_ingress_gateway/) | WAF policy, HTTPS gateway, and a load-balanced route |
 | [`examples/resources/kcore_slurm_cluster/`](examples/resources/kcore_slurm_cluster/) | Slurm cluster with a controller, two compute nodes, and NFS home |
 
 ### Minimal VM
