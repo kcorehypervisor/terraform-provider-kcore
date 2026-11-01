@@ -25853,15 +25853,19 @@ func (*GetCrlRequest) Descriptor() ([]byte, []int) {
 }
 
 type GetCrlResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	CrlPem        string                 `protobuf:"bytes,2,opt,name=crl_pem,json=crlPem,proto3" json:"crl_pem,omitempty"`
-	CrlDer        []byte                 `protobuf:"bytes,3,opt,name=crl_der,json=crlDer,proto3" json:"crl_der,omitempty"`
-	CrlNumber     int64                  `protobuf:"varint,4,opt,name=crl_number,json=crlNumber,proto3" json:"crl_number,omitempty"`
-	ThisUpdate    *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=this_update,json=thisUpdate,proto3" json:"this_update,omitempty"`
-	NextUpdate    *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=next_update,json=nextUpdate,proto3" json:"next_update,omitempty"`
-	RevokedCount  int32                  `protobuf:"varint,7,opt,name=revoked_count,json=revokedCount,proto3" json:"revoked_count,omitempty"`
-	Message       string                 `protobuf:"bytes,8,opt,name=message,proto3" json:"message,omitempty"`
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Success      bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	CrlPem       string                 `protobuf:"bytes,2,opt,name=crl_pem,json=crlPem,proto3" json:"crl_pem,omitempty"`
+	CrlDer       []byte                 `protobuf:"bytes,3,opt,name=crl_der,json=crlDer,proto3" json:"crl_der,omitempty"`
+	CrlNumber    int64                  `protobuf:"varint,4,opt,name=crl_number,json=crlNumber,proto3" json:"crl_number,omitempty"`
+	ThisUpdate   *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=this_update,json=thisUpdate,proto3" json:"this_update,omitempty"`
+	NextUpdate   *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=next_update,json=nextUpdate,proto3" json:"next_update,omitempty"`
+	RevokedCount int32                  `protobuf:"varint,7,opt,name=revoked_count,json=revokedCount,proto3" json:"revoked_count,omitempty"`
+	Message      string                 `protobuf:"bytes,8,opt,name=message,proto3" json:"message,omitempty"`
+	// PEM of the sub-CA that signed the CRL. A node whose own certificate file
+	// has no chain can verify the CRL only if it can check this certificate
+	// against its root CA, which it already trusts.
+	IssuerPem     string `protobuf:"bytes,9,opt,name=issuer_pem,json=issuerPem,proto3" json:"issuer_pem,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -25948,6 +25952,13 @@ func (x *GetCrlResponse) GetRevokedCount() int32 {
 func (x *GetCrlResponse) GetMessage() string {
 	if x != nil {
 		return x.Message
+	}
+	return ""
+}
+
+func (x *GetCrlResponse) GetIssuerPem() string {
+	if x != nil {
+		return x.IssuerPem
 	}
 	return ""
 }
@@ -34080,7 +34091,7 @@ const file_controller_proto_rawDesc = "" +
 	"\n" +
 	"crl_number\x18\x03 \x01(\x03R\tcrlNumber\x12\x18\n" +
 	"\amessage\x18\x04 \x01(\tR\amessage\"\x0f\n" +
-	"\rGetCrlRequest\"\xb4\x02\n" +
+	"\rGetCrlRequest\"\xd3\x02\n" +
 	"\x0eGetCrlResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x17\n" +
 	"\acrl_pem\x18\x02 \x01(\tR\x06crlPem\x12\x17\n" +
@@ -34092,7 +34103,9 @@ const file_controller_proto_rawDesc = "" +
 	"\vnext_update\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"nextUpdate\x12#\n" +
 	"\rrevoked_count\x18\a \x01(\x05R\frevokedCount\x12\x18\n" +
-	"\amessage\x18\b \x01(\tR\amessage\"\x15\n" +
+	"\amessage\x18\b \x01(\tR\amessage\x12\x1d\n" +
+	"\n" +
+	"issuer_pem\x18\t \x01(\tR\tissuerPem\"\x15\n" +
 	"\x13GetPkiStatusRequest\"\xbf\x06\n" +
 	"\x14GetPkiStatusResponse\x12!\n" +
 	"\factive_count\x18\x01 \x01(\x05R\vactiveCount\x12#\n" +
