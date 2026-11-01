@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -41,9 +42,13 @@ func resourceVgpuHost() *schema.Resource {
 			"host_cards": {
 				Type:        schema.TypeList,
 				Required:    true,
-				Description: "Physical functions that stay on the host driver, for example 0000:61:00.0.",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				MinItems:    1,
+				Description: "Physical functions that stay on the host driver, for example 0000:61:00.0. An intel or amd card can carry its own virtual function count as 0000:c3:00.0=4; a card without a count uses num_vfs.",
+				DiffSuppressFunc: func(_, oldValue, newValue string, d *schema.ResourceData) bool {
+					numVfs := d.Get("num_vfs").(int)
+					return splitCardKey(oldValue, numVfs) == splitCardKey(newValue, numVfs)
+				},
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				MinItems: 1,
 			},
 			"num_vfs": {
 				Type:        schema.TypeInt,
@@ -146,13 +151,41 @@ func resourceVgpuHostCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ 
 	return validateVgpuHost(
 		d.Get("vendor").(string),
 		d.Get("num_vfs").(int),
+		schemaStringListFromDiff(d, "host_cards"),
 		d.Get("manager_url").(string),
 		d.Get("manager_sha256").(string),
 		d.Get("manager_file").(string),
 	)
 }
 
-func validateVgpuHost(vendor string, numVfs int, url, sha256, file string) error {
+func schemaStringListFromDiff(d *schema.ResourceDiff, key string) []string {
+	raw, _ := d.Get(key).([]interface{})
+	out := make([]string, 0, len(raw))
+	for _, item := range raw {
+		if value, ok := item.(string); ok {
+			out = append(out, value)
+		}
+	}
+	return out
+}
+
+// splitCardKey is the form the controller stores: the address and the
+// virtual function count it will use, so a bare address and address=N with the
+// same count compare equal.
+func splitCardKey(card string, defaultVfs int) string {
+	address, count, hasCount := strings.Cut(card, "=")
+	address = strings.ToLower(strings.TrimSpace(address))
+	count = strings.TrimSpace(count)
+	if !hasCount || count == "" {
+		if defaultVfs > 0 {
+			return fmt.Sprintf("%s=%d", address, defaultVfs)
+		}
+		return address
+	}
+	return address + "=" + count
+}
+
+func validateVgpuHost(vendor string, numVfs int, hostCards []string, url, sha256, file string) error {
 	if vendor == "nvidia" || vendor == "" {
 		for _, field := range [][2]string{{"manager_url", url}, {"manager_sha256", sha256}, {"manager_file", file}} {
 			if strings.TrimSpace(field[1]) == "" {
@@ -161,8 +194,14 @@ func validateVgpuHost(vendor string, numVfs int, url, sha256, file string) error
 		}
 		return nil
 	}
-	if numVfs < 1 {
-		return fmt.Errorf("num_vfs is required when vendor is %s", vendor)
+	for _, card := range hostCards {
+		if _, count, hasCount := strings.Cut(card, "="); hasCount {
+			if n, err := strconv.Atoi(strings.TrimSpace(count)); err != nil || n < 1 {
+				return fmt.Errorf("host card %q: the count after '=' must be a positive number", card)
+			}
+		} else if numVfs < 1 {
+			return fmt.Errorf("num_vfs is required when vendor is %s, or give %s a count as %s=N", vendor, card, card)
+		}
 	}
 	if url != "" || sha256 != "" || file != "" {
 		return fmt.Errorf("manager_url, manager_sha256, and manager_file stage the NVIDIA manager; %s cards do not use them", vendor)

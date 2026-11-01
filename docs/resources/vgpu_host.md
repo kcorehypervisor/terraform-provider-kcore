@@ -34,6 +34,12 @@ resource "kcore_vgpu_host" "b50" {
   num_vfs    = 2
 }
 
+resource "kcore_vgpu_host" "v710" {
+  node_id    = "node-8"
+  vendor     = "amd"
+  host_cards = ["0000:c3:00.0=4", "0000:c4:00.0=6"]
+}
+
 resource "kcore_vm" "web" {
   # ...
   target_node = kcore_vgpu_host.b50.node_id
@@ -50,7 +56,7 @@ resource "kcore_vm" "web" {
 
 ### Required
 
-- `host_cards` (List of String) Physical functions that stay on the host driver, for example 0000:61:00.0.
+- `host_cards` (List of String) Physical functions that stay on the host driver, for example 0000:61:00.0. An intel or amd card can carry its own virtual function count as 0000:c3:00.0=4; a card without a count uses num_vfs.
 - `node_id` (String) Node that owns the card.
 
 ### Optional
