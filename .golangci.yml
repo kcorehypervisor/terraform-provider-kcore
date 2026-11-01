@@ -26,11 +26,6 @@ linters:
     paths:
       - api
     rules:
-      # grpc.Dial, DialContext, WithInsecure and WithBlock keep eager, blocking
-      # connects. Moving to grpc.NewClient changes that behaviour and needs its
-      # own change.
-      - linters: [staticcheck]
-        text: "SA1019: google.golang.org/grpc\\.(Dial|DialContext|WithInsecure|WithBlock)"
       - linters: [gosec, errcheck]
         path: _test\.go
 

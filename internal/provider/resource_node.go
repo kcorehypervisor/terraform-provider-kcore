@@ -188,8 +188,7 @@ func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	if !b(d, "insecure") {
 		return diag.FromErr(fmt.Errorf("TLS to the live installer is not implemented; set insecure = true"))
 	}
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	conn, err := grpc.DialContext(ctx, addr, opts...)
+	conn, err := grpc.NewClient(dialTarget(addr), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("dial installer %s: %w", addr, err))
 	}
@@ -284,13 +283,7 @@ func waitForController(ctx context.Context, addr, dir string) error {
 	defer ticker.Stop()
 	var last error
 	for {
-		dialCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		conn, err := grpc.DialContext(dialCtx, addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
-		if err == nil {
-			_, err = pb.NewControllerClient(conn).GetClusterHealth(dialCtx, &pb.GetClusterHealthRequest{})
-			_ = conn.Close()
-		}
-		cancel()
+		err := probeController(ctx, addr, creds)
 		if err == nil {
 			return nil
 		}
@@ -301,6 +294,21 @@ func waitForController(ctx context.Context, addr, dir string) error {
 		case <-ticker.C:
 		}
 	}
+}
+
+// probeController connects and asks for cluster health, waiting up to five
+// seconds for the connection. grpc.NewClient connects lazily, so the wait is
+// WaitForReady on the call.
+func probeController(ctx context.Context, addr string, creds credentials.TransportCredentials) error {
+	dialCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	conn, err := grpc.NewClient(dialTarget(addr), grpc.WithTransportCredentials(creds))
+	if err != nil {
+		return err
+	}
+	defer func() { _ = conn.Close() }()
+	_, err = pb.NewControllerClient(conn).GetClusterHealth(dialCtx, &pb.GetClusterHealthRequest{}, grpc.WaitForReady(true))
+	return err
 }
 
 func resourceNodeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

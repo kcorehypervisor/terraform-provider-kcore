@@ -6,11 +6,13 @@ import (
 	"crypto/x509"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	grpcinsecure "google.golang.org/grpc/credentials/insecure"
 
 	pb "github.com/kcorehypervisor/terraform-provider-kcore/api/controller"
 	vaultpb "github.com/kcorehypervisor/terraform-provider-kcore/api/vault"
@@ -122,6 +124,16 @@ func (c *apiClient) requireVault() (vaultpb.VaultClient, error) {
 	return c.vault, nil
 }
 
+// dialTarget keeps the resolver that grpc.Dial used. grpc.NewClient defaults to
+// DNS, which re-resolves and can pick another address, so a plain host:port
+// is passed through untouched. An address that names its own scheme is kept.
+func dialTarget(addr string) string {
+	if strings.Contains(addr, "://") || strings.HasPrefix(addr, "unix:") {
+		return addr
+	}
+	return "passthrough:///" + addr
+}
+
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -134,7 +146,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	var opts []grpc.DialOption
 
 	if insecure {
-		opts = append(opts, grpc.WithInsecure())
+		opts = append(opts, grpc.WithTransportCredentials(grpcinsecure.NewCredentials()))
 	} else if tlsCertPath != "" && tlsKeyPath != "" {
 		// Load client cert and key
 		cert, err := tls.LoadX509KeyPair(tlsCertPath, tlsKeyPath)
@@ -165,11 +177,11 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		creds := credentials.NewTLS(tlsConfig)
 		opts = append(opts, grpc.WithTransportCredentials(creds))
 	} else {
-		opts = append(opts, grpc.WithInsecure())
+		opts = append(opts, grpc.WithTransportCredentials(grpcinsecure.NewCredentials()))
 	}
 
 	// Connect to the controller
-	conn, err := grpc.Dial(controllerAddr, opts...)
+	conn, err := grpc.NewClient(dialTarget(controllerAddr), opts...)
 	if err != nil {
 		return nil, diag.FromErr(fmt.Errorf("failed to connect to controller: %w", err))
 	}
@@ -179,7 +191,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		controller: pb.NewControllerClient(conn),
 	}
 	if vaultAddr := d.Get("vault_address").(string); vaultAddr != "" {
-		vaultConn, err := grpc.Dial(vaultAddr, opts...)
+		vaultConn, err := grpc.NewClient(dialTarget(vaultAddr), opts...)
 		if err != nil {
 			return nil, diag.FromErr(fmt.Errorf("failed to connect to vault: %w", err))
 		}
