@@ -79,6 +79,11 @@ func (f *fakeIngressController) GetWafPolicy(_ context.Context, req *pb.GetWafPo
 
 func newIngressClient(t *testing.T, fake *fakeIngressController) *apiClient {
 	t.Helper()
+	return newControllerClient(t, fake)
+}
+
+func newControllerClient(t *testing.T, fake pb.ControllerServer) *apiClient {
+	t.Helper()
 	listener := bufconn.Listen(1 << 20)
 	server := grpc.NewServer()
 	pb.RegisterControllerServer(server, fake)

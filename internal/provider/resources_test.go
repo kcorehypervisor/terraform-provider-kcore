@@ -34,9 +34,16 @@ func TestResourcesCoverKctlCreateSurface(t *testing.T) {
 		"kcore_vault_target",
 		"kcore_vault_replication",
 		"kcore_vgpu_host",
+		"kcore_slurm_cluster",
+		"kcore_waf_policy",
+		"kcore_ingress_gateway",
+		"kcore_ingress_route",
+		"kcore_postgresql",
 	}
-	if _, ok := p.DataSourcesMap["kcore_gpus"]; !ok {
-		t.Errorf("missing data source kcore_gpus")
+	for _, name := range []string{"kcore_gpus", "kcore_slurm_cluster", "kcore_postgresql"} {
+		if _, ok := p.DataSourcesMap[name]; !ok {
+			t.Errorf("missing data source %s", name)
+		}
 	}
 	for _, name := range want {
 		if _, ok := p.ResourcesMap[name]; !ok {

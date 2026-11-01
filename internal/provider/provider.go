@@ -85,6 +85,7 @@ func New() *schema.Provider {
 			"kcore_ingress_gateway":           resourceIngressGateway(),
 			"kcore_ingress_route":             resourceIngressRoute(),
 			"kcore_waf_policy":                resourceWafPolicy(),
+			"kcore_postgresql":                resourcePostgresql(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"kcore_vm":                  dataSourceVM(),
@@ -94,6 +95,7 @@ func New() *schema.Provider {
 			"kcore_kubernetes_cluster":  dataSourceKubernetesCluster(),
 			"kcore_kubernetes_clusters": dataSourceKubernetesClusters(),
 			"kcore_slurm_cluster":       dataSourceSlurmCluster(),
+			"kcore_postgresql":          dataSourcePostgresql(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

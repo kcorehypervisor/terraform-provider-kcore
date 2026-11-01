@@ -32,6 +32,7 @@ Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terra
 | `kcore_vgpu_host` | `kctl node vgpu enable`. `vendor` is `nvidia`, `intel`, or `amd` |
 | `kcore_waf_policy`, `kcore_ingress_gateway`, `kcore_ingress_route` | `kctl apply -f` with `kind: WafPolicy`, `IngressGateway`, `IngressRoute`; `spec` is the manifest spec as `jsonencode(...)` |
 | `kcore_slurm_cluster` | `kctl apply -f` with `kind: SlurmCluster` (data source of the same name reads status) |
+| `kcore_postgresql` | `kctl apply -f` with `kind: PostgreSQL` (data source of the same name reads it back). Only `port` changes in place |
 
 Console, drain (including `kctl slurm drain-node`), migrate, backup, restore, cert rotation, certificate revoke, and node approval stay as `kctl` commands. Destroying `kcore_node` drops it from state and leaves the installed disk in place.
 
@@ -87,6 +88,7 @@ Runnable snippets live under [`examples/`](examples/):
 | [`examples/resources/kcore_kubernetes_cluster/`](examples/resources/kcore_kubernetes_cluster/) | Kubernetes cluster with a shared local-path provisioner or an LVM thin pool |
 | [`examples/resources/kcore_ingress_gateway/`](examples/resources/kcore_ingress_gateway/) | WAF policy, HTTPS gateway, and a load-balanced route |
 | [`examples/resources/kcore_slurm_cluster/`](examples/resources/kcore_slurm_cluster/) | Slurm cluster with a controller, two compute nodes, and NFS home |
+| [`examples/resources/kcore_postgresql/`](examples/resources/kcore_postgresql/) | PostgreSQL database on a chosen node |
 
 ### Minimal VM
 
