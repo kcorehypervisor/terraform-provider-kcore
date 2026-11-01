@@ -27,7 +27,6 @@ func resourceVM() *schema.Resource {
 			Update: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
-		CustomizeDiff: suppressStoredVgpuSelectors,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -75,7 +74,8 @@ func resourceVM() *schema.Resource {
 			"disk": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Disk configuration",
+				Computed:    true,
+				Description: "Disk configuration. Omitted disks stay as the controller created them.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -185,6 +185,7 @@ func resourceVM() *schema.Resource {
 			"gpus": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Description: "Whole GPU, NIC, or NVMe names. The VM must be stopped to change this. Mutually exclusive with vgpus and pci_devices.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -192,13 +193,17 @@ func resourceVM() *schema.Resource {
 				Type:             schema.TypeList,
 				Optional:         true,
 				Description:      "vGPU slice selectors such as A2-4C or nvidia0/0=A2-4C. A profile matches the slice the controller assigns. The VM must be stopped to change this.",
-				Elem:             &schema.Schema{Type: schema.TypeString},
 				DiffSuppressFunc: vgpuDiffSuppress,
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					DiffSuppressFunc: vgpuDiffSuppress,
+				},
 			},
 			"pci_devices": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Raw PCI functions. The VM must be stopped to change this. Mutually exclusive with gpus and vgpus.",
+				Computed:    true,
+				Description: "Raw PCI functions. The VM must be stopped to change this. Mutually exclusive with gpus and vgpus. A vGPU profile assigns the function, so an omitted list does not detach it.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"vgpu_slices": {
@@ -388,7 +393,7 @@ func resourceVMRead(ctx context.Context, d *schema.ResourceData, meta interface{
 		d.Set("labels", resp.Spec.Labels)
 	}
 	d.Set("gpus", resp.Spec.Gpus)
-	d.Set("vgpus", resp.Spec.Vgpus)
+	d.Set("vgpus", keepRequestedVgpuSelectors(d, resp.Spec.Vgpus))
 	d.Set("pci_devices", resp.Spec.PciDevices)
 	d.Set("vgpu_slices", resp.Spec.Vgpus)
 
@@ -522,42 +527,31 @@ func schemaStringList(d *schema.ResourceData, key string) []string {
 	return out
 }
 
-// suppressStoredVgpuSelectors keeps a config value of A2-4C from planning an
-// update after refresh stores nvidia0/0=A2-4C. TypeList does not apply
-// DiffSuppressFunc to each element, so the comparison happens here.
-func suppressStoredVgpuSelectors(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	if !d.HasChange("vgpus") {
-		return nil
+// keepRequestedVgpuSelectors leaves a config value of A2-4C in state when the
+// controller reports the slice it assigned, nvidia0/0=A2-4C. vgpu_slices
+// keeps that binding. A real profile change still replaces vgpus.
+func keepRequestedVgpuSelectors(d *schema.ResourceData, stored []string) []string {
+	prior := schemaStringList(d, "vgpus")
+	if len(prior) == 0 || len(prior) != len(stored) {
+		return stored
 	}
-	oldRaw, newRaw := d.GetChange("vgpus")
-	oldList := interfaceStrings(oldRaw)
-	newList := interfaceStrings(newRaw)
-	if len(oldList) == 0 || len(oldList) != len(newList) {
-		return nil
-	}
-	for i := range newList {
-		if !vgpuValuesMatch(oldList[i], newList[i]) {
-			return nil
+	for i := range stored {
+		if !vgpuSelectorsEquivalent(prior[i], stored[i]) {
+			return stored
 		}
 	}
-	return d.SetNew("vgpus", oldRaw)
+	return prior
 }
 
-func interfaceStrings(raw interface{}) []string {
-	items, ok := raw.([]interface{})
-	if !ok {
-		return nil
-	}
-	out := make([]string, 0, len(items))
-	for _, item := range items {
-		out = append(out, strings.TrimSpace(fmt.Sprint(item)))
-	}
-	return out
+func vgpuSelectorsEquivalent(a, b string) bool {
+	return vgpuValuesMatch(a, b) || vgpuValuesMatch(b, a)
 }
 
 // vgpuDiffSuppress treats a requested profile such as A2-4C as the same value
 // as the slice the controller stored, nvidia0/0=A2-4C. An explicit slice
-// selector is compared as written.
+// selector is compared as written. The list and each element both use it:
+// the SDK applies a list DiffSuppressFunc to the flattened keys, and the
+// element function to vgpus.N.
 func vgpuDiffSuppress(_, oldValue, newValue string, _ *schema.ResourceData) bool {
 	return vgpuValuesMatch(oldValue, newValue)
 }
