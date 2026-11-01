@@ -149,7 +149,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 
 		// Load CA cert if provided
 		if tlsCAPath != "" {
-			caCert, err := os.ReadFile(tlsCAPath)
+			caCert, err := os.ReadFile(tlsCAPath) //nolint:gosec // the CA path is operator provider configuration
 			if err != nil {
 				return nil, diag.FromErr(fmt.Errorf("failed to read CA cert: %w", err))
 			}

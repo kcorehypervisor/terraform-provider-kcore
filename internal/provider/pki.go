@@ -46,11 +46,11 @@ func generateClusterPKI(dir, controllerAddr string) error {
 	if err != nil {
 		return fmt.Errorf("cluster CA: %w", err)
 	}
-	subKey, _, subCertPEM, subKeyPEM, err := newCA("kcore-cluster-sub-ca", subCAValidity, 0)
+	subKey, _, _, subKeyPEM, err := newCA("kcore-cluster-sub-ca", subCAValidity, 0)
 	if err != nil {
 		return fmt.Errorf("sub-CA key: %w", err)
 	}
-	subCertPEM, err = signCert(subKey, caCert, caKey, "kcore-cluster-sub-ca", subCAValidity, true, 0, nil, nil)
+	subCertPEM, err := signCert(subKey, caCert, caKey, "kcore-cluster-sub-ca", subCAValidity, true, 0, nil, nil)
 	if err != nil {
 		return fmt.Errorf("sub-CA: %w", err)
 	}
@@ -214,7 +214,7 @@ func serial() *big.Int {
 }
 
 func readPEM(dir, name string) (string, error) {
-	b, err := os.ReadFile(filepath.Join(dir, name))
+	b, err := os.ReadFile(filepath.Join(dir, name)) //nolint:gosec // dir is the operator-chosen certificate directory
 	if err != nil {
 		return "", err
 	}

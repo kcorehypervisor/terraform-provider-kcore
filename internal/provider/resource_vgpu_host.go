@@ -105,7 +105,7 @@ func resourceVgpuHostUpsert(ctx context.Context, d *schema.ResourceData, meta in
 		NodeId:    nodeID,
 		Enabled:   true,
 		HostCards: schemaStringList(d, "host_cards"),
-		NumVfs:    int32(d.Get("num_vfs").(int)),
+		NumVfs:    toInt32(d.Get("num_vfs").(int)),
 		Vendor:    vendor,
 	}
 	if vendor == "nvidia" {

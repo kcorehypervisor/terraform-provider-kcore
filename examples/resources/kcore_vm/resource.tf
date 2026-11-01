@@ -1,7 +1,7 @@
 resource "kcore_vm" "app" {
-  name          = "my-app-vm"
-  cpu           = 2
-  memory_bytes  = 4 * 1024 * 1024 * 1024 # 4 GiB
+  name         = "my-app-vm"
+  cpu          = 2
+  memory_bytes = 4 * 1024 * 1024 * 1024 # 4 GiB
 
   # Required for controller API 0.2.0+
   storage_backend    = "filesystem"

@@ -1,0 +1,39 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: standard
+  enable:
+    - gosec
+    - misspell
+    - unconvert
+    - bodyclose
+    - errorlint
+  settings:
+    errcheck:
+      exclude-functions:
+        # Schema writes only fail on a key missing from the schema, which the
+        # provider InternalValidate test already rules out.
+        - (*github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema.ResourceData).Set
+    gosec:
+      excludes:
+        # errcheck owns unchecked errors and carries the ResourceData.Set exclusion above.
+        - G104
+  exclusions:
+    generated: strict
+    paths:
+      - api
+    rules:
+      # grpc.Dial, DialContext, WithInsecure and WithBlock keep eager, blocking
+      # connects. Moving to grpc.NewClient changes that behaviour and needs its
+      # own change.
+      - linters: [staticcheck]
+        text: "SA1019: google.golang.org/grpc\\.(Dial|DialContext|WithInsecure|WithBlock)"
+      - linters: [gosec, errcheck]
+        path: _test\.go
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

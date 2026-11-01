@@ -116,9 +116,9 @@ func TestAccKcoreVM_basic(t *testing.T) {
 	resourceName := "kcore_vm.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckKcoreVMDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviders,
+		CheckDestroy:      testAccCheckKcoreVMDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKcoreVMConfig_basic(),

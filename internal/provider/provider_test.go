@@ -8,15 +8,15 @@ import (
 )
 
 // testAccProviders is a map of provider factories for acceptance tests
-var testAccProviders map[string]*schema.Provider
+var testAccProviders map[string]func() (*schema.Provider, error)
 
 // testAccProvider is the provider instance for acceptance tests
 var testAccProvider *schema.Provider
 
 func init() {
 	testAccProvider = New()
-	testAccProviders = map[string]*schema.Provider{
-		"kcore": testAccProvider,
+	testAccProviders = map[string]func() (*schema.Provider, error){
+		"kcore": func() (*schema.Provider, error) { return testAccProvider, nil },
 	}
 }
 
@@ -27,7 +27,7 @@ func TestProvider(t *testing.T) {
 }
 
 func TestProvider_impl(t *testing.T) {
-	var _ *schema.Provider = New()
+	var _ = New()
 }
 
 func testAccPreCheck(t *testing.T) {

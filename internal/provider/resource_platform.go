@@ -199,8 +199,8 @@ func clusterUpdateSpec(d *schema.ResourceData) *pb.ClusterUpdateSpec {
 		},
 		Strategy: &pb.ClusterUpdateStrategy{
 			Type:           updateStrategy(s(d, "strategy")),
-			MaxUnavailable: int32(d.Get("max_unavailable").(int)),
-			BatchSize:      int32(d.Get("batch_size").(int)),
+			MaxUnavailable: toInt32(d.Get("max_unavailable").(int)),
+			BatchSize:      toInt32(d.Get("batch_size").(int)),
 		},
 		DrainVms:              b(d, "drain_vms"),
 		ActivationMode:        updateActivation(s(d, "activation")),
@@ -208,9 +208,9 @@ func clusterUpdateSpec(d *schema.ResourceData) *pb.ClusterUpdateSpec {
 		UpdateKind:            s(d, "update_kind"),
 		RequiresNixpkgs:       b(d, "requires_nixpkgs"),
 		TestedOsPins:          testedOsPins(d),
-		SchemaVersion:         int32(d.Get("schema_version").(int)),
-		PreviousSchemaVersion: int32(d.Get("previous_schema_version").(int)),
-		MinCompatibleReader:   int32(d.Get("min_compatible_reader").(int)),
+		SchemaVersion:         toInt32(d.Get("schema_version").(int)),
+		PreviousSchemaVersion: toInt32(d.Get("previous_schema_version").(int)),
+		MinCompatibleReader:   toInt32(d.Get("min_compatible_reader").(int)),
 	}
 }
 

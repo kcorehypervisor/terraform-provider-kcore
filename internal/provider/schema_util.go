@@ -2,10 +2,9 @@ package provider
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	pb "github.com/kcorehypervisor/terraform-provider-kcore/api/controller"
 )
 
 func api(meta interface{}) *apiClient {
@@ -22,8 +21,24 @@ func i64(d *schema.ResourceData, key string) int64 {
 	return int64(v)
 }
 
+// toInt32 narrows a Terraform number for a proto int32 field and saturates
+// instead of wrapping, so an out-of-range value cannot flip sign.
+func toInt32(v int) int32 {
+	return saturateInt32(int64(v))
+}
+
+func saturateInt32(v int64) int32 {
+	if v > math.MaxInt32 {
+		return math.MaxInt32
+	}
+	if v < math.MinInt32 {
+		return math.MinInt32
+	}
+	return int32(v)
+}
+
 func i32(d *schema.ResourceData, key string) int32 {
-	return int32(i64(d, key))
+	return toInt32(int(i64(d, key)))
 }
 
 func b(d *schema.ResourceData, key string) bool {
@@ -74,7 +89,7 @@ func int32List(d *schema.ResourceData, key string) []int32 {
 	for _, item := range items {
 		switch n := item.(type) {
 		case int:
-			out = append(out, int32(n))
+			out = append(out, toInt32(n))
 		case int32:
 			out = append(out, n)
 		}
@@ -90,19 +105,4 @@ func fail(ok bool, msg string) error {
 		msg = "controller rejected the request"
 	}
 	return fmt.Errorf("%s", msg)
-}
-
-func storageBackend(name string) pb.StorageBackendType {
-	switch name {
-	case "filesystem", "file":
-		return pb.StorageBackendType_STORAGE_BACKEND_TYPE_FILESYSTEM
-	case "lvm":
-		return pb.StorageBackendType_STORAGE_BACKEND_TYPE_LVM
-	case "zfs":
-		return pb.StorageBackendType_STORAGE_BACKEND_TYPE_ZFS
-	case "ceph":
-		return pb.StorageBackendType_STORAGE_BACKEND_TYPE_CEPH
-	default:
-		return pb.StorageBackendType_STORAGE_BACKEND_TYPE_UNSPECIFIED
-	}
 }
