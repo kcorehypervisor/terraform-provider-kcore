@@ -128,7 +128,7 @@ jobs:
         run: go build -trimpath ./...
 
       - name: Cross-platform snapshot build (GoReleaser, no signing, no publishing)
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           version: "~> v2"
           args: build --snapshot --clean --skip=validate
