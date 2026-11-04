@@ -28,6 +28,7 @@ func TestResourcesCoverKctlCreateSurface(t *testing.T) {
 		"kcore_ssh_key",
 		"kcore_operator",
 		"kcore_cluster_update",
+		"kcore_cluster_version",
 		"kcore_workload",
 		"kcore_kubernetes_cluster",
 		"kcore_vault_policy",
@@ -103,14 +104,16 @@ func TestClusterUpdateSpecMatchesReleaseManifest(t *testing.T) {
 
 func TestClusterUpdateRejectsUnreleasedStrategies(t *testing.T) {
 	r := resourceClusterUpdate()
-	for _, name := range []string{"canary", "batch", "per-dc"} {
+	for _, name := range []string{"batch", "per-dc"} {
 		_, errs := r.Schema["strategy"].ValidateFunc(name, "strategy")
 		if len(errs) == 0 {
 			t.Errorf("%s was accepted", name)
 		}
 	}
-	if _, errs := r.Schema["strategy"].ValidateFunc("one-at-a-time", "strategy"); len(errs) != 0 {
-		t.Fatal(errs)
+	for _, name := range []string{"one-at-a-time", "canary"} {
+		if _, errs := r.Schema["strategy"].ValidateFunc(name, "strategy"); len(errs) != 0 {
+			t.Fatal(errs)
+		}
 	}
 	if _, errs := r.Schema["activation"].ValidateFunc("", "activation"); len(errs) != 0 {
 		t.Fatal(errs)

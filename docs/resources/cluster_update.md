@@ -56,6 +56,8 @@ resource "kcore_cluster_update" "os" {
 - `approval` (String)
 - `approve` (Boolean) Call approve after create when approval is manual.
 - `batch_size` (Number)
+- `canary_node` (String) With `strategy = "canary"`: the canary. Empty picks a node labelled `kcore.io/update-canary`, else the first node in rollout order. A node that runs a controller is refused unless every node does.
+- `canary_soak_seconds` (Number) With `strategy = "canary"`: how long the canary soaks. 0 means one hour. At most 7 days.
 - `controllers_only` (Boolean)
 - `drain_vms` (Boolean)
 - `flake_rev` (String)
@@ -67,7 +69,7 @@ resource "kcore_cluster_update" "os" {
 - `previous_schema_version` (Number)
 - `requires_nixpkgs` (Boolean)
 - `schema_version` (Number)
-- `strategy` (String) one-at-a-time. The 0.5.0 controller refuses canary, batch, and per-dc.
+- `strategy` (String) `one-at-a-time` or `canary`. A canary soaks on the new version while the controller compares it with the other nodes; the rest follow one at a time. Controllers before 0.7.0 refuse `canary`. `batch` and `per-dc` are refused.
 - `system_profile` (String)
 - `tested_os_pins` (Block List) Pins from the kcore release manifest. (see [below for nested schema](#nestedblock--tested_os_pins))
 - `update_kind` (String) `kcore` or `nixpkgs`. Defaults to `kcore`.

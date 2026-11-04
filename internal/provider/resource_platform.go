@@ -33,8 +33,21 @@ func resourceClusterUpdate() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Default:      "one-at-a-time",
-				Description:  "one-at-a-time. The 0.5.0 controller refuses canary, batch, and per-dc.",
-				ValidateFunc: validation.StringInSlice([]string{"one-at-a-time"}, false),
+				Description:  "`one-at-a-time` or `canary`. A canary soaks on the new version while the controller compares it with the other nodes; the rest follow one at a time. Controllers before 0.7.0 refuse `canary`. `batch` and `per-dc` are refused.",
+				ValidateFunc: validation.StringInSlice([]string{"one-at-a-time", "canary"}, false),
+			},
+			"canary_soak_seconds": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				Description:  "With `strategy = \"canary\"`: how long the canary soaks. 0 means one hour. At most 7 days.",
+				ValidateFunc: validation.IntBetween(0, maxCanarySoakSeconds),
+			},
+			"canary_node": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "With `strategy = \"canary\"`: the canary. Empty picks a node labelled `kcore.io/update-canary`, else the first node in rollout order. A node that runs a controller is refused unless every node does.",
 			},
 			"max_unavailable": {
 				Type:        schema.TypeInt,
@@ -112,6 +125,9 @@ func resourceClusterUpdate() *schema.Resource {
 		},
 	}
 }
+
+// maxCanarySoakSeconds matches the controller's limit.
+const maxCanarySoakSeconds = 7 * 86400
 
 func updateStrategy(name string) pb.ClusterUpdateStrategyType {
 	switch name {
@@ -198,9 +214,11 @@ func clusterUpdateSpec(d *schema.ResourceData) *pb.ClusterUpdateSpec {
 			ControllersOnly: b(d, "controllers_only"),
 		},
 		Strategy: &pb.ClusterUpdateStrategy{
-			Type:           updateStrategy(s(d, "strategy")),
-			MaxUnavailable: toInt32(d.Get("max_unavailable").(int)),
-			BatchSize:      toInt32(d.Get("batch_size").(int)),
+			Type:              updateStrategy(s(d, "strategy")),
+			MaxUnavailable:    toInt32(d.Get("max_unavailable").(int)),
+			BatchSize:         toInt32(d.Get("batch_size").(int)),
+			CanarySoakSeconds: toInt32(d.Get("canary_soak_seconds").(int)),
+			CanaryNodeId:      s(d, "canary_node"),
 		},
 		DrainVms:              b(d, "drain_vms"),
 		ActivationMode:        updateActivation(s(d, "activation")),
