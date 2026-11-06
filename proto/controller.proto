@@ -24,6 +24,11 @@ service Controller {
   // AttachVmConsole proxies a bidirectional serial console session to the
   // node hosting the VM (see NodeAdmin.AttachVmConsole).
   rpc AttachVmConsole(stream ConsoleMessage) returns (stream ConsoleMessage);
+  // The same console for gRPC-web, which has no client streaming. The first
+  // event carries session_id; send keystrokes with SendVmConsoleInput. The
+  // session ends when the caller stops reading the stream.
+  rpc OpenVmConsole(OpenVmConsoleRequest) returns (stream VmConsoleEvent);
+  rpc SendVmConsoleInput(SendVmConsoleInputRequest) returns (SendVmConsoleInputResponse);
   rpc CreateWorkload(CreateWorkloadRequest) returns (CreateWorkloadResponse);
   rpc DeleteWorkload(DeleteWorkloadRequest) returns (DeleteWorkloadResponse);
   rpc SetWorkloadDesiredState(SetWorkloadDesiredStateRequest) returns (SetWorkloadDesiredStateResponse);
@@ -204,6 +209,14 @@ service Controller {
   rpc RollbackClusterUpdate(RollbackClusterUpdateRequest) returns (RollbackClusterUpdateResponse);
   // Migrate guests off one node, then boot a staged kernel. Not part of apply.
   rpc RebootClusterUpdateNode(RebootClusterUpdateNodeRequest) returns (RebootClusterUpdateNodeResponse);
+  // End a canary's soak early, or accept a canary the controller could not
+  // judge, and let the rollout continue.
+  rpc PromoteClusterUpdate(PromoteClusterUpdateRequest) returns (PromoteClusterUpdateResponse);
+  // Move every node to a release tag. Upgrades and downgrades alike start a
+  // ClusterUpdate that updates a canary, soaks it, then updates the other
+  // nodes one at a time, and stops at the first failing node.
+  rpc SetClusterVersion(SetClusterVersionRequest) returns (SetClusterVersionResponse);
+  rpc GetClusterVersion(GetClusterVersionRequest) returns (GetClusterVersionResponse);
 
   // CephCluster — declarative cluster-scoped Ceph SAN configuration.
   rpc PlanCephCluster(PlanCephClusterRequest) returns (PlanCephClusterResponse);
@@ -226,6 +239,28 @@ service Controller {
   rpc GetSharedFilesystem(GetSharedFilesystemRequest) returns (GetSharedFilesystemResponse);
   rpc ListSharedFilesystems(ListSharedFilesystemsRequest) returns (ListSharedFilesystemsResponse);
   rpc DeleteSharedFilesystem(DeleteSharedFilesystemRequest) returns (DeleteSharedFilesystemResponse);
+
+  // Ingress gateway (Caddy + Coraza WAF). Specs travel as the canonical
+  // camelCase JSON documents; the controller parses them strictly.
+  rpc PlanIngress(PlanIngressRequest) returns (PlanIngressResponse);
+  rpc CreateIngressGateway(CreateIngressGatewayRequest) returns (CreateIngressGatewayResponse);
+  rpc GetIngressGateway(GetIngressGatewayRequest) returns (GetIngressGatewayResponse);
+  rpc ListIngressGateways(ListIngressGatewaysRequest) returns (ListIngressGatewaysResponse);
+  rpc DeleteIngressGateway(DeleteIngressGatewayRequest) returns (DeleteIngressGatewayResponse);
+  rpc CreateIngressRoute(CreateIngressRouteRequest) returns (CreateIngressRouteResponse);
+  rpc GetIngressRoute(GetIngressRouteRequest) returns (GetIngressRouteResponse);
+  rpc ListIngressRoutes(ListIngressRoutesRequest) returns (ListIngressRoutesResponse);
+  rpc DeleteIngressRoute(DeleteIngressRouteRequest) returns (DeleteIngressRouteResponse);
+  rpc SetIngressRouteWafMode(SetIngressRouteWafModeRequest) returns (SetIngressRouteWafModeResponse);
+  rpc CreateWafPolicy(CreateWafPolicyRequest) returns (CreateWafPolicyResponse);
+  rpc GetWafPolicy(GetWafPolicyRequest) returns (GetWafPolicyResponse);
+  rpc ListWafPolicies(ListWafPoliciesRequest) returns (ListWafPoliciesResponse);
+  rpc DeleteWafPolicy(DeleteWafPolicyRequest) returns (DeleteWafPolicyResponse);
+  rpc ListWafEvents(ListWafEventsRequest) returns (ListWafEventsResponse);
+  // Writes a secret file (for example dns.env) on every node of a gateway.
+  rpc SetIngressSecret(SetIngressSecretRequest) returns (SetIngressSecretResponse);
+  // Node agent -> controller: batches of Coraza audit events.
+  rpc ReportWafEvents(ReportWafEventsRequest) returns (ReportWafEventsResponse);
 
   // ObjectStore (RGW) — S3-compatible object storage on Ceph.
   rpc CreateObjectStore(CreateObjectStoreRequest) returns (CreateObjectStoreResponse);
@@ -253,6 +288,16 @@ service Controller {
   rpc DeleteKubernetesCluster(DeleteKubernetesClusterRequest) returns (DeleteKubernetesClusterResponse);
   rpc ScaleKubernetesCluster(ScaleKubernetesClusterRequest) returns (ScaleKubernetesClusterResponse);
   rpc GetKubernetesClusterHealth(GetKubernetesClusterHealthRequest) returns (GetKubernetesClusterHealthResponse);
+
+  // SlurmCluster — Slurm host services on disjoint kcoreOS nodes.
+  rpc PlanSlurmCluster(PlanSlurmClusterRequest) returns (PlanSlurmClusterResponse);
+  rpc CreateSlurmCluster(CreateSlurmClusterRequest) returns (CreateSlurmClusterResponse);
+  rpc GetSlurmCluster(GetSlurmClusterRequest) returns (GetSlurmClusterResponse);
+  rpc ListSlurmClusters(ListSlurmClustersRequest) returns (ListSlurmClustersResponse);
+  rpc DeleteSlurmCluster(DeleteSlurmClusterRequest) returns (DeleteSlurmClusterResponse);
+  rpc RotateSlurmMungeKey(RotateSlurmMungeKeyRequest) returns (RotateSlurmMungeKeyResponse);
+  rpc DrainSlurmNode(DrainSlurmNodeRequest) returns (DrainSlurmNodeResponse);
+  rpc ResumeSlurmNode(ResumeSlurmNodeRequest) returns (ResumeSlurmNodeResponse);
 }
 
 message RegisterNodeRequest {
@@ -347,11 +392,15 @@ message VgpuManager {
 message ConfigureNodeVgpuRequest {
   string node_id = 1;
   bool enabled = 2;
-  // Physical functions that stay on the NVIDIA host driver, e.g. 0000:61:00.0.
+  // Physical functions that stay on the vendor host driver, e.g. 0000:61:00.0.
   repeated string host_cards = 3;
-  // 0 asks sriov-manage for every function the card supports.
+  // NVIDIA: 0 asks sriov-manage for every function the card supports.
+  // Intel and AMD: required; the card is split evenly into this many slices.
   int32 num_vfs = 4;
+  // NVIDIA only. Intel (xe) and AMD (GIM) need no manager download.
   VgpuManager manager = 5;
+  // nvidia (default), intel, or amd.
+  string vendor = 6;
 }
 
 message ConfigureNodeVgpuResponse {
@@ -374,6 +423,7 @@ message GetNodeVgpuResponse {
   string manager_sha256 = 5;
   string manager_version = 6;
   string staged_store_path = 7;
+  string vendor = 8;
 }
 
 message RebootNodeRequest {
@@ -624,6 +674,24 @@ message ConsoleMessage {
   string vm_name = 1; // required on the first client → server message
   bytes data = 2;     // raw serial bytes
 }
+
+message OpenVmConsoleRequest {
+  string vm_name = 1;
+}
+
+message VmConsoleEvent {
+  // Set on the first event only.
+  string session_id = 1;
+  bytes data = 2;
+}
+
+message SendVmConsoleInputRequest {
+  string session_id = 1;
+  // At most 64 KiB.
+  bytes data = 2;
+}
+
+message SendVmConsoleInputResponse {}
 
 message CreateWorkloadRequest {
   WorkloadKind kind = 1;
@@ -1047,6 +1115,207 @@ service ControllerAdmin {
   rpc ResolveReplicationConflict(ResolveReplicationConflictRequest) returns (ResolveReplicationConflictResponse);
 }
 
+// Auth signs operators in on the controller web listener (gRPC-web and gRPC
+// with a bearer token). The mTLS listener keeps client certificates.
+//
+// A web session needs a password and a TOTP code. Login returns a pending
+// token that is good for five minutes and only for the second-factor RPCs.
+// An operator without TOTP must enroll before the first session is issued.
+// Send tokens as `authorization: Bearer <token>`.
+service Auth {
+  rpc Login(LoginRequest) returns (LoginResponse);
+  // Pending token only. Accepts a TOTP code or one unused recovery code.
+  rpc VerifySecondFactor(VerifySecondFactorRequest) returns (VerifySecondFactorResponse);
+  // Pending token or session. Replaces any enrollment not yet confirmed.
+  rpc BeginTotpEnrollment(BeginTotpEnrollmentRequest) returns (BeginTotpEnrollmentResponse);
+  // Turns TOTP on and returns recovery codes once. With a pending token the
+  // response also carries the first session.
+  rpc ConfirmTotpEnrollment(ConfirmTotpEnrollmentRequest) returns (ConfirmTotpEnrollmentResponse);
+  // Revokes the token on this request.
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc WhoAmI(WhoAmIRequest) returns (WhoAmIResponse);
+  // Session only. Revokes the operator's other sessions.
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
+  // The caller's own sessions on this controller.
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse);
+  rpc RevokeSession(RevokeSessionRequest) returns (RevokeSessionResponse);
+  // Session only. An API token skips TOTP, so it is shown once and can be
+  // capped below the operator's own role.
+  rpc CreateApiToken(CreateApiTokenRequest) returns (CreateApiTokenResponse);
+  rpc ListApiTokens(ListApiTokensRequest) returns (ListApiTokensResponse);
+  rpc RevokeApiToken(RevokeApiTokenRequest) returns (RevokeApiTokenResponse);
+  // cluster-admin. Sets the password, revokes the operator's sessions, and
+  // keeps TOTP as it is.
+  rpc SetOperatorPassword(SetOperatorPasswordRequest) returns (SetOperatorPasswordResponse);
+  // cluster-admin. Clears TOTP and recovery codes. The next login enrolls again.
+  rpc ResetOperatorSecondFactor(ResetOperatorSecondFactorRequest) returns (ResetOperatorSecondFactorResponse);
+}
+
+enum LoginStep {
+  LOGIN_STEP_UNSPECIFIED = 0;
+  // Send VerifySecondFactor with the pending token.
+  LOGIN_STEP_TOTP = 1;
+  // Send BeginTotpEnrollment, then ConfirmTotpEnrollment, with the pending token.
+  LOGIN_STEP_ENROLL_TOTP = 2;
+}
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string pending_token = 1;
+  LoginStep next_step = 2;
+  google.protobuf.Timestamp pending_expires_at = 3;
+}
+
+message AuthSession {
+  string token = 1;
+  string token_id = 2;
+  google.protobuf.Timestamp expires_at = 3;
+  // Idle seconds before the session ends. Each request resets the clock.
+  int64 idle_timeout_secs = 4;
+}
+
+message VerifySecondFactorRequest {
+  string totp_code = 1;
+  string recovery_code = 2;
+}
+
+message VerifySecondFactorResponse {
+  AuthSession session = 1;
+  int32 recovery_codes_left = 2;
+}
+
+message BeginTotpEnrollmentRequest {}
+
+message BeginTotpEnrollmentResponse {
+  // Base32 (RFC 4648, no padding).
+  string secret = 1;
+  string otpauth_uri = 2;
+  string issuer = 3;
+  string account = 4;
+  int32 digits = 5;
+  int32 period_secs = 6;
+}
+
+message ConfirmTotpEnrollmentRequest {
+  string totp_code = 1;
+}
+
+message ConfirmTotpEnrollmentResponse {
+  repeated string recovery_codes = 1;
+  AuthSession session = 2;
+}
+
+message LogoutRequest {}
+
+message LogoutResponse {}
+
+message WhoAmIRequest {}
+
+enum AuthMethod {
+  AUTH_METHOD_UNSPECIFIED = 0;
+  AUTH_METHOD_CLIENT_CERTIFICATE = 1;
+  AUTH_METHOD_SESSION = 2;
+  AUTH_METHOD_API_TOKEN = 3;
+  // Plaintext listener started with --allow-insecure.
+  AUTH_METHOD_INSECURE = 4;
+}
+
+message WhoAmIResponse {
+  string operator = 1;
+  AuthMethod method = 2;
+  // Highest role in effect, after an API token cap.
+  OperatorRoleKind effective_role = 3;
+  repeated OperatorRoleKind roles = 4;
+  bool totp_enabled = 5;
+  bool password_set = 6;
+  string token_id = 7;
+  google.protobuf.Timestamp expires_at = 8;
+}
+
+message ChangePasswordRequest {
+  string current_password = 1;
+  string new_password = 2;
+}
+
+message ChangePasswordResponse {
+  int32 sessions_revoked = 1;
+}
+
+message AuthTokenInfo {
+  string token_id = 1;
+  string operator = 2;
+  // "session" or "api".
+  string kind = 3;
+  string name = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp expires_at = 6;
+  google.protobuf.Timestamp last_used_at = 7;
+  string created_from = 8;
+  // Unspecified means the operator's own role.
+  OperatorRoleKind max_role = 9;
+  bool current = 10;
+}
+
+message ListSessionsRequest {}
+
+message ListSessionsResponse {
+  repeated AuthTokenInfo sessions = 1;
+}
+
+message RevokeSessionRequest {
+  string token_id = 1;
+}
+
+message RevokeSessionResponse {}
+
+message CreateApiTokenRequest {
+  string name = 1;
+  // 1 to 365. 0 means 90.
+  int32 expires_in_days = 2;
+  OperatorRoleKind max_role = 3;
+}
+
+message CreateApiTokenResponse {
+  string token = 1;
+  AuthTokenInfo info = 2;
+}
+
+message ListApiTokensRequest {
+  // cluster-admin only. Empty lists the caller's tokens.
+  string operator = 1;
+}
+
+message ListApiTokensResponse {
+  repeated AuthTokenInfo tokens = 1;
+}
+
+message RevokeApiTokenRequest {
+  string token_id = 1;
+}
+
+message RevokeApiTokenResponse {}
+
+message SetOperatorPasswordRequest {
+  string name = 1;
+  string password = 2;
+}
+
+message SetOperatorPasswordResponse {
+  int32 sessions_revoked = 1;
+}
+
+message ResetOperatorSecondFactorRequest {
+  string name = 1;
+}
+
+message ResetOperatorSecondFactorResponse {
+  int32 sessions_revoked = 1;
+}
+
 message GetReplicationEventsRequest {
   int64 after_event_id = 1; // Exclusive cursor; 0 means from start.
   int32 limit = 2; // Max rows to return; defaults server-side when <= 0.
@@ -1318,6 +1587,8 @@ message CordonNodeResponse {
 
 message UncordonNodeRequest {
   string node_id = 1;
+  // A Slurm compute member stays cordoned unless force is set.
+  bool force = 2;
 }
 
 message UncordonNodeResponse {
@@ -2266,6 +2537,9 @@ message ClusterUpdateTarget {
   string flake_rev = 3;
   string nixpkgs_rev = 4;
   string system_profile = 5;
+  // Release tag (vX.Y.Z). Nodes install the release host flake for this tag,
+  // the same flake.nix and flake.lock the tag's ISO installs.
+  string tag = 6;
 }
 
 message ClusterUpdateSelector {
@@ -2288,6 +2562,13 @@ message ClusterUpdateStrategy {
   ClusterUpdateStrategyType type = 1;
   int32 max_unavailable = 2;
   int32 batch_size = 3;
+  // CANARY only. How long the canary runs the target before the other nodes
+  // start. 0 means one hour.
+  int32 canary_soak_seconds = 4;
+  // CANARY only. Empty picks a node labelled kcore.io/update-canary, else the
+  // first node in rollout order. A node that runs a controller is the canary
+  // only when every node does, so a controller on the old version judges it.
+  string canary_node_id = 5;
 }
 
 enum ClusterUpdateApprovalPolicy {
@@ -2367,6 +2648,12 @@ enum NodeUpdatePhase {
   NODE_UPDATE_PHASE_CANCELLED = 5;
   NODE_UPDATE_PHASE_ROLLING_BACK = 6;
   NODE_UPDATE_PHASE_REBOOT_REQUIRED = 7;
+  // Rebooted into the staged generation; waiting for the node to confirm it.
+  NODE_UPDATE_PHASE_REBOOTING = 8;
+  // The canary runs the target; the other nodes wait for its soak to end.
+  NODE_UPDATE_PHASE_SOAKING = 9;
+  // The soak ended without a verdict; PromoteClusterUpdate or cancel.
+  NODE_UPDATE_PHASE_AWAITING_PROMOTION = 10;
 }
 
 message NodeUpdateStatus {
@@ -2462,6 +2749,75 @@ message RebootClusterUpdateNodeRequest {
 message RebootClusterUpdateNodeResponse {
   bool success = 1;
   string message = 2;
+}
+
+message PromoteClusterUpdateRequest {
+  string name = 1;
+}
+
+message PromoteClusterUpdateResponse {
+  bool success = 1;
+  string node_id = 2;
+  string message = 3;
+}
+
+message SetClusterVersionRequest {
+  // Release tag, vX.Y.Z.
+  string version = 1;
+  // Repository the tag is resolved in. Empty means github:kcorehypervisor/kcore.
+  // An air-gapped site names its mirror, for example git+https://git.example/kcore.
+  string flake_ref = 2;
+  // Migrate guests off a node before it reboots into a new kernel.
+  bool drain_vms = 3;
+  // Resolve and compare only.
+  bool dry_run = 4;
+  // How long the canary soaks. 0 means 24 hours when the release moves to
+  // another NixOS release and one hour otherwise.
+  int32 canary_soak_seconds = 5;
+  // Update every node one at a time with no canary and no soak.
+  bool no_canary = 6;
+  // The canary. Empty picks a node labelled kcore.io/update-canary, else the
+  // first node in rollout order. A node that runs a controller is refused
+  // unless every node does.
+  string canary_node_id = 7;
+}
+
+message SetClusterVersionResponse {
+  // "upgrade", "downgrade", "mixed" (nodes on both sides), or "unchanged".
+  string direction = 1;
+  string version = 2;
+  // Commit the tag resolved to.
+  string flake_rev = 3;
+  repeated string target_node_ids = 4;
+  // Empty when nothing changes or on a dry run.
+  string update_name = 5;
+  ClusterUpdate cluster_update = 6;
+  string message = 7;
+  // Empty without a canary, which includes a single target node.
+  string canary_node_id = 8;
+  int32 canary_soak_seconds = 9;
+}
+
+message GetClusterVersionRequest {}
+
+message NodeVersion {
+  string node_id = 1;
+  string version = 2;
+  string booted_generation = 3;
+  string current_generation = 4;
+  // Node phase in the latest version update, empty when it was not part of it.
+  NodeUpdatePhase phase = 5;
+  string last_error = 6;
+}
+
+message GetClusterVersionResponse {
+  // Last version set with SetClusterVersion, empty when none was.
+  string version = 1;
+  string flake_ref = 2;
+  string flake_rev = 3;
+  string update_name = 4;
+  ClusterUpdatePhase phase = 5;
+  repeated NodeVersion nodes = 6;
 }
 
 // --- CephCluster ----------------------------------------------------------------------------
@@ -2854,6 +3210,10 @@ message GetCrlResponse {
   google.protobuf.Timestamp next_update = 6;
   int32 revoked_count = 7;
   string message = 8;
+  // PEM of the sub-CA that signed the CRL. A node whose own certificate file
+  // has no chain can verify the CRL only if it can check this certificate
+  // against its root CA, which it already trusts.
+  string issuer_pem = 9;
 }
 
 message GetPkiStatusRequest {}
@@ -3071,4 +3431,357 @@ message GetKubernetesClusterHealthResponse {
   int32 etcd_member_count = 7;
   bool api_server_reachable = 8;
   repeated NodeHealth node_health = 9;
+}
+
+// --- Ingress gateway (Caddy + Coraza) --------------------------------------------------------
+// See docs/ingress-waf-load-balancer-plan.md. `spec_json` is the canonical camelCase document.
+
+message IngressCertStatus {
+  string host = 1;
+  string issuer = 2;
+  string not_after = 3; // RFC 3339
+}
+
+message IngressUpstreamHealth {
+  string address = 1;
+  bool healthy = 2;
+}
+
+message IngressNodeStatus {
+  string node_id = 1;
+  string desired_hash = 2;
+  string applied_hash = 3;
+  bool healthy = 4;
+  string message = 5;
+  string vip_holder = 6; // address this node serves the VIP for, empty when it is not the holder
+  repeated IngressCertStatus certs = 7;
+  repeated IngressUpstreamHealth upstreams = 8;
+}
+
+message IngressGatewayStatus {
+  int64 observed_generation = 1;
+  string phase = 2; // pending | applying | ready | degraded | failed
+  string message = 3;
+  repeated IngressNodeStatus nodes = 4;
+}
+
+message IngressGateway {
+  string name = 1;
+  int64 generation = 2;
+  string spec_json = 3;
+  IngressGatewayStatus status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message IngressRouteStatus {
+  string phase = 1; // pending | ready | degraded
+  string message = 2;
+  repeated IngressCertStatus certs = 3;
+  repeated IngressUpstreamHealth upstreams = 4;
+  string last_waf_block_at = 5;
+}
+
+message IngressRoute {
+  string name = 1;
+  int64 generation = 2;
+  string gateway = 3;
+  string spec_json = 4;
+  // Empty for operator routes; k8s:<cluster>/<ns>/<ingress> for synthesised ones.
+  string owner = 5;
+  IngressRouteStatus status = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message WafPolicy {
+  string name = 1;
+  int64 generation = 2;
+  string spec_json = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+message WafEvent {
+  int64 id = 1;
+  string gateway = 2;
+  string route = 3;
+  string node_id = 4;
+  int32 rule_id = 5;
+  string severity = 6;
+  string client_ip = 7;
+  string host = 8;
+  string uri = 9;
+  string action = 10; // detected | blocked
+  string tx_id = 11;
+  string raw_json = 12;
+  google.protobuf.Timestamp created_at = 13;
+}
+
+// One document overlaid on stored state for PlanIngress.
+message IngressDocument {
+  string kind = 1; // IngressGateway | IngressRoute | WafPolicy
+  string name = 2;
+  string spec_json = 3;
+}
+
+message PlanIngressRequest {
+  string gateway = 1; // gateway whose configuration is rendered
+  repeated IngressDocument documents = 2;
+}
+message PlanIngressNode {
+  string node_id = 1;
+  string caddy_json = 2;
+  string hash = 3;
+  string applied_hash = 4; // what the node last reported; empty when unknown
+  bool changed = 5;
+}
+message PlanIngressResponse {
+  repeated string errors = 1;
+  repeated string warnings = 2;
+  repeated PlanIngressNode nodes = 3;
+}
+
+message CreateIngressGatewayRequest { string name = 1; string spec_json = 2; }
+message CreateIngressGatewayResponse {
+  bool success = 1;
+  IngressGateway gateway = 2;
+  ApplyAction action = 3;
+  repeated string changed_fields = 4;
+}
+message GetIngressGatewayRequest { string name = 1; }
+message GetIngressGatewayResponse { IngressGateway gateway = 1; }
+message ListIngressGatewaysRequest {}
+message ListIngressGatewaysResponse { repeated IngressGateway gateways = 1; }
+message DeleteIngressGatewayRequest { string name = 1; }
+message DeleteIngressGatewayResponse { bool success = 1; }
+
+message CreateIngressRouteRequest { string name = 1; string spec_json = 2; }
+message CreateIngressRouteResponse {
+  bool success = 1;
+  IngressRoute route = 2;
+  ApplyAction action = 3;
+  repeated string changed_fields = 4;
+}
+message GetIngressRouteRequest { string name = 1; }
+message GetIngressRouteResponse { IngressRoute route = 1; }
+message ListIngressRoutesRequest { string gateway = 1; }
+message ListIngressRoutesResponse { repeated IngressRoute routes = 1; }
+message DeleteIngressRouteRequest { string name = 1; }
+message DeleteIngressRouteResponse { bool success = 1; }
+message SetIngressRouteWafModeRequest {
+  string name = 1;
+  string mode = 2; // detect | block | off
+}
+message SetIngressRouteWafModeResponse { bool success = 1; IngressRoute route = 2; }
+
+message CreateWafPolicyRequest { string name = 1; string spec_json = 2; }
+message CreateWafPolicyResponse {
+  bool success = 1;
+  WafPolicy policy = 2;
+  ApplyAction action = 3;
+  repeated string changed_fields = 4;
+}
+message GetWafPolicyRequest { string name = 1; }
+message GetWafPolicyResponse { WafPolicy policy = 1; }
+message ListWafPoliciesRequest {}
+message ListWafPoliciesResponse { repeated WafPolicy policies = 1; }
+message DeleteWafPolicyRequest { string name = 1; }
+message DeleteWafPolicyResponse { bool success = 1; }
+
+message ListWafEventsRequest {
+  string gateway = 1;
+  string route = 2;
+  int32 rule_id = 3;       // 0 = any
+  string client_ip = 4;
+  int64 since_unix = 5;    // 0 = no lower bound
+  int32 limit = 6;         // 0 = default (200)
+}
+message ListWafEventsResponse { repeated WafEvent events = 1; }
+
+message ReportWafEventsRequest {
+  string node_id = 1;
+  string gateway = 2;
+  repeated WafEvent events = 3;
+}
+message ReportWafEventsResponse { int32 accepted = 1; }
+
+message SetIngressSecretRequest {
+  string gateway = 1;
+  string name = 2;      // file name, for example dns.env
+  bytes content = 3;
+}
+message SetIngressSecretResponse {
+  bool success = 1;
+  repeated string nodes = 2; // nodes the file was written to
+}
+
+// ============================================================================
+// Slurm Cluster Management
+// ============================================================================
+
+enum SlurmClusterPhase {
+  SLURM_CLUSTER_PHASE_UNSPECIFIED = 0;
+  SLURM_CLUSTER_PHASE_PENDING = 1;
+  SLURM_CLUSTER_PHASE_APPLYING = 2;
+  SLURM_CLUSTER_PHASE_READY = 3;
+  SLURM_CLUSTER_PHASE_DEGRADED = 4;
+  SLURM_CLUSTER_PHASE_DELETING = 5;
+  SLURM_CLUSTER_PHASE_FAILED = 6;
+}
+
+message SlurmControllerSpec {
+  string node_id = 1;
+  string address = 2;
+  string iface = 3;
+}
+
+message SlurmReserveSpec {
+  int32 cores = 1;
+  int64 memory_mb = 2;
+}
+
+message SlurmComputeSpec {
+  string node_id = 1;
+  string address = 2;
+  string iface = 3;
+  repeated string partitions = 4;
+  SlurmReserveSpec reserve = 5;
+  string gres = 6; // "none" (default) or "auto"
+}
+
+message SlurmPartitionSpec {
+  string name = 1;
+  bool default = 2;
+  string max_time = 3;
+  string state = 4;
+}
+
+message SlurmUserSpec {
+  string name = 1;
+  int32 uid = 2;
+  repeated string ssh_keys = 3;
+}
+
+message SlurmStorageSpec {
+  string mode = 1; // "nfs" (default), "shared-filesystem", "none"
+  repeated string exports = 2;
+  string filesystem = 3; // SharedFilesystem name when mode is shared-filesystem
+}
+
+message SlurmAccountingSpec {
+  bool enabled = 1;
+  string node_id = 2; // defaults to the controller node
+}
+
+message SlurmLoginSpec {
+  repeated string node_ids = 1;
+}
+
+message SlurmClusterSpec {
+  string cluster_name = 1;
+  SlurmControllerSpec controller = 2;
+  SlurmControllerSpec backup_controller = 3;
+  SlurmLoginSpec login = 4;
+  SlurmAccountingSpec accounting = 5;
+  repeated SlurmComputeSpec compute = 6;
+  repeated SlurmPartitionSpec partitions = 7;
+  repeated SlurmUserSpec users = 8;
+  SlurmStorageSpec storage = 9;
+  string extra_config = 10;
+  bool allow_controller_host = 11;
+  // Opt in to the host NVIDIA driver on compute members. gres: auto requires
+  // this; the module default is false because kcoreOS ships no host driver.
+  bool gpu_driver = 12;
+}
+
+message SlurmNodeStatus {
+  string node_id = 1;
+  repeated string roles = 2;
+  string slurm_state = 3; // idle, alloc, down, drain, unknown
+  int64 applied_generation = 4;
+  string config_hash = 5;
+}
+
+message SlurmClusterStatus {
+  int64 observed_generation = 1;
+  string phase = 2; // pending, applying, ready, degraded, deleting, failed
+  string message = 3;
+  repeated SlurmNodeStatus nodes = 4;
+}
+
+message SlurmCluster {
+  string name = 1;
+  int64 generation = 2;
+  SlurmClusterSpec spec = 3;
+  SlurmClusterStatus status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message PlanSlurmClusterRequest {
+  string name = 1;
+  SlurmClusterSpec spec = 2;
+}
+
+message PlanSlurmClusterResponse {
+  string action = 1; // create, update, unchanged, replace
+  repeated string blocking_issues = 2;
+  repeated string warnings = 3;
+  repeated NodePlanResult node_plans = 4;
+  string rendered_nix_preview = 5;
+}
+
+message CreateSlurmClusterRequest {
+  string name = 1;
+  SlurmClusterSpec spec = 2;
+  bool confirm = 3;
+}
+
+message CreateSlurmClusterResponse {
+  bool success = 1;
+  string message = 2;
+  SlurmCluster cluster = 3;
+  ApplyAction action = 4;
+  repeated string changed_fields = 5;
+}
+
+message GetSlurmClusterRequest { string name = 1; }
+message GetSlurmClusterResponse { SlurmCluster cluster = 1; }
+message ListSlurmClustersRequest {}
+message ListSlurmClustersResponse { repeated SlurmCluster clusters = 1; }
+
+message DeleteSlurmClusterRequest {
+  string name = 1;
+  bool force = 2;
+}
+message DeleteSlurmClusterResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message RotateSlurmMungeKeyRequest { string name = 1; }
+message RotateSlurmMungeKeyResponse {
+  bool success = 1;
+  string message = 2;
+  int64 generation = 3;
+}
+
+message DrainSlurmNodeRequest {
+  string name = 1;
+  string node_id = 2;
+  string reason = 3;
+}
+message DrainSlurmNodeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ResumeSlurmNodeRequest {
+  string name = 1;
+  string node_id = 2;
+}
+message ResumeSlurmNodeResponse {
+  bool success = 1;
+  string message = 2;
 }

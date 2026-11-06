@@ -77,6 +77,7 @@ func New() *schema.Provider {
 			"kcore_ssh_key":                   resourceSSHKey(),
 			"kcore_operator":                  resourceOperator(),
 			"kcore_cluster_update":            resourceClusterUpdate(),
+			"kcore_cluster_version":           resourceClusterVersion(),
 			"kcore_workload":                  resourceWorkload(),
 			"kcore_kubernetes_cluster":        resourceKubernetesCluster(),
 			"kcore_vault_policy":              resourceVaultPolicy(),
