@@ -14,7 +14,7 @@ The kcore release every node runs (`kctl update version set`). Changing `version
 
 ```terraform
 resource "kcore_cluster_version" "this" {
-  version             = "v0.7.0"
+  version             = "v0.8.0"
   drain_vms           = true
   canary_soak_seconds = 14400
   canary_node         = "node-b"
@@ -26,7 +26,7 @@ resource "kcore_cluster_version" "this" {
 
 ### Required
 
-- `version` (String) Release tag, `v0.7.0` or `0.7.0`.
+- `version` (String) Release tag, `v0.8.0` or `0.8.0`.
 
 ### Optional
 

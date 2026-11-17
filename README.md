@@ -2,7 +2,7 @@
 
 Manage a kcore cluster through the same create path as `kctl`: cluster TLS, node install and approval, VMs, networks, security groups, volumes, Ceph, object storage, operators, SSH keys, host updates, and container workloads.
 
-The controller API matches kcore **0.5.0**. Provider **0.5.1** publishes the resources below. [`kcore_cluster`](docs/resources/cluster.md) writes CA, sub-CA, controller, and kctl certificates on the machine running Terraform. Apply it before any node is installed.
+The controller API matches kcore **0.8.0**. Provider **0.8.0** publishes the resources below. [`kcore_cluster`](docs/resources/cluster.md) writes CA, sub-CA, controller, and kctl certificates on the machine running Terraform. Apply it before any node is installed.
 
 Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terraform.io/providers/kcorehypervisor/kcore/latest).
 
@@ -52,7 +52,7 @@ terraform {
   required_providers {
     kcore = {
       source  = "kcorehypervisor/kcore"
-      version = "0.5.1"
+      version = "0.8.0"
     }
   }
 }
