@@ -10,8 +10,8 @@ Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terra
 
 | Resource | kctl |
 |----------|------|
-| `kcore_cluster` | `kctl create cluster` (local PKI) |
-| `kcore_node` | `kctl node install`. `bootstrap = true` is the first controller; other nodes set `join_controller` to its `controller_address`. Apply waits until a controller node accepts RPCs |
+| `kcore_cluster` | `kind: Cluster` / `kctl apply`: local PKI, `node` blocks, desired `version` and `update` policy |
+| `kcore_node` | **Deprecated.** Prefer `kcore_cluster` node blocks. `kctl node install` still works |
 | `kcore_vm` | `kctl create vm` |
 | `kcore_workload` | `kctl create container` |
 | `kcore_network` | `kctl create network` |
@@ -27,7 +27,8 @@ Registry: [`registry.terraform.io/kcorehypervisor/kcore`](https://registry.terra
 | `kcore_object_user` | `kctl create object-user` (secret returned once) |
 | `kcore_ssh_key` | `kctl ssh-key add` |
 | `kcore_operator` | `kctl operator add` |
-| `kcore_cluster_update` | `kctl update cluster` (destroy cancels; reboot stays `kctl`) |
+| `kcore_cluster_version` | **Deprecated.** Prefer `kcore_cluster` `version` / `update` |
+| `kcore_cluster_update` | `kctl update cluster` (scoped hand-written rollouts; destroy cancels) |
 | `kcore_kubernetes_cluster` | `kctl kubernetes apply`. `local_provisioner` mode `shared` installs local-path; mode `lvm` creates one thin pool per node |
 | `kcore_vgpu_host` | `kctl node vgpu enable`. `vendor` is `nvidia`, `intel`, or `amd` |
 | `kcore_waf_policy`, `kcore_ingress_gateway`, `kcore_ingress_route` | `kctl apply -f` with `kind: WafPolicy`, `IngressGateway`, `IngressRoute`; `spec` is the manifest spec as `jsonencode(...)` |

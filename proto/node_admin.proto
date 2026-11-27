@@ -5,6 +5,7 @@ package kcore.node;
 option go_package = "github.com/kcorehypervisor/terraform-provider-kcore/api/node";
 
 service NodeAdmin {
+  rpc ListDisks(ListDisksRequest) returns (ListDisksResponse);
   rpc InstallToDisk(InstallToDiskRequest) returns (InstallToDiskResponse);
 }
 
@@ -14,6 +15,21 @@ enum StorageBackendType {
   STORAGE_BACKEND_TYPE_LVM = 2;
   STORAGE_BACKEND_TYPE_ZFS = 3;
   STORAGE_BACKEND_TYPE_CEPH = 4;
+}
+
+message ListDisksRequest {}
+
+message DiskInfo {
+  string name = 1;
+  string path = 2;
+  string size = 3;
+  string model = 4;
+  string fstype = 5;
+  string mountpoint = 6;
+}
+
+message ListDisksResponse {
+  repeated DiskInfo disks = 1;
 }
 
 message InstallToDiskRequest {

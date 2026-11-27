@@ -3,12 +3,14 @@
 page_title: "kcore_cluster Resource - kcore"
 subcategory: ""
 description: |-
-  Create a kcore cluster trust root: CA, sub-CA, controller certificate, and kctl client certificate. Same files as kctl create cluster.
+  Declare a kcore cluster: local PKI, nodes from the live ISO, and the desired release. Same shape as a kind: Cluster manifest.
 ---
 
 # kcore_cluster (Resource)
 
-Create a kcore cluster trust root: CA, sub-CA, controller certificate, and kctl client certificate. Same files as `kctl create cluster`.
+Declare a kcore cluster: local PKI, nodes installed from the live ISO, and the desired release. Same shape as a `kind: Cluster` manifest. Changing `version` or the `update` block calls `SetClusterVersion`. Destroy removes local certificates only; installed nodes stay on disk.
+
+Prefer this over separate `kcore_node` and `kcore_cluster_version` resources.
 
 ## Example Usage
 

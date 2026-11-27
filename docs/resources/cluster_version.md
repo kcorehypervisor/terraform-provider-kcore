@@ -8,6 +8,8 @@ description: |-
 
 # kcore_cluster_version (Resource)
 
+-> **Deprecated** Use [`kcore_cluster`](cluster.md) `version` and `update` instead. `kcore_cluster_version` still works.
+
 The kcore release every node runs (`kctl update version set`). Changing `version` starts a rollout: by default a canary node updates and soaks while the controller compares it with the other nodes, then the rest update one at a time. Another version is refused while a rollout runs. Destroy only forgets the resource; nodes keep their version.
 
 ## Example Usage

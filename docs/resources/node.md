@@ -8,6 +8,8 @@ description: |-
 
 # kcore_node (Resource)
 
+-> **Deprecated** Use [`kcore_cluster`](cluster.md) `node` blocks instead. `kcore_node` still works.
+
 Install a node from the live ISO (`kctl node install`). Set `bootstrap` on the first controller. Other nodes set `join_controller` to that node's `controller_address`, which makes Terraform create the bootstrap node first. When this node runs a controller, apply waits until that node's controller accepts RPCs. The install RPC returns when the script starts, and the script reboots the machine. Destroy drops Terraform state and leaves the installed disk in place.
 
 ## Example Usage
