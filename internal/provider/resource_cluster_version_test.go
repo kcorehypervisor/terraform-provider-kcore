@@ -21,7 +21,7 @@ func (f *fakeVersionController) SetClusterVersion(_ context.Context, req *pb.Set
 
 func (f *fakeVersionController) GetClusterVersion(context.Context, *pb.GetClusterVersionRequest) (*pb.GetClusterVersionResponse, error) {
 	return &pb.GetClusterVersionResponse{
-		Version:    "v0.8.0",
+		Version:    "v0.8.2",
 		FlakeRev:   "0123456789abcdef0123456789abcdef01234567",
 		UpdateName: "version-v0-7-0",
 		Phase:      pb.ClusterUpdatePhase_CLUSTER_UPDATE_PHASE_ROLLING_OUT,
@@ -32,14 +32,14 @@ func TestClusterVersionSetsTheTagWithItsCanary(t *testing.T) {
 	fake := &fakeVersionController{}
 	client := newControllerClient(t, fake)
 	d := schema.TestResourceDataRaw(t, resourceClusterVersion().Schema, map[string]interface{}{
-		"version":             "0.8.0",
+		"version":             "0.8.2",
 		"canary_soak_seconds": 7200,
 		"canary_node":         "node-b",
 	})
 	if diags := resourceClusterVersionSet(context.Background(), d, client); diags.HasError() {
 		t.Fatalf("%v", diags)
 	}
-	if fake.set.Version != "v0.8.0" || fake.set.CanarySoakSeconds != 7200 || fake.set.CanaryNodeId != "node-b" || fake.set.NoCanary {
+	if fake.set.Version != "v0.8.2" || fake.set.CanarySoakSeconds != 7200 || fake.set.CanaryNodeId != "node-b" || fake.set.NoCanary {
 		t.Fatalf("request = %+v", fake.set)
 	}
 	if d.Id() != clusterVersionID || d.Get("canary_node_id") != "node-b" || d.Get("update_name") != "version-v0-7-0" {
@@ -53,7 +53,7 @@ func TestClusterVersionSetsTheTagWithItsCanary(t *testing.T) {
 func TestClusterUpdateCarriesTheCanaryStrategy(t *testing.T) {
 	d := schema.TestResourceDataRaw(t, resourceClusterUpdate().Schema, map[string]interface{}{
 		"name":                "release-0-7-0",
-		"version":             "0.8.0",
+		"version":             "0.8.2",
 		"flake_ref":           "github:kcorehypervisor/kcore",
 		"all_nodes":           true,
 		"strategy":            "canary",
@@ -67,7 +67,7 @@ func TestClusterUpdateCarriesTheCanaryStrategy(t *testing.T) {
 }
 
 func TestReleaseTagAddsTheV(t *testing.T) {
-	for in, want := range map[string]string{"0.8.0": "v0.8.0", "v0.8.0": "v0.8.0", " ": ""} {
+	for in, want := range map[string]string{"0.8.2": "v0.8.2", "v0.8.2": "v0.8.2", " ": ""} {
 		if got := releaseTag(in); got != want {
 			t.Errorf("releaseTag(%q) = %q, want %q", in, got, want)
 		}
