@@ -8,31 +8,95 @@ description: |-
 
 # kcore_ceph_cluster (Resource)
 
-Ceph cluster (`kctl create ceph-cluster`).
+Ceph cluster (`kctl create ceph-cluster`). Arguments map one to one to the
+`CephCluster` YAML that `kctl apply -f` reads and to the kcore MCP
+`ceph-cluster` kind.
+
+Every argument after `node` is optional and additive: a configuration written
+for an older provider plans the same request as before. Whether a given
+controller release acts on a field is listed in kcore's
+`docs/ceph-lifecycle.md`; a controller that predates a field ignores it.
+
+- `node` and `external` are mutually exclusive. `external` points kcore at a
+  Ceph cluster it does not run: no bootstrap, no OSD reconcile, no member
+  removal. `client_keyring` is never read back.
+- Remove a reachable member by deleting its `node` block. The plan refuses
+  unless the survivors still number at least `size` and the cluster is
+  `HEALTH_OK`, and only one member leaves per apply.
+- `lost_members` is for a host that will never answer: a survivor drains it,
+  then purges its OSDs and removes its mon. Do not list a host that might come
+  back.
+- `encrypt_osds` is fixed once any OSD exists. Set it explicitly: the provider
+  sends `false` when it is omitted, while `kctl` manifests default to `true`.
+- `health` is computed from `ceph -s` (quorum, OSDs up/in, PG states, flags
+  such as `noout`, and check summaries). `operation_message` names an
+  in-progress member drain, OSD replacement, or backfill ramp.
 
 ## Example Usage
 
 ```terraform
 resource "kcore_ceph_cluster" "lab" {
-  name           = "lab"
-  public_network = "10.0.0.0/24"
-  size           = 3
-  min_size       = 2
+  name            = "lab"
+  public_network  = "10.0.0.0/24"
+  cluster_network = "10.20.0.0/24"
+  size            = 3
+  min_size        = 2
+  encrypt_osds    = true
 
-  node {
-    node_id    = "kcore-node-10.0.0.8"
-    osd_device = "/dev/sdb"
+  # Optional. Check kcore docs/ceph-lifecycle.md for which of these the
+  # reconciler acts on in your release; older controllers ignore them.
+  ms_mode        = "secure"
+  image_features = "layering,exclusive-lock"
+  cache_policy   = "writethrough"
+
+  pool {
+    name        = "kcore-vms"
+    application = "rbd"
+    size        = 3
+    min_size    = 2
+  }
+
+  recovery {
+    max_backfills       = 1
+    recovery_max_active = 1
+    scrub_begin_hour    = 1
+    scrub_end_hour      = 6
+    nearfull_ratio_bp   = 8500
   }
 
   node {
-    node_id    = "kcore-node-10.0.0.12"
-    osd_device = "/dev/sdb"
+    node_id       = "kcore-node-10.0.0.8"
+    mon_addr      = "10.0.0.8:6789"
+    cluster_addr  = "10.20.0.8"
+    public_iface  = "eth1"
+    cluster_iface = "eth2"
+    osd_device    = "/dev/disk/by-id/ata-EXAMPLE_1"
   }
 
   node {
-    node_id    = "kcore-node-10.0.0.13"
-    osd_device = "/dev/sdb"
+    node_id       = "kcore-node-10.0.0.12"
+    mon_addr      = "10.0.0.12:6789"
+    cluster_addr  = "10.20.0.12"
+    public_iface  = "eth1"
+    cluster_iface = "eth2"
+    osd_device    = "/dev/disk/by-id/ata-EXAMPLE_2"
   }
+
+  node {
+    node_id       = "kcore-node-10.0.0.13"
+    mon_addr      = "10.0.0.13:6789"
+    cluster_addr  = "10.20.0.13"
+    public_iface  = "eth1"
+    cluster_iface = "eth2"
+    osd_device    = "/dev/disk/by-id/ata-EXAMPLE_3"
+  }
+
+  # A host that is gone for good: keep it out of `node` and list it here.
+  # lost_members = ["kcore-node-10.0.0.14"]
+}
+
+output "ceph_health" {
+  value = kcore_ceph_cluster.lab.health
 }
 ```
 
@@ -42,23 +106,46 @@ resource "kcore_ceph_cluster" "lab" {
 ### Required
 
 - `name` (String)
-- `node` (Block List, Min: 1) (see [below for nested schema](#nestedblock--node))
 - `public_network` (String)
 
 ### Optional
 
+- `cache_policy` (String) `writeback` (default) or `writethrough` for new rbd-nbd maps.
 - `cluster_network` (String)
 - `encrypt_osds` (Boolean)
+- `external` (Block List, Max: 1) Use a Ceph cluster kcore does not run. Mutually exclusive with `node`. (see [below for nested schema](#nestedblock--external))
 - `force_wipe` (Boolean)
 - `fsid` (String)
+- `image_features` (String) Features for new RBD images, for example `layering,exclusive-lock`. Existing images are not changed.
+- `lost_members` (List of String) Node ids that will never answer again. A survivor drains them, then purges their OSDs and removes their mons.
 - `min_size` (Number)
+- `ms_mode` (String) `secure` or `prefer-crc` for ms_cluster_mode and ms_service_mode. Empty leaves Ceph's default.
+- `node` (Block List) Member hosts. Required unless `external` is set. (see [below for nested schema](#nestedblock--node))
+- `pool` (Block List) Pools to ensure. Empty means only the default `kcore-vms` RBD pool. (see [below for nested schema](#nestedblock--pool))
+- `recovery` (Block List, Max: 1) (see [below for nested schema](#nestedblock--recovery))
 - `size` (Number)
 
 ### Read-Only
 
+- `health` (List of Object) Parsed `ceph -s` as the reconciler last saw it. (see [below for nested schema](#nestedatt--health))
 - `health_message` (String)
 - `id` (String) The ID of this resource.
+- `operation_message` (String) In-progress day-2 step (member drain, OSD replace, backfill ramp).
 - `phase` (String)
+
+<a id="nestedblock--external"></a>
+### Nested Schema for `external`
+
+Required:
+
+- `mon_hosts` (String) Comma-separated mon_host list.
+- `pool` (String)
+
+Optional:
+
+- `client_keyring` (String, Sensitive) Keyring body. The controller never returns it.
+- `client_name` (String)
+
 
 <a id="nestedblock--node"></a>
 ### Nested Schema for `node`
@@ -66,12 +153,80 @@ resource "kcore_ceph_cluster" "lab" {
 Required:
 
 - `node_id` (String)
-- `osd_device` (String)
 
 Optional:
 
 - `cluster_addr` (String)
 - `cluster_iface` (String)
+- `device_class` (String) Device class override (`ssd`, `hdd`, `nvme`). Empty means Ceph detects it.
 - `mon_addr` (String)
+- `osd_device` (String) First OSD disk. Empty on a `mon` role node.
 - `osd_devices` (List of String)
 - `public_iface` (String)
+- `role` (String) `full` (mon, mgr, and OSDs; the default), `mon` (mon and mgr only), or `osd`.
+- `weight` (Number) CRUSH weight override for this host's OSDs. 0 leaves Ceph's default.
+
+
+<a id="nestedblock--pool"></a>
+### Nested Schema for `pool`
+
+Required:
+
+- `name` (String)
+
+Optional:
+
+- `application` (String)
+- `compression_mode` (String)
+- `crush_rule` (String)
+- `erasure_profile` (String)
+- `min_size` (Number)
+- `pg_num` (Number) 0 leaves the PG autoscaler in charge.
+- `pool_type` (String) `replicated` (default) or `erasure`.
+- `quota_bytes` (Number)
+- `size` (Number)
+
+
+<a id="nestedblock--recovery"></a>
+### Nested Schema for `recovery`
+
+Optional:
+
+- `max_backfills` (Number)
+- `nearfull_ratio_bp` (Number) Nearfull ratio as percent x 100, for example 8500 for 85%. 0 leaves Ceph's default.
+- `recovery_max_active` (Number)
+- `scrub_begin_hour` (Number) -1 leaves it unset.
+- `scrub_end_hour` (Number) -1 leaves it unset.
+
+
+<a id="nestedatt--health"></a>
+### Nested Schema for `health`
+
+Read-Only:
+
+- `backfill_pgs` (Number)
+- `bytes_avail` (Number)
+- `bytes_total` (Number)
+- `bytes_used` (Number)
+- `check` (List of Object) (see [below for nested schema](#nestedobjatt--health--check))
+- `flags` (List of String)
+- `mon_count` (Number)
+- `mon_quorum` (List of String)
+- `noout` (Boolean)
+- `norebalance` (Boolean)
+- `osd_in` (Number)
+- `osd_total` (Number)
+- `osd_up` (Number)
+- `pgs_by_state` (Map of Number)
+- `pgs_not_clean` (Number)
+- `pgs_total` (Number)
+- `status` (String)
+
+<a id="nestedobjatt--health--check"></a>
+### Nested Schema for `health.check`
+
+Read-Only:
+
+- `severity` (String)
+- `summary` (String)
+- `type` (String)

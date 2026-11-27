@@ -19,183 +19,215 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Controller_RegisterNode_FullMethodName                = "/kcore.controller.Controller/RegisterNode"
-	Controller_Heartbeat_FullMethodName                   = "/kcore.controller.Controller/Heartbeat"
-	Controller_SyncVmState_FullMethodName                 = "/kcore.controller.Controller/SyncVmState"
-	Controller_SyncWorkloadState_FullMethodName           = "/kcore.controller.Controller/SyncWorkloadState"
-	Controller_CreateVm_FullMethodName                    = "/kcore.controller.Controller/CreateVm"
-	Controller_UpdateVm_FullMethodName                    = "/kcore.controller.Controller/UpdateVm"
-	Controller_DeleteVm_FullMethodName                    = "/kcore.controller.Controller/DeleteVm"
-	Controller_SetVmDesiredState_FullMethodName           = "/kcore.controller.Controller/SetVmDesiredState"
-	Controller_GetVm_FullMethodName                       = "/kcore.controller.Controller/GetVm"
-	Controller_ListVms_FullMethodName                     = "/kcore.controller.Controller/ListVms"
-	Controller_AttachVmConsole_FullMethodName             = "/kcore.controller.Controller/AttachVmConsole"
-	Controller_OpenVmConsole_FullMethodName               = "/kcore.controller.Controller/OpenVmConsole"
-	Controller_SendVmConsoleInput_FullMethodName          = "/kcore.controller.Controller/SendVmConsoleInput"
-	Controller_CreateWorkload_FullMethodName              = "/kcore.controller.Controller/CreateWorkload"
-	Controller_DeleteWorkload_FullMethodName              = "/kcore.controller.Controller/DeleteWorkload"
-	Controller_SetWorkloadDesiredState_FullMethodName     = "/kcore.controller.Controller/SetWorkloadDesiredState"
-	Controller_GetWorkload_FullMethodName                 = "/kcore.controller.Controller/GetWorkload"
-	Controller_ListWorkloads_FullMethodName               = "/kcore.controller.Controller/ListWorkloads"
-	Controller_CreateNetwork_FullMethodName               = "/kcore.controller.Controller/CreateNetwork"
-	Controller_DeleteNetwork_FullMethodName               = "/kcore.controller.Controller/DeleteNetwork"
-	Controller_ListNetworks_FullMethodName                = "/kcore.controller.Controller/ListNetworks"
-	Controller_CreatePostgresql_FullMethodName            = "/kcore.controller.Controller/CreatePostgresql"
-	Controller_DeletePostgresql_FullMethodName            = "/kcore.controller.Controller/DeletePostgresql"
-	Controller_GetPostgresql_FullMethodName               = "/kcore.controller.Controller/GetPostgresql"
-	Controller_ListPostgresqls_FullMethodName             = "/kcore.controller.Controller/ListPostgresqls"
-	Controller_CreateSecurityGroup_FullMethodName         = "/kcore.controller.Controller/CreateSecurityGroup"
-	Controller_GetSecurityGroup_FullMethodName            = "/kcore.controller.Controller/GetSecurityGroup"
-	Controller_ListSecurityGroups_FullMethodName          = "/kcore.controller.Controller/ListSecurityGroups"
-	Controller_DeleteSecurityGroup_FullMethodName         = "/kcore.controller.Controller/DeleteSecurityGroup"
-	Controller_AttachSecurityGroup_FullMethodName         = "/kcore.controller.Controller/AttachSecurityGroup"
-	Controller_DetachSecurityGroup_FullMethodName         = "/kcore.controller.Controller/DetachSecurityGroup"
-	Controller_ListNodes_FullMethodName                   = "/kcore.controller.Controller/ListNodes"
-	Controller_GetNode_FullMethodName                     = "/kcore.controller.Controller/GetNode"
-	Controller_ListGpus_FullMethodName                    = "/kcore.controller.Controller/ListGpus"
-	Controller_ListPciDevices_FullMethodName              = "/kcore.controller.Controller/ListPciDevices"
-	Controller_ConfigureNodeVgpu_FullMethodName           = "/kcore.controller.Controller/ConfigureNodeVgpu"
-	Controller_GetNodeVgpu_FullMethodName                 = "/kcore.controller.Controller/GetNodeVgpu"
-	Controller_RebootNode_FullMethodName                  = "/kcore.controller.Controller/RebootNode"
-	Controller_CreateSshKey_FullMethodName                = "/kcore.controller.Controller/CreateSshKey"
-	Controller_DeleteSshKey_FullMethodName                = "/kcore.controller.Controller/DeleteSshKey"
-	Controller_ListSshKeys_FullMethodName                 = "/kcore.controller.Controller/ListSshKeys"
-	Controller_GetSshKey_FullMethodName                   = "/kcore.controller.Controller/GetSshKey"
-	Controller_DrainNode_FullMethodName                   = "/kcore.controller.Controller/DrainNode"
-	Controller_MigrateVm_FullMethodName                   = "/kcore.controller.Controller/MigrateVm"
-	Controller_GetLiveMigrateReceiveStatus_FullMethodName = "/kcore.controller.Controller/GetLiveMigrateReceiveStatus"
-	Controller_ResetLiveMigrateReceive_FullMethodName     = "/kcore.controller.Controller/ResetLiveMigrateReceive"
-	Controller_ApproveNode_FullMethodName                 = "/kcore.controller.Controller/ApproveNode"
-	Controller_RejectNode_FullMethodName                  = "/kcore.controller.Controller/RejectNode"
-	Controller_CordonNode_FullMethodName                  = "/kcore.controller.Controller/CordonNode"
-	Controller_UncordonNode_FullMethodName                = "/kcore.controller.Controller/UncordonNode"
-	Controller_DeleteNode_FullMethodName                  = "/kcore.controller.Controller/DeleteNode"
-	Controller_GetClusterHealth_FullMethodName            = "/kcore.controller.Controller/GetClusterHealth"
-	Controller_GetHaStatus_FullMethodName                 = "/kcore.controller.Controller/GetHaStatus"
-	Controller_ListHaEvents_FullMethodName                = "/kcore.controller.Controller/ListHaEvents"
-	Controller_BackupCluster_FullMethodName               = "/kcore.controller.Controller/BackupCluster"
-	Controller_RestoreCluster_FullMethodName              = "/kcore.controller.Controller/RestoreCluster"
-	Controller_RenewNodeCert_FullMethodName               = "/kcore.controller.Controller/RenewNodeCert"
-	Controller_IssueNodeBootstrapCert_FullMethodName      = "/kcore.controller.Controller/IssueNodeBootstrapCert"
-	Controller_RotateSubCa_FullMethodName                 = "/kcore.controller.Controller/RotateSubCa"
-	Controller_ReloadTls_FullMethodName                   = "/kcore.controller.Controller/ReloadTls"
-	Controller_SignNodeCsr_FullMethodName                 = "/kcore.controller.Controller/SignNodeCsr"
-	Controller_RotateNodeCerts_FullMethodName             = "/kcore.controller.Controller/RotateNodeCerts"
-	Controller_ListCertificates_FullMethodName            = "/kcore.controller.Controller/ListCertificates"
-	Controller_RevokeCertificate_FullMethodName           = "/kcore.controller.Controller/RevokeCertificate"
-	Controller_GetCrl_FullMethodName                      = "/kcore.controller.Controller/GetCrl"
-	Controller_GetPkiStatus_FullMethodName                = "/kcore.controller.Controller/GetPkiStatus"
-	Controller_GetComplianceReport_FullMethodName         = "/kcore.controller.Controller/GetComplianceReport"
-	Controller_GetCryptoConfig_FullMethodName             = "/kcore.controller.Controller/GetCryptoConfig"
-	Controller_ExportSbom_FullMethodName                  = "/kcore.controller.Controller/ExportSbom"
-	Controller_ListAuditEvents_FullMethodName             = "/kcore.controller.Controller/ListAuditEvents"
-	Controller_GetNetworkOverview_FullMethodName          = "/kcore.controller.Controller/GetNetworkOverview"
-	Controller_GetStorageOverview_FullMethodName          = "/kcore.controller.Controller/GetStorageOverview"
-	Controller_ListVolumes_FullMethodName                 = "/kcore.controller.Controller/ListVolumes"
-	Controller_CreateVolume_FullMethodName                = "/kcore.controller.Controller/CreateVolume"
-	Controller_GetVolume_FullMethodName                   = "/kcore.controller.Controller/GetVolume"
-	Controller_AttachVolume_FullMethodName                = "/kcore.controller.Controller/AttachVolume"
-	Controller_DetachVolume_FullMethodName                = "/kcore.controller.Controller/DetachVolume"
-	Controller_DeleteVolume_FullMethodName                = "/kcore.controller.Controller/DeleteVolume"
-	Controller_ListVmOperations_FullMethodName            = "/kcore.controller.Controller/ListVmOperations"
-	Controller_GetVmOperation_FullMethodName              = "/kcore.controller.Controller/GetVmOperation"
-	Controller_CancelVmOperation_FullMethodName           = "/kcore.controller.Controller/CancelVmOperation"
-	Controller_CreateVolumeSnapshot_FullMethodName        = "/kcore.controller.Controller/CreateVolumeSnapshot"
-	Controller_ListVolumeSnapshots_FullMethodName         = "/kcore.controller.Controller/ListVolumeSnapshots"
-	Controller_DeleteVolumeSnapshot_FullMethodName        = "/kcore.controller.Controller/DeleteVolumeSnapshot"
-	Controller_RestoreVolume_FullMethodName               = "/kcore.controller.Controller/RestoreVolume"
-	Controller_FlattenVolume_FullMethodName               = "/kcore.controller.Controller/FlattenVolume"
-	Controller_ResizeVolume_FullMethodName                = "/kcore.controller.Controller/ResizeVolume"
-	Controller_ExposeVolumeSnapshot_FullMethodName        = "/kcore.controller.Controller/ExposeVolumeSnapshot"
-	Controller_UnexposeVolumeSnapshot_FullMethodName      = "/kcore.controller.Controller/UnexposeVolumeSnapshot"
-	Controller_ListVolumeChangedExtents_FullMethodName    = "/kcore.controller.Controller/ListVolumeChangedExtents"
-	Controller_ReadVolumeBlocks_FullMethodName            = "/kcore.controller.Controller/ReadVolumeBlocks"
-	Controller_WriteVolumeBlocks_FullMethodName           = "/kcore.controller.Controller/WriteVolumeBlocks"
-	Controller_FreezeVmFilesystems_FullMethodName         = "/kcore.controller.Controller/FreezeVmFilesystems"
-	Controller_PrepareInstantRecovery_FullMethodName      = "/kcore.controller.Controller/PrepareInstantRecovery"
-	Controller_FinalizeInstantRecovery_FullMethodName     = "/kcore.controller.Controller/FinalizeInstantRecovery"
-	Controller_FormatVolume_FullMethodName                = "/kcore.controller.Controller/FormatVolume"
-	Controller_MountVolume_FullMethodName                 = "/kcore.controller.Controller/MountVolume"
-	Controller_UnmountVolume_FullMethodName               = "/kcore.controller.Controller/UnmountVolume"
-	Controller_EncryptVolume_FullMethodName               = "/kcore.controller.Controller/EncryptVolume"
-	Controller_CreateSnapshotPolicy_FullMethodName        = "/kcore.controller.Controller/CreateSnapshotPolicy"
-	Controller_GetSnapshotPolicy_FullMethodName           = "/kcore.controller.Controller/GetSnapshotPolicy"
-	Controller_ListSnapshotPolicies_FullMethodName        = "/kcore.controller.Controller/ListSnapshotPolicies"
-	Controller_DeleteSnapshotPolicy_FullMethodName        = "/kcore.controller.Controller/DeleteSnapshotPolicy"
-	Controller_CreateDiskLayout_FullMethodName            = "/kcore.controller.Controller/CreateDiskLayout"
-	Controller_GetDiskLayout_FullMethodName               = "/kcore.controller.Controller/GetDiskLayout"
-	Controller_ListDiskLayouts_FullMethodName             = "/kcore.controller.Controller/ListDiskLayouts"
-	Controller_DeleteDiskLayout_FullMethodName            = "/kcore.controller.Controller/DeleteDiskLayout"
-	Controller_ClassifyDiskLayout_FullMethodName          = "/kcore.controller.Controller/ClassifyDiskLayout"
-	Controller_CreateClusterUpdate_FullMethodName         = "/kcore.controller.Controller/CreateClusterUpdate"
-	Controller_GetClusterUpdate_FullMethodName            = "/kcore.controller.Controller/GetClusterUpdate"
-	Controller_ListClusterUpdates_FullMethodName          = "/kcore.controller.Controller/ListClusterUpdates"
-	Controller_PlanClusterUpdate_FullMethodName           = "/kcore.controller.Controller/PlanClusterUpdate"
-	Controller_ApproveClusterUpdate_FullMethodName        = "/kcore.controller.Controller/ApproveClusterUpdate"
-	Controller_CancelClusterUpdate_FullMethodName         = "/kcore.controller.Controller/CancelClusterUpdate"
-	Controller_RollbackClusterUpdate_FullMethodName       = "/kcore.controller.Controller/RollbackClusterUpdate"
-	Controller_RebootClusterUpdateNode_FullMethodName     = "/kcore.controller.Controller/RebootClusterUpdateNode"
-	Controller_PromoteClusterUpdate_FullMethodName        = "/kcore.controller.Controller/PromoteClusterUpdate"
-	Controller_SetClusterVersion_FullMethodName           = "/kcore.controller.Controller/SetClusterVersion"
-	Controller_GetClusterVersion_FullMethodName           = "/kcore.controller.Controller/GetClusterVersion"
-	Controller_PlanCephCluster_FullMethodName             = "/kcore.controller.Controller/PlanCephCluster"
-	Controller_CreateCephCluster_FullMethodName           = "/kcore.controller.Controller/CreateCephCluster"
-	Controller_GetCephCluster_FullMethodName              = "/kcore.controller.Controller/GetCephCluster"
-	Controller_ListCephClusters_FullMethodName            = "/kcore.controller.Controller/ListCephClusters"
-	Controller_DeleteCephCluster_FullMethodName           = "/kcore.controller.Controller/DeleteCephCluster"
-	Controller_GetCephClusterCapacity_FullMethodName      = "/kcore.controller.Controller/GetCephClusterCapacity"
-	Controller_GetCephDashboardCredentials_FullMethodName = "/kcore.controller.Controller/GetCephDashboardCredentials"
-	Controller_SetCephDashboardCredentials_FullMethodName = "/kcore.controller.Controller/SetCephDashboardCredentials"
-	Controller_CreateSharedFilesystem_FullMethodName      = "/kcore.controller.Controller/CreateSharedFilesystem"
-	Controller_GetSharedFilesystem_FullMethodName         = "/kcore.controller.Controller/GetSharedFilesystem"
-	Controller_ListSharedFilesystems_FullMethodName       = "/kcore.controller.Controller/ListSharedFilesystems"
-	Controller_DeleteSharedFilesystem_FullMethodName      = "/kcore.controller.Controller/DeleteSharedFilesystem"
-	Controller_PlanIngress_FullMethodName                 = "/kcore.controller.Controller/PlanIngress"
-	Controller_CreateIngressGateway_FullMethodName        = "/kcore.controller.Controller/CreateIngressGateway"
-	Controller_GetIngressGateway_FullMethodName           = "/kcore.controller.Controller/GetIngressGateway"
-	Controller_ListIngressGateways_FullMethodName         = "/kcore.controller.Controller/ListIngressGateways"
-	Controller_DeleteIngressGateway_FullMethodName        = "/kcore.controller.Controller/DeleteIngressGateway"
-	Controller_CreateIngressRoute_FullMethodName          = "/kcore.controller.Controller/CreateIngressRoute"
-	Controller_GetIngressRoute_FullMethodName             = "/kcore.controller.Controller/GetIngressRoute"
-	Controller_ListIngressRoutes_FullMethodName           = "/kcore.controller.Controller/ListIngressRoutes"
-	Controller_DeleteIngressRoute_FullMethodName          = "/kcore.controller.Controller/DeleteIngressRoute"
-	Controller_SetIngressRouteWafMode_FullMethodName      = "/kcore.controller.Controller/SetIngressRouteWafMode"
-	Controller_CreateWafPolicy_FullMethodName             = "/kcore.controller.Controller/CreateWafPolicy"
-	Controller_GetWafPolicy_FullMethodName                = "/kcore.controller.Controller/GetWafPolicy"
-	Controller_ListWafPolicies_FullMethodName             = "/kcore.controller.Controller/ListWafPolicies"
-	Controller_DeleteWafPolicy_FullMethodName             = "/kcore.controller.Controller/DeleteWafPolicy"
-	Controller_ListWafEvents_FullMethodName               = "/kcore.controller.Controller/ListWafEvents"
-	Controller_SetIngressSecret_FullMethodName            = "/kcore.controller.Controller/SetIngressSecret"
-	Controller_ReportWafEvents_FullMethodName             = "/kcore.controller.Controller/ReportWafEvents"
-	Controller_CreateObjectStore_FullMethodName           = "/kcore.controller.Controller/CreateObjectStore"
-	Controller_GetObjectStore_FullMethodName              = "/kcore.controller.Controller/GetObjectStore"
-	Controller_ListObjectStores_FullMethodName            = "/kcore.controller.Controller/ListObjectStores"
-	Controller_DeleteObjectStore_FullMethodName           = "/kcore.controller.Controller/DeleteObjectStore"
-	Controller_CreateObjectUser_FullMethodName            = "/kcore.controller.Controller/CreateObjectUser"
-	Controller_DeleteObjectUser_FullMethodName            = "/kcore.controller.Controller/DeleteObjectUser"
-	Controller_CreateOperator_FullMethodName              = "/kcore.controller.Controller/CreateOperator"
-	Controller_DeleteOperator_FullMethodName              = "/kcore.controller.Controller/DeleteOperator"
-	Controller_ListOperators_FullMethodName               = "/kcore.controller.Controller/ListOperators"
-	Controller_GetOperator_FullMethodName                 = "/kcore.controller.Controller/GetOperator"
-	Controller_GrantOperatorRole_FullMethodName           = "/kcore.controller.Controller/GrantOperatorRole"
-	Controller_RevokeOperatorRole_FullMethodName          = "/kcore.controller.Controller/RevokeOperatorRole"
-	Controller_IssueOperatorCert_FullMethodName           = "/kcore.controller.Controller/IssueOperatorCert"
-	Controller_PlanKubernetesCluster_FullMethodName       = "/kcore.controller.Controller/PlanKubernetesCluster"
-	Controller_CreateKubernetesCluster_FullMethodName     = "/kcore.controller.Controller/CreateKubernetesCluster"
-	Controller_UpdateKubernetesCluster_FullMethodName     = "/kcore.controller.Controller/UpdateKubernetesCluster"
-	Controller_GetKubernetesCluster_FullMethodName        = "/kcore.controller.Controller/GetKubernetesCluster"
-	Controller_ListKubernetesClusters_FullMethodName      = "/kcore.controller.Controller/ListKubernetesClusters"
-	Controller_DeleteKubernetesCluster_FullMethodName     = "/kcore.controller.Controller/DeleteKubernetesCluster"
-	Controller_ScaleKubernetesCluster_FullMethodName      = "/kcore.controller.Controller/ScaleKubernetesCluster"
-	Controller_GetKubernetesClusterHealth_FullMethodName  = "/kcore.controller.Controller/GetKubernetesClusterHealth"
-	Controller_PlanSlurmCluster_FullMethodName            = "/kcore.controller.Controller/PlanSlurmCluster"
-	Controller_CreateSlurmCluster_FullMethodName          = "/kcore.controller.Controller/CreateSlurmCluster"
-	Controller_GetSlurmCluster_FullMethodName             = "/kcore.controller.Controller/GetSlurmCluster"
-	Controller_ListSlurmClusters_FullMethodName           = "/kcore.controller.Controller/ListSlurmClusters"
-	Controller_DeleteSlurmCluster_FullMethodName          = "/kcore.controller.Controller/DeleteSlurmCluster"
-	Controller_RotateSlurmMungeKey_FullMethodName         = "/kcore.controller.Controller/RotateSlurmMungeKey"
-	Controller_DrainSlurmNode_FullMethodName              = "/kcore.controller.Controller/DrainSlurmNode"
-	Controller_ResumeSlurmNode_FullMethodName             = "/kcore.controller.Controller/ResumeSlurmNode"
+	Controller_RegisterNode_FullMethodName                    = "/kcore.controller.Controller/RegisterNode"
+	Controller_Heartbeat_FullMethodName                       = "/kcore.controller.Controller/Heartbeat"
+	Controller_SyncVmState_FullMethodName                     = "/kcore.controller.Controller/SyncVmState"
+	Controller_SyncWorkloadState_FullMethodName               = "/kcore.controller.Controller/SyncWorkloadState"
+	Controller_CreateVm_FullMethodName                        = "/kcore.controller.Controller/CreateVm"
+	Controller_UpdateVm_FullMethodName                        = "/kcore.controller.Controller/UpdateVm"
+	Controller_DeleteVm_FullMethodName                        = "/kcore.controller.Controller/DeleteVm"
+	Controller_SetVmDesiredState_FullMethodName               = "/kcore.controller.Controller/SetVmDesiredState"
+	Controller_GetVm_FullMethodName                           = "/kcore.controller.Controller/GetVm"
+	Controller_ListVms_FullMethodName                         = "/kcore.controller.Controller/ListVms"
+	Controller_AttachVmConsole_FullMethodName                 = "/kcore.controller.Controller/AttachVmConsole"
+	Controller_OpenVmConsole_FullMethodName                   = "/kcore.controller.Controller/OpenVmConsole"
+	Controller_SendVmConsoleInput_FullMethodName              = "/kcore.controller.Controller/SendVmConsoleInput"
+	Controller_CreateWorkload_FullMethodName                  = "/kcore.controller.Controller/CreateWorkload"
+	Controller_DeleteWorkload_FullMethodName                  = "/kcore.controller.Controller/DeleteWorkload"
+	Controller_SetWorkloadDesiredState_FullMethodName         = "/kcore.controller.Controller/SetWorkloadDesiredState"
+	Controller_GetWorkload_FullMethodName                     = "/kcore.controller.Controller/GetWorkload"
+	Controller_ListWorkloads_FullMethodName                   = "/kcore.controller.Controller/ListWorkloads"
+	Controller_CreateNetwork_FullMethodName                   = "/kcore.controller.Controller/CreateNetwork"
+	Controller_DeleteNetwork_FullMethodName                   = "/kcore.controller.Controller/DeleteNetwork"
+	Controller_ListNetworks_FullMethodName                    = "/kcore.controller.Controller/ListNetworks"
+	Controller_CreatePostgresql_FullMethodName                = "/kcore.controller.Controller/CreatePostgresql"
+	Controller_DeletePostgresql_FullMethodName                = "/kcore.controller.Controller/DeletePostgresql"
+	Controller_GetPostgresql_FullMethodName                   = "/kcore.controller.Controller/GetPostgresql"
+	Controller_ListPostgresqls_FullMethodName                 = "/kcore.controller.Controller/ListPostgresqls"
+	Controller_CreateSecurityGroup_FullMethodName             = "/kcore.controller.Controller/CreateSecurityGroup"
+	Controller_GetSecurityGroup_FullMethodName                = "/kcore.controller.Controller/GetSecurityGroup"
+	Controller_ListSecurityGroups_FullMethodName              = "/kcore.controller.Controller/ListSecurityGroups"
+	Controller_DeleteSecurityGroup_FullMethodName             = "/kcore.controller.Controller/DeleteSecurityGroup"
+	Controller_AttachSecurityGroup_FullMethodName             = "/kcore.controller.Controller/AttachSecurityGroup"
+	Controller_DetachSecurityGroup_FullMethodName             = "/kcore.controller.Controller/DetachSecurityGroup"
+	Controller_ListNodes_FullMethodName                       = "/kcore.controller.Controller/ListNodes"
+	Controller_GetNode_FullMethodName                         = "/kcore.controller.Controller/GetNode"
+	Controller_ListGpus_FullMethodName                        = "/kcore.controller.Controller/ListGpus"
+	Controller_ListPciDevices_FullMethodName                  = "/kcore.controller.Controller/ListPciDevices"
+	Controller_ConfigureNodeVgpu_FullMethodName               = "/kcore.controller.Controller/ConfigureNodeVgpu"
+	Controller_GetNodeVgpu_FullMethodName                     = "/kcore.controller.Controller/GetNodeVgpu"
+	Controller_RebootNode_FullMethodName                      = "/kcore.controller.Controller/RebootNode"
+	Controller_CreateSshKey_FullMethodName                    = "/kcore.controller.Controller/CreateSshKey"
+	Controller_DeleteSshKey_FullMethodName                    = "/kcore.controller.Controller/DeleteSshKey"
+	Controller_ListSshKeys_FullMethodName                     = "/kcore.controller.Controller/ListSshKeys"
+	Controller_GetSshKey_FullMethodName                       = "/kcore.controller.Controller/GetSshKey"
+	Controller_DrainNode_FullMethodName                       = "/kcore.controller.Controller/DrainNode"
+	Controller_MigrateVm_FullMethodName                       = "/kcore.controller.Controller/MigrateVm"
+	Controller_GetLiveMigrateReceiveStatus_FullMethodName     = "/kcore.controller.Controller/GetLiveMigrateReceiveStatus"
+	Controller_ResetLiveMigrateReceive_FullMethodName         = "/kcore.controller.Controller/ResetLiveMigrateReceive"
+	Controller_ApproveNode_FullMethodName                     = "/kcore.controller.Controller/ApproveNode"
+	Controller_RejectNode_FullMethodName                      = "/kcore.controller.Controller/RejectNode"
+	Controller_CordonNode_FullMethodName                      = "/kcore.controller.Controller/CordonNode"
+	Controller_UncordonNode_FullMethodName                    = "/kcore.controller.Controller/UncordonNode"
+	Controller_SetNodeMaintenance_FullMethodName              = "/kcore.controller.Controller/SetNodeMaintenance"
+	Controller_DeleteNode_FullMethodName                      = "/kcore.controller.Controller/DeleteNode"
+	Controller_GetClusterHealth_FullMethodName                = "/kcore.controller.Controller/GetClusterHealth"
+	Controller_GetHaStatus_FullMethodName                     = "/kcore.controller.Controller/GetHaStatus"
+	Controller_ListHaEvents_FullMethodName                    = "/kcore.controller.Controller/ListHaEvents"
+	Controller_BackupCluster_FullMethodName                   = "/kcore.controller.Controller/BackupCluster"
+	Controller_RestoreCluster_FullMethodName                  = "/kcore.controller.Controller/RestoreCluster"
+	Controller_RenewNodeCert_FullMethodName                   = "/kcore.controller.Controller/RenewNodeCert"
+	Controller_IssueNodeBootstrapCert_FullMethodName          = "/kcore.controller.Controller/IssueNodeBootstrapCert"
+	Controller_RotateSubCa_FullMethodName                     = "/kcore.controller.Controller/RotateSubCa"
+	Controller_ReloadTls_FullMethodName                       = "/kcore.controller.Controller/ReloadTls"
+	Controller_SignNodeCsr_FullMethodName                     = "/kcore.controller.Controller/SignNodeCsr"
+	Controller_RotateNodeCerts_FullMethodName                 = "/kcore.controller.Controller/RotateNodeCerts"
+	Controller_ListCertificates_FullMethodName                = "/kcore.controller.Controller/ListCertificates"
+	Controller_RevokeCertificate_FullMethodName               = "/kcore.controller.Controller/RevokeCertificate"
+	Controller_GetCrl_FullMethodName                          = "/kcore.controller.Controller/GetCrl"
+	Controller_GetPkiStatus_FullMethodName                    = "/kcore.controller.Controller/GetPkiStatus"
+	Controller_GetComplianceReport_FullMethodName             = "/kcore.controller.Controller/GetComplianceReport"
+	Controller_GetCryptoConfig_FullMethodName                 = "/kcore.controller.Controller/GetCryptoConfig"
+	Controller_ExportSbom_FullMethodName                      = "/kcore.controller.Controller/ExportSbom"
+	Controller_ListAuditEvents_FullMethodName                 = "/kcore.controller.Controller/ListAuditEvents"
+	Controller_GetNetworkOverview_FullMethodName              = "/kcore.controller.Controller/GetNetworkOverview"
+	Controller_GetStorageOverview_FullMethodName              = "/kcore.controller.Controller/GetStorageOverview"
+	Controller_ListVolumes_FullMethodName                     = "/kcore.controller.Controller/ListVolumes"
+	Controller_CreateVolume_FullMethodName                    = "/kcore.controller.Controller/CreateVolume"
+	Controller_GetVolume_FullMethodName                       = "/kcore.controller.Controller/GetVolume"
+	Controller_AttachVolume_FullMethodName                    = "/kcore.controller.Controller/AttachVolume"
+	Controller_DetachVolume_FullMethodName                    = "/kcore.controller.Controller/DetachVolume"
+	Controller_DeleteVolume_FullMethodName                    = "/kcore.controller.Controller/DeleteVolume"
+	Controller_ListVmOperations_FullMethodName                = "/kcore.controller.Controller/ListVmOperations"
+	Controller_GetVmOperation_FullMethodName                  = "/kcore.controller.Controller/GetVmOperation"
+	Controller_CancelVmOperation_FullMethodName               = "/kcore.controller.Controller/CancelVmOperation"
+	Controller_CreateVolumeSnapshot_FullMethodName            = "/kcore.controller.Controller/CreateVolumeSnapshot"
+	Controller_ListVolumeSnapshots_FullMethodName             = "/kcore.controller.Controller/ListVolumeSnapshots"
+	Controller_DeleteVolumeSnapshot_FullMethodName            = "/kcore.controller.Controller/DeleteVolumeSnapshot"
+	Controller_RestoreVolume_FullMethodName                   = "/kcore.controller.Controller/RestoreVolume"
+	Controller_FlattenVolume_FullMethodName                   = "/kcore.controller.Controller/FlattenVolume"
+	Controller_ResizeVolume_FullMethodName                    = "/kcore.controller.Controller/ResizeVolume"
+	Controller_ConvertVolume_FullMethodName                   = "/kcore.controller.Controller/ConvertVolume"
+	Controller_ExposeVolumeSnapshot_FullMethodName            = "/kcore.controller.Controller/ExposeVolumeSnapshot"
+	Controller_UnexposeVolumeSnapshot_FullMethodName          = "/kcore.controller.Controller/UnexposeVolumeSnapshot"
+	Controller_ListVolumeChangedExtents_FullMethodName        = "/kcore.controller.Controller/ListVolumeChangedExtents"
+	Controller_ReadVolumeBlocks_FullMethodName                = "/kcore.controller.Controller/ReadVolumeBlocks"
+	Controller_WriteVolumeBlocks_FullMethodName               = "/kcore.controller.Controller/WriteVolumeBlocks"
+	Controller_FreezeVmFilesystems_FullMethodName             = "/kcore.controller.Controller/FreezeVmFilesystems"
+	Controller_PrepareInstantRecovery_FullMethodName          = "/kcore.controller.Controller/PrepareInstantRecovery"
+	Controller_FinalizeInstantRecovery_FullMethodName         = "/kcore.controller.Controller/FinalizeInstantRecovery"
+	Controller_FormatVolume_FullMethodName                    = "/kcore.controller.Controller/FormatVolume"
+	Controller_MountVolume_FullMethodName                     = "/kcore.controller.Controller/MountVolume"
+	Controller_UnmountVolume_FullMethodName                   = "/kcore.controller.Controller/UnmountVolume"
+	Controller_EncryptVolume_FullMethodName                   = "/kcore.controller.Controller/EncryptVolume"
+	Controller_ConvertVmStorage_FullMethodName                = "/kcore.controller.Controller/ConvertVmStorage"
+	Controller_CopyVolumeToCluster_FullMethodName             = "/kcore.controller.Controller/CopyVolumeToCluster"
+	Controller_CreateSnapshotPolicy_FullMethodName            = "/kcore.controller.Controller/CreateSnapshotPolicy"
+	Controller_GetSnapshotPolicy_FullMethodName               = "/kcore.controller.Controller/GetSnapshotPolicy"
+	Controller_ListSnapshotPolicies_FullMethodName            = "/kcore.controller.Controller/ListSnapshotPolicies"
+	Controller_DeleteSnapshotPolicy_FullMethodName            = "/kcore.controller.Controller/DeleteSnapshotPolicy"
+	Controller_CreateDiskLayout_FullMethodName                = "/kcore.controller.Controller/CreateDiskLayout"
+	Controller_GetDiskLayout_FullMethodName                   = "/kcore.controller.Controller/GetDiskLayout"
+	Controller_ListDiskLayouts_FullMethodName                 = "/kcore.controller.Controller/ListDiskLayouts"
+	Controller_DeleteDiskLayout_FullMethodName                = "/kcore.controller.Controller/DeleteDiskLayout"
+	Controller_ClassifyDiskLayout_FullMethodName              = "/kcore.controller.Controller/ClassifyDiskLayout"
+	Controller_CreateClusterUpdate_FullMethodName             = "/kcore.controller.Controller/CreateClusterUpdate"
+	Controller_GetClusterUpdate_FullMethodName                = "/kcore.controller.Controller/GetClusterUpdate"
+	Controller_ListClusterUpdates_FullMethodName              = "/kcore.controller.Controller/ListClusterUpdates"
+	Controller_PlanClusterUpdate_FullMethodName               = "/kcore.controller.Controller/PlanClusterUpdate"
+	Controller_ApproveClusterUpdate_FullMethodName            = "/kcore.controller.Controller/ApproveClusterUpdate"
+	Controller_CancelClusterUpdate_FullMethodName             = "/kcore.controller.Controller/CancelClusterUpdate"
+	Controller_RollbackClusterUpdate_FullMethodName           = "/kcore.controller.Controller/RollbackClusterUpdate"
+	Controller_RebootClusterUpdateNode_FullMethodName         = "/kcore.controller.Controller/RebootClusterUpdateNode"
+	Controller_PromoteClusterUpdate_FullMethodName            = "/kcore.controller.Controller/PromoteClusterUpdate"
+	Controller_SetClusterVersion_FullMethodName               = "/kcore.controller.Controller/SetClusterVersion"
+	Controller_GetClusterVersion_FullMethodName               = "/kcore.controller.Controller/GetClusterVersion"
+	Controller_SetSubscription_FullMethodName                 = "/kcore.controller.Controller/SetSubscription"
+	Controller_GetSubscription_FullMethodName                 = "/kcore.controller.Controller/GetSubscription"
+	Controller_PlanCephCluster_FullMethodName                 = "/kcore.controller.Controller/PlanCephCluster"
+	Controller_CreateCephCluster_FullMethodName               = "/kcore.controller.Controller/CreateCephCluster"
+	Controller_GetCephCluster_FullMethodName                  = "/kcore.controller.Controller/GetCephCluster"
+	Controller_ListCephClusters_FullMethodName                = "/kcore.controller.Controller/ListCephClusters"
+	Controller_DeleteCephCluster_FullMethodName               = "/kcore.controller.Controller/DeleteCephCluster"
+	Controller_GetCephClusterCapacity_FullMethodName          = "/kcore.controller.Controller/GetCephClusterCapacity"
+	Controller_GetCephDashboardCredentials_FullMethodName     = "/kcore.controller.Controller/GetCephDashboardCredentials"
+	Controller_SetCephDashboardCredentials_FullMethodName     = "/kcore.controller.Controller/SetCephDashboardCredentials"
+	Controller_FinalizeCephOsdRelease_FullMethodName          = "/kcore.controller.Controller/FinalizeCephOsdRelease"
+	Controller_RotateCephMonKey_FullMethodName                = "/kcore.controller.Controller/RotateCephMonKey"
+	Controller_RotateCephOsdDmcrypt_FullMethodName            = "/kcore.controller.Controller/RotateCephOsdDmcrypt"
+	Controller_ListVolumeTrash_FullMethodName                 = "/kcore.controller.Controller/ListVolumeTrash"
+	Controller_PurgeVolumeTrash_FullMethodName                = "/kcore.controller.Controller/PurgeVolumeTrash"
+	Controller_CreateSharedFilesystem_FullMethodName          = "/kcore.controller.Controller/CreateSharedFilesystem"
+	Controller_GetSharedFilesystem_FullMethodName             = "/kcore.controller.Controller/GetSharedFilesystem"
+	Controller_ListSharedFilesystems_FullMethodName           = "/kcore.controller.Controller/ListSharedFilesystems"
+	Controller_DeleteSharedFilesystem_FullMethodName          = "/kcore.controller.Controller/DeleteSharedFilesystem"
+	Controller_PlanIngress_FullMethodName                     = "/kcore.controller.Controller/PlanIngress"
+	Controller_CreateIngressGateway_FullMethodName            = "/kcore.controller.Controller/CreateIngressGateway"
+	Controller_GetIngressGateway_FullMethodName               = "/kcore.controller.Controller/GetIngressGateway"
+	Controller_ListIngressGateways_FullMethodName             = "/kcore.controller.Controller/ListIngressGateways"
+	Controller_DeleteIngressGateway_FullMethodName            = "/kcore.controller.Controller/DeleteIngressGateway"
+	Controller_CreateIngressRoute_FullMethodName              = "/kcore.controller.Controller/CreateIngressRoute"
+	Controller_GetIngressRoute_FullMethodName                 = "/kcore.controller.Controller/GetIngressRoute"
+	Controller_ListIngressRoutes_FullMethodName               = "/kcore.controller.Controller/ListIngressRoutes"
+	Controller_DeleteIngressRoute_FullMethodName              = "/kcore.controller.Controller/DeleteIngressRoute"
+	Controller_SetIngressRouteWafMode_FullMethodName          = "/kcore.controller.Controller/SetIngressRouteWafMode"
+	Controller_CreateWafPolicy_FullMethodName                 = "/kcore.controller.Controller/CreateWafPolicy"
+	Controller_GetWafPolicy_FullMethodName                    = "/kcore.controller.Controller/GetWafPolicy"
+	Controller_ListWafPolicies_FullMethodName                 = "/kcore.controller.Controller/ListWafPolicies"
+	Controller_DeleteWafPolicy_FullMethodName                 = "/kcore.controller.Controller/DeleteWafPolicy"
+	Controller_ListWafEvents_FullMethodName                   = "/kcore.controller.Controller/ListWafEvents"
+	Controller_SetIngressSecret_FullMethodName                = "/kcore.controller.Controller/SetIngressSecret"
+	Controller_ReportWafEvents_FullMethodName                 = "/kcore.controller.Controller/ReportWafEvents"
+	Controller_CreateObjectStore_FullMethodName               = "/kcore.controller.Controller/CreateObjectStore"
+	Controller_GetObjectStore_FullMethodName                  = "/kcore.controller.Controller/GetObjectStore"
+	Controller_ListObjectStores_FullMethodName                = "/kcore.controller.Controller/ListObjectStores"
+	Controller_DeleteObjectStore_FullMethodName               = "/kcore.controller.Controller/DeleteObjectStore"
+	Controller_CreateObjectUser_FullMethodName                = "/kcore.controller.Controller/CreateObjectUser"
+	Controller_DeleteObjectUser_FullMethodName                = "/kcore.controller.Controller/DeleteObjectUser"
+	Controller_CreateOperator_FullMethodName                  = "/kcore.controller.Controller/CreateOperator"
+	Controller_DeleteOperator_FullMethodName                  = "/kcore.controller.Controller/DeleteOperator"
+	Controller_ListOperators_FullMethodName                   = "/kcore.controller.Controller/ListOperators"
+	Controller_GetOperator_FullMethodName                     = "/kcore.controller.Controller/GetOperator"
+	Controller_GrantOperatorRole_FullMethodName               = "/kcore.controller.Controller/GrantOperatorRole"
+	Controller_RevokeOperatorRole_FullMethodName              = "/kcore.controller.Controller/RevokeOperatorRole"
+	Controller_IssueOperatorCert_FullMethodName               = "/kcore.controller.Controller/IssueOperatorCert"
+	Controller_PlanKubernetesCluster_FullMethodName           = "/kcore.controller.Controller/PlanKubernetesCluster"
+	Controller_CreateKubernetesCluster_FullMethodName         = "/kcore.controller.Controller/CreateKubernetesCluster"
+	Controller_UpdateKubernetesCluster_FullMethodName         = "/kcore.controller.Controller/UpdateKubernetesCluster"
+	Controller_GetKubernetesCluster_FullMethodName            = "/kcore.controller.Controller/GetKubernetesCluster"
+	Controller_ListKubernetesClusters_FullMethodName          = "/kcore.controller.Controller/ListKubernetesClusters"
+	Controller_DeleteKubernetesCluster_FullMethodName         = "/kcore.controller.Controller/DeleteKubernetesCluster"
+	Controller_ScaleKubernetesCluster_FullMethodName          = "/kcore.controller.Controller/ScaleKubernetesCluster"
+	Controller_GetKubernetesClusterHealth_FullMethodName      = "/kcore.controller.Controller/GetKubernetesClusterHealth"
+	Controller_PlanSlurmCluster_FullMethodName                = "/kcore.controller.Controller/PlanSlurmCluster"
+	Controller_CreateSlurmCluster_FullMethodName              = "/kcore.controller.Controller/CreateSlurmCluster"
+	Controller_GetSlurmCluster_FullMethodName                 = "/kcore.controller.Controller/GetSlurmCluster"
+	Controller_ListSlurmClusters_FullMethodName               = "/kcore.controller.Controller/ListSlurmClusters"
+	Controller_DeleteSlurmCluster_FullMethodName              = "/kcore.controller.Controller/DeleteSlurmCluster"
+	Controller_RotateSlurmMungeKey_FullMethodName             = "/kcore.controller.Controller/RotateSlurmMungeKey"
+	Controller_DrainSlurmNode_FullMethodName                  = "/kcore.controller.Controller/DrainSlurmNode"
+	Controller_ResumeSlurmNode_FullMethodName                 = "/kcore.controller.Controller/ResumeSlurmNode"
+	Controller_PlanPostgresqlCluster_FullMethodName           = "/kcore.controller.Controller/PlanPostgresqlCluster"
+	Controller_CreatePostgresqlCluster_FullMethodName         = "/kcore.controller.Controller/CreatePostgresqlCluster"
+	Controller_UpdatePostgresqlCluster_FullMethodName         = "/kcore.controller.Controller/UpdatePostgresqlCluster"
+	Controller_GetPostgresqlCluster_FullMethodName            = "/kcore.controller.Controller/GetPostgresqlCluster"
+	Controller_ListPostgresqlClusters_FullMethodName          = "/kcore.controller.Controller/ListPostgresqlClusters"
+	Controller_DeletePostgresqlCluster_FullMethodName         = "/kcore.controller.Controller/DeletePostgresqlCluster"
+	Controller_ScalePostgresqlCluster_FullMethodName          = "/kcore.controller.Controller/ScalePostgresqlCluster"
+	Controller_ReplacePostgresqlMember_FullMethodName         = "/kcore.controller.Controller/ReplacePostgresqlMember"
+	Controller_ReinitPostgresqlMember_FullMethodName          = "/kcore.controller.Controller/ReinitPostgresqlMember"
+	Controller_UpgradePostgresqlCluster_FullMethodName        = "/kcore.controller.Controller/UpgradePostgresqlCluster"
+	Controller_FinalizePostgresqlUpgrade_FullMethodName       = "/kcore.controller.Controller/FinalizePostgresqlUpgrade"
+	Controller_RollbackPostgresqlUpgrade_FullMethodName       = "/kcore.controller.Controller/RollbackPostgresqlUpgrade"
+	Controller_SwitchoverPostgresqlCluster_FullMethodName     = "/kcore.controller.Controller/SwitchoverPostgresqlCluster"
+	Controller_FailoverPostgresqlCluster_FullMethodName       = "/kcore.controller.Controller/FailoverPostgresqlCluster"
+	Controller_SetPostgresqlMaintenance_FullMethodName        = "/kcore.controller.Controller/SetPostgresqlMaintenance"
+	Controller_GetPostgresqlClusterHealth_FullMethodName      = "/kcore.controller.Controller/GetPostgresqlClusterHealth"
+	Controller_ListPostgresqlClusterEvents_FullMethodName     = "/kcore.controller.Controller/ListPostgresqlClusterEvents"
+	Controller_GetPostgresqlOperation_FullMethodName          = "/kcore.controller.Controller/GetPostgresqlOperation"
+	Controller_ListPostgresqlOperations_FullMethodName        = "/kcore.controller.Controller/ListPostgresqlOperations"
+	Controller_CancelPostgresqlOperation_FullMethodName       = "/kcore.controller.Controller/CancelPostgresqlOperation"
+	Controller_GetPostgresqlClusterCredentials_FullMethodName = "/kcore.controller.Controller/GetPostgresqlClusterCredentials"
 )
 
 // ControllerClient is the client API for Controller service.
@@ -278,6 +310,9 @@ type ControllerClient interface {
 	// anything new on it. Uncordon returns it to scheduling.
 	CordonNode(ctx context.Context, in *CordonNodeRequest, opts ...grpc.CallOption) (*CordonNodeResponse, error)
 	UncordonNode(ctx context.Context, in *UncordonNodeRequest, opts ...grpc.CallOption) (*UncordonNodeResponse, error)
+	// Cordon, set Ceph noout, and drain Ceph VMs (or reverse). Refuses when the
+	// node is the only mon or taking it down would break pool min_size.
+	SetNodeMaintenance(ctx context.Context, in *SetNodeMaintenanceRequest, opts ...grpc.CallOption) (*SetNodeMaintenanceResponse, error)
 	// Remove the node after it has no VMs or networks. Revokes every certificate
 	// issued to it before the row is deleted.
 	DeleteNode(ctx context.Context, in *DeleteNodeRequest, opts ...grpc.CallOption) (*DeleteNodeResponse, error)
@@ -342,6 +377,8 @@ type ControllerClient interface {
 	RestoreVolume(ctx context.Context, in *RestoreVolumeRequest, opts ...grpc.CallOption) (*RestoreVolumeResponse, error)
 	FlattenVolume(ctx context.Context, in *FlattenVolumeRequest, opts ...grpc.CallOption) (*FlattenVolumeResponse, error)
 	ResizeVolume(ctx context.Context, in *ResizeVolumeRequest, opts ...grpc.CallOption) (*ResizeVolumeResponse, error)
+	// Move a detached LVM or ZFS volume onto Ceph RBD and update the row.
+	ConvertVolume(ctx context.Context, in *ConvertVolumeRequest, opts ...grpc.CallOption) (*ConvertVolumeResponse, error)
 	// Snapshot export hooks (docs/backup.md). Controllers proxy to NodeStorage.
 	ExposeVolumeSnapshot(ctx context.Context, in *ExposeVolumeSnapshotRequest, opts ...grpc.CallOption) (*ExposeVolumeSnapshotResponse, error)
 	UnexposeVolumeSnapshot(ctx context.Context, in *UnexposeVolumeSnapshotRequest, opts ...grpc.CallOption) (*UnexposeVolumeSnapshotResponse, error)
@@ -359,6 +396,12 @@ type ControllerClient interface {
 	UnmountVolume(ctx context.Context, in *UnmountVolumeRequest, opts ...grpc.CallOption) (*UnmountVolumeResponse, error)
 	// In-place LUKS over an existing plain RBD image (data-destructive; see destroy_data).
 	EncryptVolume(ctx context.Context, in *EncryptVolumeRequest, opts ...grpc.CallOption) (*EncryptVolumeResponse, error)
+	// Move a stopped LVM or ZFS VM's disk onto Ceph: new RBD image, extent copy,
+	// storage_backend flip, Nix push, start. The local disk is kept.
+	ConvertVmStorage(ctx context.Context, in *ConvertVmStorageRequest, opts ...grpc.CallOption) (*ConvertVmStorageResponse, error)
+	// Copy a whole Ceph volume into a new volume on another CephCluster (snapshot,
+	// expose, read extents, write). Blocking; the source stays untouched.
+	CopyVolumeToCluster(ctx context.Context, in *CopyVolumeToClusterRequest, opts ...grpc.CallOption) (*CopyVolumeToClusterResponse, error)
 	CreateSnapshotPolicy(ctx context.Context, in *CreateSnapshotPolicyRequest, opts ...grpc.CallOption) (*CreateSnapshotPolicyResponse, error)
 	GetSnapshotPolicy(ctx context.Context, in *GetSnapshotPolicyRequest, opts ...grpc.CallOption) (*GetSnapshotPolicyResponse, error)
 	ListSnapshotPolicies(ctx context.Context, in *ListSnapshotPoliciesRequest, opts ...grpc.CallOption) (*ListSnapshotPoliciesResponse, error)
@@ -394,6 +437,11 @@ type ControllerClient interface {
 	// nodes one at a time, and stops at the first failing node.
 	SetClusterVersion(ctx context.Context, in *SetClusterVersionRequest, opts ...grpc.CallOption) (*SetClusterVersionResponse, error)
 	GetClusterVersion(ctx context.Context, in *GetClusterVersionRequest, opts ...grpc.CallOption) (*GetClusterVersionResponse, error)
+	// Subscription token for the private enterprise update channel
+	// (kcorehypervisor/enterprise). Cluster-admin only; the token is a
+	// GitHub classic PAT with repo scope for a dedicated collaborator account.
+	SetSubscription(ctx context.Context, in *SetSubscriptionRequest, opts ...grpc.CallOption) (*SetSubscriptionResponse, error)
+	GetSubscription(ctx context.Context, in *GetSubscriptionRequest, opts ...grpc.CallOption) (*GetSubscriptionResponse, error)
 	// CephCluster — declarative cluster-scoped Ceph SAN configuration.
 	PlanCephCluster(ctx context.Context, in *PlanCephClusterRequest, opts ...grpc.CallOption) (*PlanCephClusterResponse, error)
 	CreateCephCluster(ctx context.Context, in *CreateCephClusterRequest, opts ...grpc.CallOption) (*CreateCephClusterResponse, error)
@@ -406,6 +454,12 @@ type ControllerClient interface {
 	// Ceph itself keeps only a password hash, so plaintext is served from kcore.
 	GetCephDashboardCredentials(ctx context.Context, in *GetCephDashboardCredentialsRequest, opts ...grpc.CallOption) (*GetCephDashboardCredentialsResponse, error)
 	SetCephDashboardCredentials(ctx context.Context, in *SetCephDashboardCredentialsRequest, opts ...grpc.CallOption) (*SetCephDashboardCredentialsResponse, error)
+	// After every member runs the new Ceph, set osd require-osd-release.
+	FinalizeCephOsdRelease(ctx context.Context, in *FinalizeCephOsdReleaseRequest, opts ...grpc.CallOption) (*FinalizeCephOsdReleaseResponse, error)
+	RotateCephMonKey(ctx context.Context, in *RotateCephMonKeyRequest, opts ...grpc.CallOption) (*RotateCephMonKeyResponse, error)
+	RotateCephOsdDmcrypt(ctx context.Context, in *RotateCephOsdDmcryptRequest, opts ...grpc.CallOption) (*RotateCephOsdDmcryptResponse, error)
+	ListVolumeTrash(ctx context.Context, in *ListVolumeTrashRequest, opts ...grpc.CallOption) (*ListVolumeTrashResponse, error)
+	PurgeVolumeTrash(ctx context.Context, in *PurgeVolumeTrashRequest, opts ...grpc.CallOption) (*PurgeVolumeTrashResponse, error)
 	// SharedFilesystem (CephFS) — cluster-scoped POSIX file service on Ceph.
 	CreateSharedFilesystem(ctx context.Context, in *CreateSharedFilesystemRequest, opts ...grpc.CallOption) (*CreateSharedFilesystemResponse, error)
 	GetSharedFilesystem(ctx context.Context, in *GetSharedFilesystemRequest, opts ...grpc.CallOption) (*GetSharedFilesystemResponse, error)
@@ -465,6 +519,34 @@ type ControllerClient interface {
 	RotateSlurmMungeKey(ctx context.Context, in *RotateSlurmMungeKeyRequest, opts ...grpc.CallOption) (*RotateSlurmMungeKeyResponse, error)
 	DrainSlurmNode(ctx context.Context, in *DrainSlurmNodeRequest, opts ...grpc.CallOption) (*DrainSlurmNodeResponse, error)
 	ResumeSlurmNode(ctx context.Context, in *ResumeSlurmNodeRequest, opts ...grpc.CallOption) (*ResumeSlurmNodeResponse, error)
+	// PostgresqlCluster — a Patroni-managed primary with streaming standbys on
+	// kcoreOS nodes (docs/bare-metal-postgresql.md). Patroni and etcd decide
+	// automatic failover; these RPCs drive every planned change as an operation.
+	PlanPostgresqlCluster(ctx context.Context, in *PlanPostgresqlClusterRequest, opts ...grpc.CallOption) (*PlanPostgresqlClusterResponse, error)
+	CreatePostgresqlCluster(ctx context.Context, in *CreatePostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error)
+	UpdatePostgresqlCluster(ctx context.Context, in *UpdatePostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error)
+	GetPostgresqlCluster(ctx context.Context, in *GetPostgresqlClusterRequest, opts ...grpc.CallOption) (*GetPostgresqlClusterResponse, error)
+	ListPostgresqlClusters(ctx context.Context, in *ListPostgresqlClustersRequest, opts ...grpc.CallOption) (*ListPostgresqlClustersResponse, error)
+	DeletePostgresqlCluster(ctx context.Context, in *DeletePostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error)
+	ScalePostgresqlCluster(ctx context.Context, in *ScalePostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error)
+	ReplacePostgresqlMember(ctx context.Context, in *ReplacePostgresqlMemberRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error)
+	ReinitPostgresqlMember(ctx context.Context, in *ReinitPostgresqlMemberRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error)
+	// Same major: rolling minor upgrade (after a pin move). Higher major:
+	// pg_upgrade with a downtime window stated by plan.
+	UpgradePostgresqlCluster(ctx context.Context, in *UpgradePostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error)
+	FinalizePostgresqlUpgrade(ctx context.Context, in *PostgresqlClusterNameRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error)
+	RollbackPostgresqlUpgrade(ctx context.Context, in *PostgresqlClusterNameRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error)
+	SwitchoverPostgresqlCluster(ctx context.Context, in *SwitchoverPostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error)
+	// Manual promotion when Patroni cannot elect. Requires force and a candidate.
+	FailoverPostgresqlCluster(ctx context.Context, in *FailoverPostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error)
+	SetPostgresqlMaintenance(ctx context.Context, in *SetPostgresqlMaintenanceRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error)
+	GetPostgresqlClusterHealth(ctx context.Context, in *PostgresqlClusterNameRequest, opts ...grpc.CallOption) (*GetPostgresqlClusterHealthResponse, error)
+	ListPostgresqlClusterEvents(ctx context.Context, in *ListPostgresqlClusterEventsRequest, opts ...grpc.CallOption) (*ListPostgresqlClusterEventsResponse, error)
+	GetPostgresqlOperation(ctx context.Context, in *GetPostgresqlOperationRequest, opts ...grpc.CallOption) (*GetPostgresqlOperationResponse, error)
+	ListPostgresqlOperations(ctx context.Context, in *ListPostgresqlOperationsRequest, opts ...grpc.CallOption) (*ListPostgresqlOperationsResponse, error)
+	CancelPostgresqlOperation(ctx context.Context, in *GetPostgresqlOperationRequest, opts ...grpc.CallOption) (*GetPostgresqlOperationResponse, error)
+	// Superuser and generated role passwords, connection strings, CA. Audited.
+	GetPostgresqlClusterCredentials(ctx context.Context, in *PostgresqlClusterNameRequest, opts ...grpc.CallOption) (*GetPostgresqlClusterCredentialsResponse, error)
 }
 
 type controllerClient struct {
@@ -987,6 +1069,16 @@ func (c *controllerClient) UncordonNode(ctx context.Context, in *UncordonNodeReq
 	return out, nil
 }
 
+func (c *controllerClient) SetNodeMaintenance(ctx context.Context, in *SetNodeMaintenanceRequest, opts ...grpc.CallOption) (*SetNodeMaintenanceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetNodeMaintenanceResponse)
+	err := c.cc.Invoke(ctx, Controller_SetNodeMaintenance_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controllerClient) DeleteNode(ctx context.Context, in *DeleteNodeRequest, opts ...grpc.CallOption) (*DeleteNodeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteNodeResponse)
@@ -1357,6 +1449,16 @@ func (c *controllerClient) ResizeVolume(ctx context.Context, in *ResizeVolumeReq
 	return out, nil
 }
 
+func (c *controllerClient) ConvertVolume(ctx context.Context, in *ConvertVolumeRequest, opts ...grpc.CallOption) (*ConvertVolumeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ConvertVolumeResponse)
+	err := c.cc.Invoke(ctx, Controller_ConvertVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controllerClient) ExposeVolumeSnapshot(ctx context.Context, in *ExposeVolumeSnapshotRequest, opts ...grpc.CallOption) (*ExposeVolumeSnapshotResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ExposeVolumeSnapshotResponse)
@@ -1483,6 +1585,26 @@ func (c *controllerClient) EncryptVolume(ctx context.Context, in *EncryptVolumeR
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(EncryptVolumeResponse)
 	err := c.cc.Invoke(ctx, Controller_EncryptVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ConvertVmStorage(ctx context.Context, in *ConvertVmStorageRequest, opts ...grpc.CallOption) (*ConvertVmStorageResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ConvertVmStorageResponse)
+	err := c.cc.Invoke(ctx, Controller_ConvertVmStorage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) CopyVolumeToCluster(ctx context.Context, in *CopyVolumeToClusterRequest, opts ...grpc.CallOption) (*CopyVolumeToClusterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CopyVolumeToClusterResponse)
+	err := c.cc.Invoke(ctx, Controller_CopyVolumeToCluster_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1689,6 +1811,26 @@ func (c *controllerClient) GetClusterVersion(ctx context.Context, in *GetCluster
 	return out, nil
 }
 
+func (c *controllerClient) SetSubscription(ctx context.Context, in *SetSubscriptionRequest, opts ...grpc.CallOption) (*SetSubscriptionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetSubscriptionResponse)
+	err := c.cc.Invoke(ctx, Controller_SetSubscription_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetSubscription(ctx context.Context, in *GetSubscriptionRequest, opts ...grpc.CallOption) (*GetSubscriptionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSubscriptionResponse)
+	err := c.cc.Invoke(ctx, Controller_GetSubscription_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controllerClient) PlanCephCluster(ctx context.Context, in *PlanCephClusterRequest, opts ...grpc.CallOption) (*PlanCephClusterResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PlanCephClusterResponse)
@@ -1763,6 +1905,56 @@ func (c *controllerClient) SetCephDashboardCredentials(ctx context.Context, in *
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SetCephDashboardCredentialsResponse)
 	err := c.cc.Invoke(ctx, Controller_SetCephDashboardCredentials_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) FinalizeCephOsdRelease(ctx context.Context, in *FinalizeCephOsdReleaseRequest, opts ...grpc.CallOption) (*FinalizeCephOsdReleaseResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FinalizeCephOsdReleaseResponse)
+	err := c.cc.Invoke(ctx, Controller_FinalizeCephOsdRelease_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) RotateCephMonKey(ctx context.Context, in *RotateCephMonKeyRequest, opts ...grpc.CallOption) (*RotateCephMonKeyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RotateCephMonKeyResponse)
+	err := c.cc.Invoke(ctx, Controller_RotateCephMonKey_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) RotateCephOsdDmcrypt(ctx context.Context, in *RotateCephOsdDmcryptRequest, opts ...grpc.CallOption) (*RotateCephOsdDmcryptResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RotateCephOsdDmcryptResponse)
+	err := c.cc.Invoke(ctx, Controller_RotateCephOsdDmcrypt_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListVolumeTrash(ctx context.Context, in *ListVolumeTrashRequest, opts ...grpc.CallOption) (*ListVolumeTrashResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListVolumeTrashResponse)
+	err := c.cc.Invoke(ctx, Controller_ListVolumeTrash_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) PurgeVolumeTrash(ctx context.Context, in *PurgeVolumeTrashRequest, opts ...grpc.CallOption) (*PurgeVolumeTrashResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PurgeVolumeTrashResponse)
+	err := c.cc.Invoke(ctx, Controller_PurgeVolumeTrash_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2269,6 +2461,216 @@ func (c *controllerClient) ResumeSlurmNode(ctx context.Context, in *ResumeSlurmN
 	return out, nil
 }
 
+func (c *controllerClient) PlanPostgresqlCluster(ctx context.Context, in *PlanPostgresqlClusterRequest, opts ...grpc.CallOption) (*PlanPostgresqlClusterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PlanPostgresqlClusterResponse)
+	err := c.cc.Invoke(ctx, Controller_PlanPostgresqlCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) CreatePostgresqlCluster(ctx context.Context, in *CreatePostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostgresqlClusterOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_CreatePostgresqlCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) UpdatePostgresqlCluster(ctx context.Context, in *UpdatePostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostgresqlClusterOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_UpdatePostgresqlCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetPostgresqlCluster(ctx context.Context, in *GetPostgresqlClusterRequest, opts ...grpc.CallOption) (*GetPostgresqlClusterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPostgresqlClusterResponse)
+	err := c.cc.Invoke(ctx, Controller_GetPostgresqlCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListPostgresqlClusters(ctx context.Context, in *ListPostgresqlClustersRequest, opts ...grpc.CallOption) (*ListPostgresqlClustersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPostgresqlClustersResponse)
+	err := c.cc.Invoke(ctx, Controller_ListPostgresqlClusters_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) DeletePostgresqlCluster(ctx context.Context, in *DeletePostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostgresqlClusterOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_DeletePostgresqlCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ScalePostgresqlCluster(ctx context.Context, in *ScalePostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostgresqlClusterOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_ScalePostgresqlCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ReplacePostgresqlMember(ctx context.Context, in *ReplacePostgresqlMemberRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostgresqlClusterOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_ReplacePostgresqlMember_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ReinitPostgresqlMember(ctx context.Context, in *ReinitPostgresqlMemberRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostgresqlClusterOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_ReinitPostgresqlMember_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) UpgradePostgresqlCluster(ctx context.Context, in *UpgradePostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostgresqlClusterOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_UpgradePostgresqlCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) FinalizePostgresqlUpgrade(ctx context.Context, in *PostgresqlClusterNameRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostgresqlClusterOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_FinalizePostgresqlUpgrade_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) RollbackPostgresqlUpgrade(ctx context.Context, in *PostgresqlClusterNameRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostgresqlClusterOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_RollbackPostgresqlUpgrade_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) SwitchoverPostgresqlCluster(ctx context.Context, in *SwitchoverPostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostgresqlClusterOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_SwitchoverPostgresqlCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) FailoverPostgresqlCluster(ctx context.Context, in *FailoverPostgresqlClusterRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostgresqlClusterOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_FailoverPostgresqlCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) SetPostgresqlMaintenance(ctx context.Context, in *SetPostgresqlMaintenanceRequest, opts ...grpc.CallOption) (*PostgresqlClusterOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostgresqlClusterOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_SetPostgresqlMaintenance_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetPostgresqlClusterHealth(ctx context.Context, in *PostgresqlClusterNameRequest, opts ...grpc.CallOption) (*GetPostgresqlClusterHealthResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPostgresqlClusterHealthResponse)
+	err := c.cc.Invoke(ctx, Controller_GetPostgresqlClusterHealth_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListPostgresqlClusterEvents(ctx context.Context, in *ListPostgresqlClusterEventsRequest, opts ...grpc.CallOption) (*ListPostgresqlClusterEventsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPostgresqlClusterEventsResponse)
+	err := c.cc.Invoke(ctx, Controller_ListPostgresqlClusterEvents_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetPostgresqlOperation(ctx context.Context, in *GetPostgresqlOperationRequest, opts ...grpc.CallOption) (*GetPostgresqlOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPostgresqlOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_GetPostgresqlOperation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListPostgresqlOperations(ctx context.Context, in *ListPostgresqlOperationsRequest, opts ...grpc.CallOption) (*ListPostgresqlOperationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPostgresqlOperationsResponse)
+	err := c.cc.Invoke(ctx, Controller_ListPostgresqlOperations_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) CancelPostgresqlOperation(ctx context.Context, in *GetPostgresqlOperationRequest, opts ...grpc.CallOption) (*GetPostgresqlOperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPostgresqlOperationResponse)
+	err := c.cc.Invoke(ctx, Controller_CancelPostgresqlOperation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetPostgresqlClusterCredentials(ctx context.Context, in *PostgresqlClusterNameRequest, opts ...grpc.CallOption) (*GetPostgresqlClusterCredentialsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPostgresqlClusterCredentialsResponse)
+	err := c.cc.Invoke(ctx, Controller_GetPostgresqlClusterCredentials_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ControllerServer is the server API for Controller service.
 // All implementations must embed UnimplementedControllerServer
 // for forward compatibility.
@@ -2349,6 +2751,9 @@ type ControllerServer interface {
 	// anything new on it. Uncordon returns it to scheduling.
 	CordonNode(context.Context, *CordonNodeRequest) (*CordonNodeResponse, error)
 	UncordonNode(context.Context, *UncordonNodeRequest) (*UncordonNodeResponse, error)
+	// Cordon, set Ceph noout, and drain Ceph VMs (or reverse). Refuses when the
+	// node is the only mon or taking it down would break pool min_size.
+	SetNodeMaintenance(context.Context, *SetNodeMaintenanceRequest) (*SetNodeMaintenanceResponse, error)
 	// Remove the node after it has no VMs or networks. Revokes every certificate
 	// issued to it before the row is deleted.
 	DeleteNode(context.Context, *DeleteNodeRequest) (*DeleteNodeResponse, error)
@@ -2413,6 +2818,8 @@ type ControllerServer interface {
 	RestoreVolume(context.Context, *RestoreVolumeRequest) (*RestoreVolumeResponse, error)
 	FlattenVolume(context.Context, *FlattenVolumeRequest) (*FlattenVolumeResponse, error)
 	ResizeVolume(context.Context, *ResizeVolumeRequest) (*ResizeVolumeResponse, error)
+	// Move a detached LVM or ZFS volume onto Ceph RBD and update the row.
+	ConvertVolume(context.Context, *ConvertVolumeRequest) (*ConvertVolumeResponse, error)
 	// Snapshot export hooks (docs/backup.md). Controllers proxy to NodeStorage.
 	ExposeVolumeSnapshot(context.Context, *ExposeVolumeSnapshotRequest) (*ExposeVolumeSnapshotResponse, error)
 	UnexposeVolumeSnapshot(context.Context, *UnexposeVolumeSnapshotRequest) (*UnexposeVolumeSnapshotResponse, error)
@@ -2430,6 +2837,12 @@ type ControllerServer interface {
 	UnmountVolume(context.Context, *UnmountVolumeRequest) (*UnmountVolumeResponse, error)
 	// In-place LUKS over an existing plain RBD image (data-destructive; see destroy_data).
 	EncryptVolume(context.Context, *EncryptVolumeRequest) (*EncryptVolumeResponse, error)
+	// Move a stopped LVM or ZFS VM's disk onto Ceph: new RBD image, extent copy,
+	// storage_backend flip, Nix push, start. The local disk is kept.
+	ConvertVmStorage(context.Context, *ConvertVmStorageRequest) (*ConvertVmStorageResponse, error)
+	// Copy a whole Ceph volume into a new volume on another CephCluster (snapshot,
+	// expose, read extents, write). Blocking; the source stays untouched.
+	CopyVolumeToCluster(context.Context, *CopyVolumeToClusterRequest) (*CopyVolumeToClusterResponse, error)
 	CreateSnapshotPolicy(context.Context, *CreateSnapshotPolicyRequest) (*CreateSnapshotPolicyResponse, error)
 	GetSnapshotPolicy(context.Context, *GetSnapshotPolicyRequest) (*GetSnapshotPolicyResponse, error)
 	ListSnapshotPolicies(context.Context, *ListSnapshotPoliciesRequest) (*ListSnapshotPoliciesResponse, error)
@@ -2465,6 +2878,11 @@ type ControllerServer interface {
 	// nodes one at a time, and stops at the first failing node.
 	SetClusterVersion(context.Context, *SetClusterVersionRequest) (*SetClusterVersionResponse, error)
 	GetClusterVersion(context.Context, *GetClusterVersionRequest) (*GetClusterVersionResponse, error)
+	// Subscription token for the private enterprise update channel
+	// (kcorehypervisor/enterprise). Cluster-admin only; the token is a
+	// GitHub classic PAT with repo scope for a dedicated collaborator account.
+	SetSubscription(context.Context, *SetSubscriptionRequest) (*SetSubscriptionResponse, error)
+	GetSubscription(context.Context, *GetSubscriptionRequest) (*GetSubscriptionResponse, error)
 	// CephCluster — declarative cluster-scoped Ceph SAN configuration.
 	PlanCephCluster(context.Context, *PlanCephClusterRequest) (*PlanCephClusterResponse, error)
 	CreateCephCluster(context.Context, *CreateCephClusterRequest) (*CreateCephClusterResponse, error)
@@ -2477,6 +2895,12 @@ type ControllerServer interface {
 	// Ceph itself keeps only a password hash, so plaintext is served from kcore.
 	GetCephDashboardCredentials(context.Context, *GetCephDashboardCredentialsRequest) (*GetCephDashboardCredentialsResponse, error)
 	SetCephDashboardCredentials(context.Context, *SetCephDashboardCredentialsRequest) (*SetCephDashboardCredentialsResponse, error)
+	// After every member runs the new Ceph, set osd require-osd-release.
+	FinalizeCephOsdRelease(context.Context, *FinalizeCephOsdReleaseRequest) (*FinalizeCephOsdReleaseResponse, error)
+	RotateCephMonKey(context.Context, *RotateCephMonKeyRequest) (*RotateCephMonKeyResponse, error)
+	RotateCephOsdDmcrypt(context.Context, *RotateCephOsdDmcryptRequest) (*RotateCephOsdDmcryptResponse, error)
+	ListVolumeTrash(context.Context, *ListVolumeTrashRequest) (*ListVolumeTrashResponse, error)
+	PurgeVolumeTrash(context.Context, *PurgeVolumeTrashRequest) (*PurgeVolumeTrashResponse, error)
 	// SharedFilesystem (CephFS) — cluster-scoped POSIX file service on Ceph.
 	CreateSharedFilesystem(context.Context, *CreateSharedFilesystemRequest) (*CreateSharedFilesystemResponse, error)
 	GetSharedFilesystem(context.Context, *GetSharedFilesystemRequest) (*GetSharedFilesystemResponse, error)
@@ -2536,6 +2960,34 @@ type ControllerServer interface {
 	RotateSlurmMungeKey(context.Context, *RotateSlurmMungeKeyRequest) (*RotateSlurmMungeKeyResponse, error)
 	DrainSlurmNode(context.Context, *DrainSlurmNodeRequest) (*DrainSlurmNodeResponse, error)
 	ResumeSlurmNode(context.Context, *ResumeSlurmNodeRequest) (*ResumeSlurmNodeResponse, error)
+	// PostgresqlCluster — a Patroni-managed primary with streaming standbys on
+	// kcoreOS nodes (docs/bare-metal-postgresql.md). Patroni and etcd decide
+	// automatic failover; these RPCs drive every planned change as an operation.
+	PlanPostgresqlCluster(context.Context, *PlanPostgresqlClusterRequest) (*PlanPostgresqlClusterResponse, error)
+	CreatePostgresqlCluster(context.Context, *CreatePostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error)
+	UpdatePostgresqlCluster(context.Context, *UpdatePostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error)
+	GetPostgresqlCluster(context.Context, *GetPostgresqlClusterRequest) (*GetPostgresqlClusterResponse, error)
+	ListPostgresqlClusters(context.Context, *ListPostgresqlClustersRequest) (*ListPostgresqlClustersResponse, error)
+	DeletePostgresqlCluster(context.Context, *DeletePostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error)
+	ScalePostgresqlCluster(context.Context, *ScalePostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error)
+	ReplacePostgresqlMember(context.Context, *ReplacePostgresqlMemberRequest) (*PostgresqlClusterOperationResponse, error)
+	ReinitPostgresqlMember(context.Context, *ReinitPostgresqlMemberRequest) (*PostgresqlClusterOperationResponse, error)
+	// Same major: rolling minor upgrade (after a pin move). Higher major:
+	// pg_upgrade with a downtime window stated by plan.
+	UpgradePostgresqlCluster(context.Context, *UpgradePostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error)
+	FinalizePostgresqlUpgrade(context.Context, *PostgresqlClusterNameRequest) (*PostgresqlClusterOperationResponse, error)
+	RollbackPostgresqlUpgrade(context.Context, *PostgresqlClusterNameRequest) (*PostgresqlClusterOperationResponse, error)
+	SwitchoverPostgresqlCluster(context.Context, *SwitchoverPostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error)
+	// Manual promotion when Patroni cannot elect. Requires force and a candidate.
+	FailoverPostgresqlCluster(context.Context, *FailoverPostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error)
+	SetPostgresqlMaintenance(context.Context, *SetPostgresqlMaintenanceRequest) (*PostgresqlClusterOperationResponse, error)
+	GetPostgresqlClusterHealth(context.Context, *PostgresqlClusterNameRequest) (*GetPostgresqlClusterHealthResponse, error)
+	ListPostgresqlClusterEvents(context.Context, *ListPostgresqlClusterEventsRequest) (*ListPostgresqlClusterEventsResponse, error)
+	GetPostgresqlOperation(context.Context, *GetPostgresqlOperationRequest) (*GetPostgresqlOperationResponse, error)
+	ListPostgresqlOperations(context.Context, *ListPostgresqlOperationsRequest) (*ListPostgresqlOperationsResponse, error)
+	CancelPostgresqlOperation(context.Context, *GetPostgresqlOperationRequest) (*GetPostgresqlOperationResponse, error)
+	// Superuser and generated role passwords, connection strings, CA. Audited.
+	GetPostgresqlClusterCredentials(context.Context, *PostgresqlClusterNameRequest) (*GetPostgresqlClusterCredentialsResponse, error)
 	mustEmbedUnimplementedControllerServer()
 }
 
@@ -2696,6 +3148,9 @@ func (UnimplementedControllerServer) CordonNode(context.Context, *CordonNodeRequ
 func (UnimplementedControllerServer) UncordonNode(context.Context, *UncordonNodeRequest) (*UncordonNodeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UncordonNode not implemented")
 }
+func (UnimplementedControllerServer) SetNodeMaintenance(context.Context, *SetNodeMaintenanceRequest) (*SetNodeMaintenanceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetNodeMaintenance not implemented")
+}
 func (UnimplementedControllerServer) DeleteNode(context.Context, *DeleteNodeRequest) (*DeleteNodeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteNode not implemented")
 }
@@ -2807,6 +3262,9 @@ func (UnimplementedControllerServer) FlattenVolume(context.Context, *FlattenVolu
 func (UnimplementedControllerServer) ResizeVolume(context.Context, *ResizeVolumeRequest) (*ResizeVolumeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ResizeVolume not implemented")
 }
+func (UnimplementedControllerServer) ConvertVolume(context.Context, *ConvertVolumeRequest) (*ConvertVolumeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConvertVolume not implemented")
+}
 func (UnimplementedControllerServer) ExposeVolumeSnapshot(context.Context, *ExposeVolumeSnapshotRequest) (*ExposeVolumeSnapshotResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ExposeVolumeSnapshot not implemented")
 }
@@ -2842,6 +3300,12 @@ func (UnimplementedControllerServer) UnmountVolume(context.Context, *UnmountVolu
 }
 func (UnimplementedControllerServer) EncryptVolume(context.Context, *EncryptVolumeRequest) (*EncryptVolumeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method EncryptVolume not implemented")
+}
+func (UnimplementedControllerServer) ConvertVmStorage(context.Context, *ConvertVmStorageRequest) (*ConvertVmStorageResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConvertVmStorage not implemented")
+}
+func (UnimplementedControllerServer) CopyVolumeToCluster(context.Context, *CopyVolumeToClusterRequest) (*CopyVolumeToClusterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CopyVolumeToCluster not implemented")
 }
 func (UnimplementedControllerServer) CreateSnapshotPolicy(context.Context, *CreateSnapshotPolicyRequest) (*CreateSnapshotPolicyResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateSnapshotPolicy not implemented")
@@ -2903,6 +3367,12 @@ func (UnimplementedControllerServer) SetClusterVersion(context.Context, *SetClus
 func (UnimplementedControllerServer) GetClusterVersion(context.Context, *GetClusterVersionRequest) (*GetClusterVersionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetClusterVersion not implemented")
 }
+func (UnimplementedControllerServer) SetSubscription(context.Context, *SetSubscriptionRequest) (*SetSubscriptionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetSubscription not implemented")
+}
+func (UnimplementedControllerServer) GetSubscription(context.Context, *GetSubscriptionRequest) (*GetSubscriptionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSubscription not implemented")
+}
 func (UnimplementedControllerServer) PlanCephCluster(context.Context, *PlanCephClusterRequest) (*PlanCephClusterResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method PlanCephCluster not implemented")
 }
@@ -2926,6 +3396,21 @@ func (UnimplementedControllerServer) GetCephDashboardCredentials(context.Context
 }
 func (UnimplementedControllerServer) SetCephDashboardCredentials(context.Context, *SetCephDashboardCredentialsRequest) (*SetCephDashboardCredentialsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetCephDashboardCredentials not implemented")
+}
+func (UnimplementedControllerServer) FinalizeCephOsdRelease(context.Context, *FinalizeCephOsdReleaseRequest) (*FinalizeCephOsdReleaseResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method FinalizeCephOsdRelease not implemented")
+}
+func (UnimplementedControllerServer) RotateCephMonKey(context.Context, *RotateCephMonKeyRequest) (*RotateCephMonKeyResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RotateCephMonKey not implemented")
+}
+func (UnimplementedControllerServer) RotateCephOsdDmcrypt(context.Context, *RotateCephOsdDmcryptRequest) (*RotateCephOsdDmcryptResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RotateCephOsdDmcrypt not implemented")
+}
+func (UnimplementedControllerServer) ListVolumeTrash(context.Context, *ListVolumeTrashRequest) (*ListVolumeTrashResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListVolumeTrash not implemented")
+}
+func (UnimplementedControllerServer) PurgeVolumeTrash(context.Context, *PurgeVolumeTrashRequest) (*PurgeVolumeTrashResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PurgeVolumeTrash not implemented")
 }
 func (UnimplementedControllerServer) CreateSharedFilesystem(context.Context, *CreateSharedFilesystemRequest) (*CreateSharedFilesystemResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateSharedFilesystem not implemented")
@@ -3076,6 +3561,69 @@ func (UnimplementedControllerServer) DrainSlurmNode(context.Context, *DrainSlurm
 }
 func (UnimplementedControllerServer) ResumeSlurmNode(context.Context, *ResumeSlurmNodeRequest) (*ResumeSlurmNodeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ResumeSlurmNode not implemented")
+}
+func (UnimplementedControllerServer) PlanPostgresqlCluster(context.Context, *PlanPostgresqlClusterRequest) (*PlanPostgresqlClusterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PlanPostgresqlCluster not implemented")
+}
+func (UnimplementedControllerServer) CreatePostgresqlCluster(context.Context, *CreatePostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreatePostgresqlCluster not implemented")
+}
+func (UnimplementedControllerServer) UpdatePostgresqlCluster(context.Context, *UpdatePostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdatePostgresqlCluster not implemented")
+}
+func (UnimplementedControllerServer) GetPostgresqlCluster(context.Context, *GetPostgresqlClusterRequest) (*GetPostgresqlClusterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPostgresqlCluster not implemented")
+}
+func (UnimplementedControllerServer) ListPostgresqlClusters(context.Context, *ListPostgresqlClustersRequest) (*ListPostgresqlClustersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListPostgresqlClusters not implemented")
+}
+func (UnimplementedControllerServer) DeletePostgresqlCluster(context.Context, *DeletePostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeletePostgresqlCluster not implemented")
+}
+func (UnimplementedControllerServer) ScalePostgresqlCluster(context.Context, *ScalePostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ScalePostgresqlCluster not implemented")
+}
+func (UnimplementedControllerServer) ReplacePostgresqlMember(context.Context, *ReplacePostgresqlMemberRequest) (*PostgresqlClusterOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReplacePostgresqlMember not implemented")
+}
+func (UnimplementedControllerServer) ReinitPostgresqlMember(context.Context, *ReinitPostgresqlMemberRequest) (*PostgresqlClusterOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReinitPostgresqlMember not implemented")
+}
+func (UnimplementedControllerServer) UpgradePostgresqlCluster(context.Context, *UpgradePostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpgradePostgresqlCluster not implemented")
+}
+func (UnimplementedControllerServer) FinalizePostgresqlUpgrade(context.Context, *PostgresqlClusterNameRequest) (*PostgresqlClusterOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method FinalizePostgresqlUpgrade not implemented")
+}
+func (UnimplementedControllerServer) RollbackPostgresqlUpgrade(context.Context, *PostgresqlClusterNameRequest) (*PostgresqlClusterOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RollbackPostgresqlUpgrade not implemented")
+}
+func (UnimplementedControllerServer) SwitchoverPostgresqlCluster(context.Context, *SwitchoverPostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SwitchoverPostgresqlCluster not implemented")
+}
+func (UnimplementedControllerServer) FailoverPostgresqlCluster(context.Context, *FailoverPostgresqlClusterRequest) (*PostgresqlClusterOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method FailoverPostgresqlCluster not implemented")
+}
+func (UnimplementedControllerServer) SetPostgresqlMaintenance(context.Context, *SetPostgresqlMaintenanceRequest) (*PostgresqlClusterOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetPostgresqlMaintenance not implemented")
+}
+func (UnimplementedControllerServer) GetPostgresqlClusterHealth(context.Context, *PostgresqlClusterNameRequest) (*GetPostgresqlClusterHealthResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPostgresqlClusterHealth not implemented")
+}
+func (UnimplementedControllerServer) ListPostgresqlClusterEvents(context.Context, *ListPostgresqlClusterEventsRequest) (*ListPostgresqlClusterEventsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListPostgresqlClusterEvents not implemented")
+}
+func (UnimplementedControllerServer) GetPostgresqlOperation(context.Context, *GetPostgresqlOperationRequest) (*GetPostgresqlOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPostgresqlOperation not implemented")
+}
+func (UnimplementedControllerServer) ListPostgresqlOperations(context.Context, *ListPostgresqlOperationsRequest) (*ListPostgresqlOperationsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListPostgresqlOperations not implemented")
+}
+func (UnimplementedControllerServer) CancelPostgresqlOperation(context.Context, *GetPostgresqlOperationRequest) (*GetPostgresqlOperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CancelPostgresqlOperation not implemented")
+}
+func (UnimplementedControllerServer) GetPostgresqlClusterCredentials(context.Context, *PostgresqlClusterNameRequest) (*GetPostgresqlClusterCredentialsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPostgresqlClusterCredentials not implemented")
 }
 func (UnimplementedControllerServer) mustEmbedUnimplementedControllerServer() {}
 func (UnimplementedControllerServer) testEmbeddedByValue()                    {}
@@ -3980,6 +4528,24 @@ func _Controller_UncordonNode_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_SetNodeMaintenance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetNodeMaintenanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).SetNodeMaintenance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_SetNodeMaintenance_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).SetNodeMaintenance(ctx, req.(*SetNodeMaintenanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Controller_DeleteNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteNodeRequest)
 	if err := dec(in); err != nil {
@@ -4646,6 +5212,24 @@ func _Controller_ResizeVolume_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_ConvertVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConvertVolumeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ConvertVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ConvertVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ConvertVolume(ctx, req.(*ConvertVolumeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Controller_ExposeVolumeSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ExposeVolumeSnapshotRequest)
 	if err := dec(in); err != nil {
@@ -4840,6 +5424,42 @@ func _Controller_EncryptVolume_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ControllerServer).EncryptVolume(ctx, req.(*EncryptVolumeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ConvertVmStorage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConvertVmStorageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ConvertVmStorage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ConvertVmStorage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ConvertVmStorage(ctx, req.(*ConvertVmStorageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_CopyVolumeToCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CopyVolumeToClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).CopyVolumeToCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_CopyVolumeToCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).CopyVolumeToCluster(ctx, req.(*CopyVolumeToClusterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -5204,6 +5824,42 @@ func _Controller_GetClusterVersion_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_SetSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetSubscriptionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).SetSubscription(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_SetSubscription_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).SetSubscription(ctx, req.(*SetSubscriptionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSubscriptionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetSubscription(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_GetSubscription_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetSubscription(ctx, req.(*GetSubscriptionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Controller_PlanCephCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PlanCephClusterRequest)
 	if err := dec(in); err != nil {
@@ -5344,6 +6000,96 @@ func _Controller_SetCephDashboardCredentials_Handler(srv interface{}, ctx contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ControllerServer).SetCephDashboardCredentials(ctx, req.(*SetCephDashboardCredentialsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_FinalizeCephOsdRelease_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FinalizeCephOsdReleaseRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).FinalizeCephOsdRelease(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_FinalizeCephOsdRelease_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).FinalizeCephOsdRelease(ctx, req.(*FinalizeCephOsdReleaseRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_RotateCephMonKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RotateCephMonKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).RotateCephMonKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_RotateCephMonKey_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).RotateCephMonKey(ctx, req.(*RotateCephMonKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_RotateCephOsdDmcrypt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RotateCephOsdDmcryptRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).RotateCephOsdDmcrypt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_RotateCephOsdDmcrypt_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).RotateCephOsdDmcrypt(ctx, req.(*RotateCephOsdDmcryptRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ListVolumeTrash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListVolumeTrashRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ListVolumeTrash(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ListVolumeTrash_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ListVolumeTrash(ctx, req.(*ListVolumeTrashRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_PurgeVolumeTrash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PurgeVolumeTrashRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).PurgeVolumeTrash(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_PurgeVolumeTrash_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).PurgeVolumeTrash(ctx, req.(*PurgeVolumeTrashRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -6248,6 +6994,384 @@ func _Controller_ResumeSlurmNode_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_PlanPostgresqlCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlanPostgresqlClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).PlanPostgresqlCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_PlanPostgresqlCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).PlanPostgresqlCluster(ctx, req.(*PlanPostgresqlClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_CreatePostgresqlCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePostgresqlClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).CreatePostgresqlCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_CreatePostgresqlCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).CreatePostgresqlCluster(ctx, req.(*CreatePostgresqlClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_UpdatePostgresqlCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePostgresqlClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).UpdatePostgresqlCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_UpdatePostgresqlCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).UpdatePostgresqlCluster(ctx, req.(*UpdatePostgresqlClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetPostgresqlCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPostgresqlClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetPostgresqlCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_GetPostgresqlCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetPostgresqlCluster(ctx, req.(*GetPostgresqlClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ListPostgresqlClusters_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPostgresqlClustersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ListPostgresqlClusters(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ListPostgresqlClusters_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ListPostgresqlClusters(ctx, req.(*ListPostgresqlClustersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_DeletePostgresqlCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePostgresqlClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).DeletePostgresqlCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_DeletePostgresqlCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).DeletePostgresqlCluster(ctx, req.(*DeletePostgresqlClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ScalePostgresqlCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ScalePostgresqlClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ScalePostgresqlCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ScalePostgresqlCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ScalePostgresqlCluster(ctx, req.(*ScalePostgresqlClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ReplacePostgresqlMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReplacePostgresqlMemberRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ReplacePostgresqlMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ReplacePostgresqlMember_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ReplacePostgresqlMember(ctx, req.(*ReplacePostgresqlMemberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ReinitPostgresqlMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReinitPostgresqlMemberRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ReinitPostgresqlMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ReinitPostgresqlMember_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ReinitPostgresqlMember(ctx, req.(*ReinitPostgresqlMemberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_UpgradePostgresqlCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpgradePostgresqlClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).UpgradePostgresqlCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_UpgradePostgresqlCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).UpgradePostgresqlCluster(ctx, req.(*UpgradePostgresqlClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_FinalizePostgresqlUpgrade_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostgresqlClusterNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).FinalizePostgresqlUpgrade(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_FinalizePostgresqlUpgrade_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).FinalizePostgresqlUpgrade(ctx, req.(*PostgresqlClusterNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_RollbackPostgresqlUpgrade_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostgresqlClusterNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).RollbackPostgresqlUpgrade(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_RollbackPostgresqlUpgrade_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).RollbackPostgresqlUpgrade(ctx, req.(*PostgresqlClusterNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_SwitchoverPostgresqlCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SwitchoverPostgresqlClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).SwitchoverPostgresqlCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_SwitchoverPostgresqlCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).SwitchoverPostgresqlCluster(ctx, req.(*SwitchoverPostgresqlClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_FailoverPostgresqlCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FailoverPostgresqlClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).FailoverPostgresqlCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_FailoverPostgresqlCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).FailoverPostgresqlCluster(ctx, req.(*FailoverPostgresqlClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_SetPostgresqlMaintenance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetPostgresqlMaintenanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).SetPostgresqlMaintenance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_SetPostgresqlMaintenance_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).SetPostgresqlMaintenance(ctx, req.(*SetPostgresqlMaintenanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetPostgresqlClusterHealth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostgresqlClusterNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetPostgresqlClusterHealth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_GetPostgresqlClusterHealth_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetPostgresqlClusterHealth(ctx, req.(*PostgresqlClusterNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ListPostgresqlClusterEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPostgresqlClusterEventsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ListPostgresqlClusterEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ListPostgresqlClusterEvents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ListPostgresqlClusterEvents(ctx, req.(*ListPostgresqlClusterEventsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetPostgresqlOperation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPostgresqlOperationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetPostgresqlOperation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_GetPostgresqlOperation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetPostgresqlOperation(ctx, req.(*GetPostgresqlOperationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ListPostgresqlOperations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPostgresqlOperationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ListPostgresqlOperations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ListPostgresqlOperations_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ListPostgresqlOperations(ctx, req.(*ListPostgresqlOperationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_CancelPostgresqlOperation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPostgresqlOperationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).CancelPostgresqlOperation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_CancelPostgresqlOperation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).CancelPostgresqlOperation(ctx, req.(*GetPostgresqlOperationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetPostgresqlClusterCredentials_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostgresqlClusterNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetPostgresqlClusterCredentials(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_GetPostgresqlClusterCredentials_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetPostgresqlClusterCredentials(ctx, req.(*PostgresqlClusterNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Controller_ServiceDesc is the grpc.ServiceDesc for Controller service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -6448,6 +7572,10 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Controller_UncordonNode_Handler,
 		},
 		{
+			MethodName: "SetNodeMaintenance",
+			Handler:    _Controller_SetNodeMaintenance_Handler,
+		},
+		{
 			MethodName: "DeleteNode",
 			Handler:    _Controller_DeleteNode_Handler,
 		},
@@ -6596,6 +7724,10 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Controller_ResizeVolume_Handler,
 		},
 		{
+			MethodName: "ConvertVolume",
+			Handler:    _Controller_ConvertVolume_Handler,
+		},
+		{
 			MethodName: "ExposeVolumeSnapshot",
 			Handler:    _Controller_ExposeVolumeSnapshot_Handler,
 		},
@@ -6634,6 +7766,14 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EncryptVolume",
 			Handler:    _Controller_EncryptVolume_Handler,
+		},
+		{
+			MethodName: "ConvertVmStorage",
+			Handler:    _Controller_ConvertVmStorage_Handler,
+		},
+		{
+			MethodName: "CopyVolumeToCluster",
+			Handler:    _Controller_CopyVolumeToCluster_Handler,
 		},
 		{
 			MethodName: "CreateSnapshotPolicy",
@@ -6716,6 +7856,14 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Controller_GetClusterVersion_Handler,
 		},
 		{
+			MethodName: "SetSubscription",
+			Handler:    _Controller_SetSubscription_Handler,
+		},
+		{
+			MethodName: "GetSubscription",
+			Handler:    _Controller_GetSubscription_Handler,
+		},
+		{
 			MethodName: "PlanCephCluster",
 			Handler:    _Controller_PlanCephCluster_Handler,
 		},
@@ -6746,6 +7894,26 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetCephDashboardCredentials",
 			Handler:    _Controller_SetCephDashboardCredentials_Handler,
+		},
+		{
+			MethodName: "FinalizeCephOsdRelease",
+			Handler:    _Controller_FinalizeCephOsdRelease_Handler,
+		},
+		{
+			MethodName: "RotateCephMonKey",
+			Handler:    _Controller_RotateCephMonKey_Handler,
+		},
+		{
+			MethodName: "RotateCephOsdDmcrypt",
+			Handler:    _Controller_RotateCephOsdDmcrypt_Handler,
+		},
+		{
+			MethodName: "ListVolumeTrash",
+			Handler:    _Controller_ListVolumeTrash_Handler,
+		},
+		{
+			MethodName: "PurgeVolumeTrash",
+			Handler:    _Controller_PurgeVolumeTrash_Handler,
 		},
 		{
 			MethodName: "CreateSharedFilesystem",
@@ -6946,6 +8114,90 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResumeSlurmNode",
 			Handler:    _Controller_ResumeSlurmNode_Handler,
+		},
+		{
+			MethodName: "PlanPostgresqlCluster",
+			Handler:    _Controller_PlanPostgresqlCluster_Handler,
+		},
+		{
+			MethodName: "CreatePostgresqlCluster",
+			Handler:    _Controller_CreatePostgresqlCluster_Handler,
+		},
+		{
+			MethodName: "UpdatePostgresqlCluster",
+			Handler:    _Controller_UpdatePostgresqlCluster_Handler,
+		},
+		{
+			MethodName: "GetPostgresqlCluster",
+			Handler:    _Controller_GetPostgresqlCluster_Handler,
+		},
+		{
+			MethodName: "ListPostgresqlClusters",
+			Handler:    _Controller_ListPostgresqlClusters_Handler,
+		},
+		{
+			MethodName: "DeletePostgresqlCluster",
+			Handler:    _Controller_DeletePostgresqlCluster_Handler,
+		},
+		{
+			MethodName: "ScalePostgresqlCluster",
+			Handler:    _Controller_ScalePostgresqlCluster_Handler,
+		},
+		{
+			MethodName: "ReplacePostgresqlMember",
+			Handler:    _Controller_ReplacePostgresqlMember_Handler,
+		},
+		{
+			MethodName: "ReinitPostgresqlMember",
+			Handler:    _Controller_ReinitPostgresqlMember_Handler,
+		},
+		{
+			MethodName: "UpgradePostgresqlCluster",
+			Handler:    _Controller_UpgradePostgresqlCluster_Handler,
+		},
+		{
+			MethodName: "FinalizePostgresqlUpgrade",
+			Handler:    _Controller_FinalizePostgresqlUpgrade_Handler,
+		},
+		{
+			MethodName: "RollbackPostgresqlUpgrade",
+			Handler:    _Controller_RollbackPostgresqlUpgrade_Handler,
+		},
+		{
+			MethodName: "SwitchoverPostgresqlCluster",
+			Handler:    _Controller_SwitchoverPostgresqlCluster_Handler,
+		},
+		{
+			MethodName: "FailoverPostgresqlCluster",
+			Handler:    _Controller_FailoverPostgresqlCluster_Handler,
+		},
+		{
+			MethodName: "SetPostgresqlMaintenance",
+			Handler:    _Controller_SetPostgresqlMaintenance_Handler,
+		},
+		{
+			MethodName: "GetPostgresqlClusterHealth",
+			Handler:    _Controller_GetPostgresqlClusterHealth_Handler,
+		},
+		{
+			MethodName: "ListPostgresqlClusterEvents",
+			Handler:    _Controller_ListPostgresqlClusterEvents_Handler,
+		},
+		{
+			MethodName: "GetPostgresqlOperation",
+			Handler:    _Controller_GetPostgresqlOperation_Handler,
+		},
+		{
+			MethodName: "ListPostgresqlOperations",
+			Handler:    _Controller_ListPostgresqlOperations_Handler,
+		},
+		{
+			MethodName: "CancelPostgresqlOperation",
+			Handler:    _Controller_CancelPostgresqlOperation_Handler,
+		},
+		{
+			MethodName: "GetPostgresqlClusterCredentials",
+			Handler:    _Controller_GetPostgresqlClusterCredentials_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

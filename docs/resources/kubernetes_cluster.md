@@ -70,6 +70,7 @@ resource "kcore_kubernetes_cluster" "pools" {
     enabled            = true
     mode               = "lvm"
     storage_class_name = "kcore-lvm"
+    ceph_cluster       = "kcore-san" # also install the Ceph RBD CSI StorageClass
 
     volume {
       name          = "kcore-kdata"
@@ -160,6 +161,7 @@ Optional:
 
 Optional:
 
+- `ceph_cluster` (String) Name of a `kcore_ceph_cluster`. When set, the Ceph RBD CSI StorageClass is installed against it, in addition to or instead of local-path.
 - `enabled` (Boolean)
 - `mode` (String) shared or lvm. Empty means shared.
 - `storage_class_name` (String) Empty means local-path.

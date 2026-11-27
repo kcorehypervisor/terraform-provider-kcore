@@ -8,7 +8,29 @@ description: |-
 
 # kcore_ceph_cluster (Resource)
 
-Ceph cluster (`kctl create ceph-cluster`).
+Ceph cluster (`kctl create ceph-cluster`). Arguments map one to one to the
+`CephCluster` YAML that `kctl apply -f` reads and to the kcore MCP
+`ceph-cluster` kind.
+
+Every argument after `node` is optional and additive: a configuration written
+for an older provider plans the same request as before. Whether a given
+controller release acts on a field is listed in kcore's
+`docs/ceph-lifecycle.md`; a controller that predates a field ignores it.
+
+- `node` and `external` are mutually exclusive. `external` points kcore at a
+  Ceph cluster it does not run: no bootstrap, no OSD reconcile, no member
+  removal. `client_keyring` is never read back.
+- Remove a reachable member by deleting its `node` block. The plan refuses
+  unless the survivors still number at least `size` and the cluster is
+  `HEALTH_OK`, and only one member leaves per apply.
+- `lost_members` is for a host that will never answer: a survivor drains it,
+  then purges its OSDs and removes its mon. Do not list a host that might come
+  back.
+- `encrypt_osds` is fixed once any OSD exists. Set it explicitly: the provider
+  sends `false` when it is omitted, while `kctl` manifests default to `true`.
+- `health` is computed from `ceph -s` (quorum, OSDs up/in, PG states, flags
+  such as `noout`, and check summaries). `operation_message` names an
+  in-progress member drain, OSD replacement, or backfill ramp.
 
 ## Example Usage
 

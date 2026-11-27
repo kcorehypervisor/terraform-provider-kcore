@@ -70,6 +70,7 @@ func kubernetesClusterSchema() map[string]*schema.Schema {
 				"enabled":            {Type: schema.TypeBool, Optional: true},
 				"mode":               {Type: schema.TypeString, Optional: true, ValidateFunc: validation.StringInSlice([]string{"", "shared", "lvm"}, false), Description: "shared or lvm. Empty means shared."},
 				"storage_class_name": {Type: schema.TypeString, Optional: true, Description: "Empty means local-path."},
+				"ceph_cluster":       {Type: schema.TypeString, Optional: true, Description: "Name of a `kcore_ceph_cluster`. When set, the Ceph RBD CSI StorageClass is installed against it, in addition to or instead of local-path."},
 				"volume": {
 					Type:     schema.TypeList,
 					Optional: true,
@@ -296,10 +297,11 @@ func kubernetesSpec(d *schema.ResourceData) (*pb.KubernetesClusterSpec, error) {
 		if err != nil {
 			return nil, err
 		}
-		if mbool(row, "enabled") || len(volumes) > 0 {
+		if mbool(row, "enabled") || len(volumes) > 0 || mstring(row, "ceph_cluster") != "" {
 			local = &pb.KubernetesLocalProvisioner{
 				Enabled:          mbool(row, "enabled"),
 				StorageClassName: mstring(row, "storage_class_name"),
+				CephCluster:      mstring(row, "ceph_cluster"),
 				Mode:             mstring(row, "mode"),
 				Volumes:          volumes,
 			}
