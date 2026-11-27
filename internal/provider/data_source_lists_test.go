@@ -57,7 +57,7 @@ func (f *fakeListController) ListWafPolicies(context.Context, *pb.ListWafPolicie
 
 func (f *fakeListController) ListClusterUpdates(context.Context, *pb.ListClusterUpdatesRequest) (*pb.ListClusterUpdatesResponse, error) {
 	return &pb.ListClusterUpdatesResponse{ClusterUpdates: []*pb.ClusterUpdate{
-		{Spec: &pb.ClusterUpdateSpec{Name: "0.8.0", UpdateKind: "release"}, Generation: 1},
+		{Spec: &pb.ClusterUpdateSpec{Name: "0.8.2", UpdateKind: "release"}, Generation: 1},
 	}}, nil
 }
 
@@ -136,7 +136,7 @@ func TestIngressAndWafDataSources(t *testing.T) {
 func TestClusterUpdatesDataSourceReadsTheSpecName(t *testing.T) {
 	client := newControllerClient(t, &fakeListController{})
 	d := readList(t, dataSourceClusterUpdates(), client, nil)
-	if d.Get("updates.0.name") != "0.8.0" || d.Get("updates.0.update_kind") != "release" || d.Get("updates.0.phase") == "" {
+	if d.Get("updates.0.name") != "0.8.2" || d.Get("updates.0.update_kind") != "release" || d.Get("updates.0.phase") == "" {
 		t.Fatalf("state = %v", d.State())
 	}
 }

@@ -27,7 +27,7 @@ func resourceClusterVersion() *schema.Resource {
 			"version": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "Release tag, `v0.8.0` or `0.8.0`.",
+				Description:      "Release tag, `v0.8.2` or `0.8.2`.",
 				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool { return releaseTag(old) == releaseTag(new) },
 			},
 			"flake_ref": {
