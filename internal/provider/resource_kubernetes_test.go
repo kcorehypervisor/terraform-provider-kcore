@@ -133,6 +133,24 @@ func TestKubernetesScaleDeltaAddsAndRemovesMembers(t *testing.T) {
 	}
 }
 
+func TestKubernetesSpecCarriesCephClusterWithoutLocalPath(t *testing.T) {
+	spec := kubernetesSpecFrom(t, map[string]interface{}{
+		"cluster_cidr":        "10.244.0.0/16",
+		"service_cidr":        "10.96.0.0/12",
+		"api_server_endpoint": "192.168.40.220:6443",
+		"control_plane_node": []interface{}{
+			map[string]interface{}{"node_id": "node-107", "advertise_address": "192.168.40.107", "initial_cluster": true},
+		},
+		"local_provisioner": []interface{}{
+			map[string]interface{}{"ceph_cluster": "kcore-san"},
+		},
+	})
+	local := spec.GetLocalProvisioner()
+	if local == nil || local.GetCephCluster() != "kcore-san" || local.GetEnabled() {
+		t.Fatalf("provisioner = %+v", local)
+	}
+}
+
 func TestKubernetesSchemaRejectsUnknownProvisionerMode(t *testing.T) {
 	resource := resourceKubernetesCluster()
 	provisioner := resource.Schema["local_provisioner"].Elem.(*schema.Resource)

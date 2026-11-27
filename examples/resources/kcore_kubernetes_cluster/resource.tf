@@ -55,6 +55,7 @@ resource "kcore_kubernetes_cluster" "pools" {
     enabled            = true
     mode               = "lvm"
     storage_class_name = "kcore-lvm"
+    ceph_cluster       = "kcore-san" # also install the Ceph RBD CSI StorageClass
 
     volume {
       name          = "kcore-kdata"
