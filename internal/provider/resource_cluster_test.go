@@ -72,19 +72,6 @@ func (f *fakeNodeAdmin) InstallToDisk(_ context.Context, req *nodepb.InstallToDi
 	return &nodepb.InstallToDiskResponse{Accepted: f.acceptInstall, Message: "ok"}, nil
 }
 
-func startFakeNodeAdmin(t *testing.T, fake *fakeNodeAdmin) string {
-	t.Helper()
-	listener := bufconn.Listen(1 << 20)
-	server := grpc.NewServer()
-	nodepb.RegisterNodeAdminServer(server, fake)
-	go func() { _ = server.Serve(listener) }()
-	t.Cleanup(func() { server.Stop() })
-	// Override dial for tests by returning a custom address scheme is hard;
-	// tests that need Install use helpers directly.
-	_ = listener
-	return "bufnet"
-}
-
 func TestClusterControllerAddrFromNode(t *testing.T) {
 	d := schema.TestResourceDataRaw(t, resourceCluster().Schema, map[string]interface{}{
 		"name":      "prod",

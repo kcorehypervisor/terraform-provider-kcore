@@ -212,6 +212,8 @@ func (c *apiClient) dialOptions() ([]grpc.DialOption, error) {
 		},
 	}
 	if c.tlsCAPath != "" {
+		// Session tickets must be off: VerifyPeerCertificate is skipped on resumed sessions.
+		tlsConfig.SessionTicketsDisabled = true
 		tlsConfig.InsecureSkipVerify = true
 		tlsConfig.VerifyPeerCertificate = func(rawCerts [][]byte, _ [][]*x509.Certificate) error {
 			if len(rawCerts) == 0 {
