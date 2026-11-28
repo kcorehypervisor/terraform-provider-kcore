@@ -3,20 +3,40 @@
 page_title: "kcore_cluster Resource - kcore"
 subcategory: ""
 description: |-
-  Create a kcore cluster trust root: CA, sub-CA, controller certificate, and kctl client certificate. Same files as kctl create cluster.
+  Declare a kcore cluster: local PKI, nodes from the live ISO, and the desired release. Same shape as a kind: Cluster manifest.
 ---
 
 # kcore_cluster (Resource)
 
-Create a kcore cluster trust root: CA, sub-CA, controller certificate, and kctl client certificate. Same files as `kctl create cluster`.
+Declare a kcore cluster: local PKI, nodes installed from the live ISO, and the desired release. Same shape as a `kind: Cluster` manifest. Changing `version` or the `update` block calls `SetClusterVersion`. Destroy removes local certificates only; installed nodes stay on disk.
+
+Prefer this over separate `kcore_node` and `kcore_cluster_version` resources.
 
 ## Example Usage
 
 ```terraform
-resource "kcore_cluster" "lab" {
-  name       = "lab"
-  controller = "10.0.0.8:9090"
-  certs_dir  = "${path.module}/certs"
+resource "kcore_cluster" "prod" {
+  name      = "prod"
+  version   = "v0.8.3"
+  certs_dir = "${path.module}/certs"
+
+  update {
+    reboot    = false
+    drain_vms = true
+  }
+
+  node {
+    name       = "node-107"
+    address    = "192.168.40.107"
+    os_disk    = "/dev/sda"
+    controller = true
+  }
+
+  node {
+    name    = "node-105"
+    address = "192.168.40.105"
+    os_disk = "/dev/sda"
+  }
 }
 ```
 
@@ -26,12 +46,15 @@ resource "kcore_cluster" "lab" {
 ### Required
 
 - `certs_dir` (String) Directory for ca.crt, controller.crt, kctl.crt, and their keys.
-- `controller` (String) Controller address (host or host:9090). The controller certificate CN and SAN use the host.
 - `name` (String) Cluster context name.
 
 ### Optional
 
+- `controller` (String) Controller address for the local controller certificate (host or host:9090). Defaults to the first node with controller = true.
 - `force` (Boolean) Overwrite certificates that already exist in certs_dir.
+- `node` (Block List) Nodes to install from the live ISO when not already registered. Controllers install first. (see [below for nested schema](#nestedblock--node))
+- `update` (Block List, Max: 1) Desired update policy stored with the version. (see [below for nested schema](#nestedblock--update))
+- `version` (String) Desired release tag (`v0.8.3` or `0.9.0`). Changing it starts a canary rollout.
 
 ### Read-Only
 
@@ -40,4 +63,41 @@ resource "kcore_cluster" "lab" {
 - `client_key_path` (String, Sensitive)
 - `controller_cert_path` (String)
 - `controller_key_path` (String, Sensitive)
+- `flake_rev` (String) Commit the desired tag resolved to.
 - `id` (String) The ID of this resource.
+- `in_sync` (Boolean) True when every approved heartbeating node reports the desired version.
+- `phase` (String) Phase of the latest version rollout.
+- `status_message` (String) Why the cluster is not converging, empty when in sync.
+- `update_name` (String) ClusterUpdate of the latest version rollout.
+
+<a id="nestedblock--node"></a>
+### Nested Schema for `node`
+
+Required:
+
+- `address` (String) Live installer address. Port defaults to 9091.
+- `name` (String) Node id registered with the controller.
+- `os_disk` (String)
+
+Optional:
+
+- `controller` (Boolean) Install and run a controller on this node.
+- `data_disk` (List of String)
+- `dc_id` (String)
+- `disable_vxlan` (Boolean)
+- `hostname` (String)
+- `storage_backend` (String)
+
+
+<a id="nestedblock--update"></a>
+### Nested Schema for `update`
+
+Optional:
+
+- `canary_node` (String) Canary node id. Empty picks a labelled node or the first in rollout order.
+- `canary_soak_seconds` (Number) How long the canary soaks. 0 means the controller default. At most 7 days.
+- `channel` (String) `community`, `enterprise`, or empty for the controller default.
+- `drain_vms` (Boolean) Migrate guests off a node before it reboots into a new kernel.
+- `flake_ref` (String) Repository the tag is resolved in. Empty means github:kcorehypervisor/kcore.
+- `no_canary` (Boolean) Update every node one at a time with no canary and no soak.
+- `reboot` (Boolean) Force every node a rollout updates to stage a boot and reboot. False keeps auto activation.

@@ -27,9 +27,10 @@ func resourceNode() *schema.Resource {
 			"Set bootstrap on the first controller. Other nodes set join_controller to that node's controller_address so Terraform creates the bootstrap node first. " +
 			"When this node runs a controller, apply waits until that node's controller accepts RPCs. The install RPC returns when the script starts, and the script reboots the machine. " +
 			"Destroy drops Terraform state and leaves the installed disk in place.",
-		CreateContext: resourceNodeCreate,
-		ReadContext:   resourceNodeRead,
-		DeleteContext: resourceNodeDelete,
+		DeprecationMessage: "Use kcore_cluster node blocks instead. kcore_node still works.",
+		CreateContext:      resourceNodeCreate,
+		ReadContext:        resourceNodeRead,
+		DeleteContext:      resourceNodeDelete,
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 		},

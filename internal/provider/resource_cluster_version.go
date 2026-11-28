@@ -19,10 +19,11 @@ func resourceClusterVersion() *schema.Resource {
 			"Changing `version` starts a rollout: by default a canary node updates and soaks while the controller compares it with the other nodes, " +
 			"then the rest update one at a time. Another version is refused while a rollout runs. " +
 			"Destroy only forgets the resource; nodes keep their version.",
-		CreateContext: resourceClusterVersionSet,
-		ReadContext:   resourceClusterVersionRead,
-		UpdateContext: resourceClusterVersionSet,
-		DeleteContext: resourceClusterVersionDelete,
+		DeprecationMessage: "Use kcore_cluster version and update instead. kcore_cluster_version still works.",
+		CreateContext:      resourceClusterVersionSet,
+		ReadContext:        resourceClusterVersionRead,
+		UpdateContext:      resourceClusterVersionSet,
+		DeleteContext:      resourceClusterVersionDelete,
 		Schema: map[string]*schema.Schema{
 			"version": {
 				Type:             schema.TypeString,

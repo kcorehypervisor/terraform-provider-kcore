@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -113,12 +114,23 @@ func New() *schema.Provider {
 }
 
 type apiClient struct {
+	mu         sync.Mutex
 	conn       *grpc.ClientConn
 	controller pb.ControllerClient
 	vault      vaultpb.VaultClient
+
+	controllerAddr string
+	tlsCertPath    string
+	tlsKeyPath     string
+	tlsCAPath      string
+	insecure       bool
+	vaultAddr      string
 }
 
 func (c *apiClient) requireVault() (vaultpb.VaultClient, error) {
+	if err := c.ensure(); err != nil {
+		return nil, err
+	}
 	if c.vault == nil {
 		return nil, fmt.Errorf("vault_address is not set")
 	}
@@ -136,68 +148,100 @@ func dialTarget(addr string) string {
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	controllerAddr := d.Get("controller_address").(string)
-	tlsCertPath := d.Get("tls_cert_path").(string)
-	tlsKeyPath := d.Get("tls_key_path").(string)
-	tlsCAPath := d.Get("tls_ca_path").(string)
-	insecure := d.Get("insecure").(bool)
-
-	var opts []grpc.DialOption
-
-	if insecure {
-		opts = append(opts, grpc.WithTransportCredentials(grpcinsecure.NewCredentials()))
-	} else if tlsCertPath != "" && tlsKeyPath != "" {
-		// Load client cert and key
-		cert, err := tls.LoadX509KeyPair(tlsCertPath, tlsKeyPath)
-		if err != nil {
-			return nil, diag.FromErr(fmt.Errorf("failed to load client cert: %w", err))
-		}
-
-		// Create TLS config
-		tlsConfig := &tls.Config{
-			Certificates: []tls.Certificate{cert},
-		}
-
-		// Load CA cert if provided
-		if tlsCAPath != "" {
-			caCert, err := os.ReadFile(tlsCAPath) //nolint:gosec // the CA path is operator provider configuration
-			if err != nil {
-				return nil, diag.FromErr(fmt.Errorf("failed to read CA cert: %w", err))
-			}
-
-			caCertPool := x509.NewCertPool()
-			if !caCertPool.AppendCertsFromPEM(caCert) {
-				return nil, diag.FromErr(fmt.Errorf("failed to parse CA cert"))
-			}
-
-			tlsConfig.RootCAs = caCertPool
-		}
-
-		creds := credentials.NewTLS(tlsConfig)
-		opts = append(opts, grpc.WithTransportCredentials(creds))
-	} else {
-		opts = append(opts, grpc.WithTransportCredentials(grpcinsecure.NewCredentials()))
-	}
-
-	// Connect to the controller
-	conn, err := grpc.NewClient(dialTarget(controllerAddr), opts...)
-	if err != nil {
-		return nil, diag.FromErr(fmt.Errorf("failed to connect to controller: %w", err))
-	}
-
+	_ = ctx
 	client := &apiClient{
-		conn:       conn,
-		controller: pb.NewControllerClient(conn),
+		controllerAddr: d.Get("controller_address").(string),
+		tlsCertPath:    d.Get("tls_cert_path").(string),
+		tlsKeyPath:     d.Get("tls_key_path").(string),
+		tlsCAPath:      d.Get("tls_ca_path").(string),
+		insecure:       d.Get("insecure").(bool),
+		vaultAddr:      d.Get("vault_address").(string),
 	}
-	if vaultAddr := d.Get("vault_address").(string); vaultAddr != "" {
-		vaultConn, err := grpc.NewClient(dialTarget(vaultAddr), opts...)
-		if err != nil {
-			return nil, diag.FromErr(fmt.Errorf("failed to connect to vault: %w", err))
-		}
-		client.vault = vaultpb.NewVaultClient(vaultConn)
+	// Client certificates load at handshake time (GetClientCertificate), so a
+	// first apply can create them with kcore_cluster before any other resource
+	// dials. grpc.NewClient itself does not open the connection yet.
+	if err := client.ensure(); err != nil {
+		return nil, diag.FromErr(err)
 	}
+	return client, nil
+}
 
-	return client, diags
+func (c *apiClient) ensure() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.controller != nil {
+		return nil
+	}
+	opts, err := c.dialOptions()
+	if err != nil {
+		return err
+	}
+	conn, err := grpc.NewClient(dialTarget(c.controllerAddr), opts...)
+	if err != nil {
+		return fmt.Errorf("failed to connect to controller: %w", err)
+	}
+	c.conn = conn
+	c.controller = pb.NewControllerClient(conn)
+	if c.vaultAddr != "" {
+		vaultConn, err := grpc.NewClient(dialTarget(c.vaultAddr), opts...)
+		if err != nil {
+			return fmt.Errorf("failed to connect to vault: %w", err)
+		}
+		c.vault = vaultpb.NewVaultClient(vaultConn)
+	}
+	return nil
+}
+
+func (c *apiClient) dialOptions() ([]grpc.DialOption, error) {
+	if c.insecure || (c.tlsCertPath == "" && c.tlsKeyPath == "") {
+		return []grpc.DialOption{grpc.WithTransportCredentials(grpcinsecure.NewCredentials())}, nil
+	}
+	if c.tlsCertPath == "" || c.tlsKeyPath == "" {
+		return nil, fmt.Errorf("tls_cert_path and tls_key_path must both be set")
+	}
+	// Load client certs at handshake time so a first apply can create them via
+	// kcore_cluster before any other resource dials the controller.
+	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		GetClientCertificate: func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
+			cert, err := tls.LoadX509KeyPair(c.tlsCertPath, c.tlsKeyPath)
+			if err != nil {
+				return nil, fmt.Errorf("failed to load client cert: %w", err)
+			}
+			return &cert, nil
+		},
+	}
+	if c.tlsCAPath != "" {
+		// Session tickets must be off: VerifyPeerCertificate is skipped on resumed sessions.
+		tlsConfig.SessionTicketsDisabled = true
+		tlsConfig.InsecureSkipVerify = true
+		tlsConfig.VerifyPeerCertificate = func(rawCerts [][]byte, _ [][]*x509.Certificate) error {
+			if len(rawCerts) == 0 {
+				return fmt.Errorf("server presented no certificates")
+			}
+			caPEM, err := os.ReadFile(c.tlsCAPath) //nolint:gosec // operator provider configuration
+			if err != nil {
+				return fmt.Errorf("failed to read CA cert: %w", err)
+			}
+			pool := x509.NewCertPool()
+			if !pool.AppendCertsFromPEM(caPEM) {
+				return fmt.Errorf("failed to parse CA cert")
+			}
+			certs := make([]*x509.Certificate, 0, len(rawCerts))
+			for _, raw := range rawCerts {
+				cert, err := x509.ParseCertificate(raw)
+				if err != nil {
+					return fmt.Errorf("parse server cert: %w", err)
+				}
+				certs = append(certs, cert)
+			}
+			intermediates := x509.NewCertPool()
+			for _, cert := range certs[1:] {
+				intermediates.AddCert(cert)
+			}
+			_, err = certs[0].Verify(x509.VerifyOptions{Roots: pool, Intermediates: intermediates})
+			return err
+		}
+	}
+	return []grpc.DialOption{grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig))}, nil
 }
