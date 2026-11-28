@@ -29,8 +29,8 @@ func resourceNode() *schema.Resource {
 			"Destroy drops Terraform state and leaves the installed disk in place.",
 		DeprecationMessage: "Use kcore_cluster node blocks instead. kcore_node still works.",
 		CreateContext:      resourceNodeCreate,
-		ReadContext:   resourceNodeRead,
-		DeleteContext: resourceNodeDelete,
+		ReadContext:        resourceNodeRead,
+		DeleteContext:      resourceNodeDelete,
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 		},

@@ -21,9 +21,9 @@ func resourceClusterVersion() *schema.Resource {
 			"Destroy only forgets the resource; nodes keep their version.",
 		DeprecationMessage: "Use kcore_cluster version and update instead. kcore_cluster_version still works.",
 		CreateContext:      resourceClusterVersionSet,
-		ReadContext:   resourceClusterVersionRead,
-		UpdateContext: resourceClusterVersionSet,
-		DeleteContext: resourceClusterVersionDelete,
+		ReadContext:        resourceClusterVersionRead,
+		UpdateContext:      resourceClusterVersionSet,
+		DeleteContext:      resourceClusterVersionDelete,
 		Schema: map[string]*schema.Schema{
 			"version": {
 				Type:             schema.TypeString,
